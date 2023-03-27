@@ -83,7 +83,7 @@ public abstract class VisitorBase : Visitor
             case GivensStatementNode givensStatementNode:
                 Visit(givensStatementNode);
                 break;
-        default:
+            default:
                 break;
         }
 
