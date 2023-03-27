@@ -6,11 +6,11 @@ public abstract class UnitStatementNode : IAstNode
 {
     protected UnitStatementNode(UnitNode parent)
     {
-        Parent = parent;
+        Parent = parent
     }
 
     IAstNode IAstNode.Parent => Parent;
-    public UnitNode Parent { get; }
+    public UnitNode Parent { get; internal set; }
 
     public abstract IEnumerable<IAstNode> Children();
 

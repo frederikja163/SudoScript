@@ -7,7 +7,7 @@ public sealed class GivensNode : UnitStatementNode
         GivensStatements = givensStatements;
     }
 
-    IReadOnlyList<GivensStatementNode> GivensStatements { get; }
+    public IReadOnlyList<GivensStatementNode> GivensStatements { get; }
 
     public override IEnumerable<IAstNode> Children()
     {
