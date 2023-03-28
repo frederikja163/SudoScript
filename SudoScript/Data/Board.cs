@@ -2,7 +2,7 @@
 
 public sealed class Board : ICloneable
 {
-    private IReadOnlyDictionary<(int, int), Cell> _cells;
+    private readonly IReadOnlyDictionary<(int, int), Cell> _cells;
 
     private Board(IReadOnlyDictionary<(int, int), Cell> cells, IReadOnlyList<Unit> units)
     {
