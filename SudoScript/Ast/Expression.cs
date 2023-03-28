@@ -131,3 +131,24 @@ public sealed class IdentifierNode : ExpressionNode
             node.Name == Name;
     }
 }
+
+public sealed class ValueNode : ExpressionNode
+{
+    public ValueNode(FunctionCallNode parent, int value) : base(parent)
+    {
+        Value = value;
+    }
+
+    public int Value { get; }
+
+    public override IEnumerable<IAstNode> Children()
+    {
+        yield break;
+    }
+
+    public override bool Equals(IAstNode? other)
+    {
+        return other is ValueNode node &&
+            node.Value == Value;
+    }
+}
