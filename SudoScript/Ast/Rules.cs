@@ -2,9 +2,13 @@
 
 public sealed class RulesNode : UnitStatementNode
 {
-    public RulesNode(UnitNode parent, IReadOnlyList<FunctionCallNode> functionCallNode) : base(parent)
+    public RulesNode(IReadOnlyList<FunctionCallNode> functionCallNode)
     {
         FunctionCalls = functionCallNode;
+        foreach (FunctionCallNode functionCall in FunctionCalls)
+        {
+            functionCall.Parent = this;
+        }
     }
 
     public IReadOnlyList<FunctionCallNode> FunctionCalls { get; }

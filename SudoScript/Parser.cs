@@ -1,5 +1,4 @@
 ﻿using SudoScript.Ast;
-using System.Reflection.PortableExecutable;
 
 namespace SudoScript;
 

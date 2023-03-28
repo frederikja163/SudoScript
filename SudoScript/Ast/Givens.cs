@@ -2,9 +2,13 @@
 
 public sealed class GivensNode : UnitStatementNode
 {
-    public GivensNode(UnitNode parent, IReadOnlyList<GivensStatementNode> givensStatements) : base(parent)
+    public GivensNode(IReadOnlyList<GivensStatementNode> givensStatements)
     {
         GivensStatements = givensStatements;
+        foreach (GivensStatementNode givensStatement in GivensStatements)
+        {
+            givensStatement.Parent = this;
+        }
     }
 
     public IReadOnlyList<GivensStatementNode> GivensStatements { get; }
@@ -23,18 +27,19 @@ public sealed class GivensNode : UnitStatementNode
 
 public sealed class GivensStatementNode : IAstNode
 {
-    public GivensStatementNode(GivensNode parent, CellNode cell, ExpressionNode digit)
+    public GivensStatementNode(CellNode cell, ExpressionNode digit)
     {
         Cell = cell;
+        Cell.Parent = this;
         Digit = digit;
-        Parent = parent;
+        Digit.Parent = this;
     }
 
     public CellNode Cell { get; }
     public ExpressionNode Digit { get; }
 
-    IAstNode IAstNode.Parent => Parent;
-    public GivensNode Parent { get; }
+    IAstNode? IAstNode.Parent => Parent;
+    public GivensNode? Parent { get; internal set; }
 
     public IEnumerable<IAstNode> Children()
     {

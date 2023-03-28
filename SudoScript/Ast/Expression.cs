@@ -2,21 +2,19 @@
 
 public abstract class ExpressionNode : ArgumentNode
 {
-    protected ExpressionNode(FunctionCallNode parent) : base(parent)
-    {
-    }
 }
 
 public sealed class RangeNode : ExpressionNode
 {
-    public RangeNode(FunctionCallNode parent,
-        ExpressionNode minimumExpression,
+    public RangeNode(ExpressionNode minimumExpression,
         ExpressionNode maximumExpression,
         bool isMinInclusive,
-        bool isMaxInclusive) : base(parent)
+        bool isMaxInclusive)
     {
         MinimumExpression = minimumExpression;
+        MinimumExpression.Parent = this;
         MaximumExpression = maximumExpression;
+        MaximumExpression.Parent = this;
         IsMinInclusive = isMinInclusive;
         IsMaxInclusive = isMaxInclusive;
     }
@@ -54,11 +52,13 @@ public enum BinaryType
 
 public sealed class BinaryNode : ExpressionNode
 {
-    public BinaryNode(FunctionCallNode parent, BinaryType binaryType, ExpressionNode left, ExpressionNode right) : base(parent)
+    public BinaryNode(BinaryType binaryType, ExpressionNode left, ExpressionNode right)
     {
         BinaryType = binaryType;
         Left = left;
+        Left.Parent = this;
         Right = right;
+        Right.Parent = this;
     }
 
     public ExpressionNode Left { get; }
@@ -88,10 +88,11 @@ public enum UnaryType
 
 public sealed class UnaryNode : ExpressionNode
 {
-    public UnaryNode(FunctionCallNode parent, UnaryType unaryType, ExpressionNode expression) : base(parent)
+    public UnaryNode(UnaryType unaryType, ExpressionNode expression)
     {
         UnaryType = unaryType;
         Expression = expression;
+        Expression.Parent = this;
     }
 
     public ExpressionNode Expression { get; }
@@ -113,7 +114,7 @@ public sealed class UnaryNode : ExpressionNode
 
 public sealed class IdentifierNode : ExpressionNode
 {
-    public IdentifierNode(FunctionCallNode parent, string name) : base(parent)
+    public IdentifierNode(string name)
     {
         Name = name;
     }
@@ -134,7 +135,7 @@ public sealed class IdentifierNode : ExpressionNode
 
 public sealed class ValueNode : ExpressionNode
 {
-    public ValueNode(FunctionCallNode parent, int value) : base(parent)
+    public ValueNode(int value)
     {
         Value = value;
     }

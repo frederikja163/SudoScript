@@ -1,16 +1,8 @@
-﻿using System.Xml.Linq;
-
-namespace SudoScript.Ast;
+﻿namespace SudoScript.Ast;
 
 public abstract class UnitStatementNode : IAstNode
 {
-    protected UnitStatementNode(UnitNode parent)
-    {
-        Parent = parent;
-    }
-
-    IAstNode IAstNode.Parent => Parent;
-    public UnitNode Parent { get; internal set; }
+    public IAstNode? Parent { get; internal set; }
 
     public abstract IEnumerable<IAstNode> Children();
 
@@ -19,15 +11,21 @@ public abstract class UnitStatementNode : IAstNode
 
 public sealed class UnitNode : UnitStatementNode
 {
-    public UnitNode(UnitNode parent,
-        string? name,
+    public UnitNode(string? name,
         List<UnitStatementNode> unitStatements,
         List<ParameterNode> parameters)
-        : base(parent)
     {
         Name = name;
         UnitStatements = unitStatements;
+        foreach (UnitStatementNode unitStatement in UnitStatements)
+        {
+            unitStatement.Parent = this;
+        }
         Parameters = parameters;
+        foreach (ParameterNode parameter in Parameters)
+        {
+            parameter.Parent = this;
+        }
     }
 
     public string? Name { get; }
@@ -43,7 +41,7 @@ public sealed class UnitNode : UnitStatementNode
     public override bool Equals(IAstNode? other)
     {
         return other is UnitNode node &&
-                node.Parent.Equals(Parent) &&
+                (node.Parent?.Equals(Parent) ?? false) &&
                 node.Name == Name &&
                 node.Children().SequenceEqual(UnitStatements);
     }
@@ -51,14 +49,7 @@ public sealed class UnitNode : UnitStatementNode
 
 public abstract class ParameterNode : IAstNode
 {
-    protected ParameterNode(UnitNode parent)
-    {
-        Parent = parent;
-    }
-
-    IAstNode IAstNode.Parent => Parent;
-
-    public UnitNode Parent { get; }
+    public IAstNode? Parent { get; internal set; }
 
     public abstract IEnumerable<IAstNode> Children();
 
@@ -67,10 +58,12 @@ public abstract class ParameterNode : IAstNode
 
 public sealed class ParameterCellNode : ParameterNode
 {
-    public ParameterCellNode(UnitNode parent, ParameterIdentifierNode x, ParameterIdentifierNode y) : base(parent)
+    public ParameterCellNode(ParameterIdentifierNode x, ParameterIdentifierNode y)
     {
         X = x;
+        X.Parent = this;
         Y = y;
+        Y.Parent = this;
     }
 
     public ParameterIdentifierNode X { get; }
@@ -85,7 +78,7 @@ public sealed class ParameterCellNode : ParameterNode
     public override bool Equals(IAstNode? other)
     {
         return other is ParameterCellNode node &&
-                node.Parent.Equals(Parent) &&
+                (node.Parent?.Equals(Parent) ?? false) &&
                 node.X.Equals(X) &&
                 node.Y.Equals(Y);
     }
@@ -93,7 +86,7 @@ public sealed class ParameterCellNode : ParameterNode
 
 public sealed class ParameterIdentifierNode : ParameterNode
 {
-    public ParameterIdentifierNode(UnitNode parent, string name) : base(parent)
+    public ParameterIdentifierNode(string name)
     {
         Name = name;
     }

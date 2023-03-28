@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace SudoScript.Data;
+﻿namespace SudoScript.Data;
 
 public class Unit
 {

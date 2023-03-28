@@ -2,10 +2,14 @@
 
 public sealed class FunctionCallNode : UnitStatementNode
 {
-    public FunctionCallNode(UnitNode parent, string name, List<ArgumentNode> arguments) : base(parent)
+    public FunctionCallNode(string name, List<ArgumentNode> arguments)
     {
         Name = name;
         Arguments = arguments;
+        foreach (ArgumentNode argument in arguments)
+        {
+            argument.Parent = this;
+        }
     }
 
     public string Name { get; }
@@ -26,13 +30,7 @@ public sealed class FunctionCallNode : UnitStatementNode
 
 public abstract class ArgumentNode : IAstNode
 {
-    protected ArgumentNode(FunctionCallNode parent)
-    {
-        Parent = parent;
-    }
-
-    IAstNode IAstNode.Parent => Parent;
-    public FunctionCallNode Parent { get; }
+    public IAstNode? Parent { get; internal set; }
 
     public abstract IEnumerable<IAstNode> Children();
 
@@ -41,10 +39,12 @@ public abstract class ArgumentNode : IAstNode
 
 public sealed class CellNode : ArgumentNode
 {
-    public CellNode(FunctionCallNode parent, ExpressionNode x, ExpressionNode y) : base(parent)
+    public CellNode(ExpressionNode x, ExpressionNode y)
     {
         X = x;
+        X.Parent = this;
         Y = y;
+        Y.Parent = this;
     }
 
     public ExpressionNode X { get; }
