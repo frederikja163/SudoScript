@@ -19,10 +19,15 @@ public class Unit
         _rules = unit._rules;
     }
 
-    public Board Board { get; internal set; }
+    public Board? Board { get; internal set; }
 
     public IEnumerable<Cell> Cells()
     {
+        if (Board is null)
+        {
+            yield break;
+        }
+
         foreach (CellReference cell in _cells)
         {
             yield return Board[cell.X, cell.Y];

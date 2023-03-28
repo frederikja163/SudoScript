@@ -6,7 +6,7 @@ public abstract class UnitStatementNode : IAstNode
 {
     protected UnitStatementNode(UnitNode parent)
     {
-        Parent = parent
+        Parent = parent;
     }
 
     IAstNode IAstNode.Parent => Parent;

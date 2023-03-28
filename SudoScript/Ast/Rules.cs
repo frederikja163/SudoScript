@@ -2,8 +2,9 @@
 
 public sealed class RulesNode : UnitStatementNode
 {
-    public RulesNode(UnitNode parent) : base(parent)
+    public RulesNode(UnitNode parent, IReadOnlyList<FunctionCallNode> functionCallNode) : base(parent)
     {
+        FunctionCalls = functionCallNode;
     }
 
     public IReadOnlyList<FunctionCallNode> FunctionCalls { get; }
