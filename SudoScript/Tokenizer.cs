@@ -52,9 +52,9 @@ public static class Tokenizer
 /// <param name="Match">What this token matches with.</param>
 /// <param name="Line">The line this token is found on. Try to re-use the same line for all tokens if at all possible.</param>
 /// <param name="Row">The row of the start of this token.</param>
-/// <param name="Collumn">The collumn of the start of this token.</param>
+/// <param name="Column">The collumn of the start of this token.</param>
 /// <param name="FileName">The file name of this token.</param>
-public record Token(TokenType Type, string Match, string Line, int Row, int Collumn, string FileName);
+public record Token(TokenType Type, string Match, string Line, int Row, int Column, string FileName);
 
 
 // The token stream should read the tokens one at a time, so it doesn't use too much memory.
