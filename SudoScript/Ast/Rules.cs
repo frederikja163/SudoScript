@@ -2,8 +2,11 @@
 
 public sealed class RulesNode : UnitStatementNode
 {
-    public RulesNode(IReadOnlyList<FunctionCallNode> functionCallNode)
+    public RulesNode(Token rulesToken, Token startToken, Token endToken, IReadOnlyList<FunctionCallNode> functionCallNode)
     {
+        RulesToken = rulesToken;
+        StartToken = startToken;
+        EndToken = endToken;
         FunctionCalls = functionCallNode;
         foreach (FunctionCallNode functionCall in FunctionCalls)
         {
@@ -11,6 +14,9 @@ public sealed class RulesNode : UnitStatementNode
         }
     }
 
+    public Token RulesToken { get; }
+    public Token StartToken { get; }
+    public Token EndToken { get; }
     public IReadOnlyList<FunctionCallNode> FunctionCalls { get; }
 
     public override IEnumerable<IAstNode> Children()
@@ -21,6 +27,9 @@ public sealed class RulesNode : UnitStatementNode
     public override bool Equals(IAstNode? other)
     {
         return other is RulesNode node &&
-            FunctionCalls.SequenceEqual(node.FunctionCalls);
+            node.RulesToken.Equals(RulesToken) &&
+            node.StartToken.Equals(StartToken) &&
+            node.EndToken.Equals(EndToken) &&
+            node.FunctionCalls.SequenceEqual(FunctionCalls);
     }
 }

@@ -2,7 +2,7 @@
 
 public sealed class FunctionCallNode : UnitStatementNode
 {
-    public FunctionCallNode(string name, List<ArgumentNode> arguments)
+    public FunctionCallNode(Token name, List<ArgumentNode> arguments)
     {
         Name = name;
         Arguments = arguments;
@@ -12,7 +12,7 @@ public sealed class FunctionCallNode : UnitStatementNode
         }
     }
 
-    public string Name { get; }
+    public Token Name { get; }
     public IReadOnlyList<ArgumentNode> Arguments { get; }
 
     public override IEnumerable<IAstNode> Children()
@@ -39,14 +39,20 @@ public abstract class ArgumentNode : IAstNode
 
 public sealed class CellNode : ArgumentNode
 {
-    public CellNode(ExpressionNode x, ExpressionNode y)
+    public CellNode(Token startToken, Token endToken, Token commaToken, ExpressionNode x, ExpressionNode y)
     {
+        StartToken = startToken;
+        EndToken = endToken;
+        CommaToken = commaToken;
         X = x;
         X.Parent = this;
         Y = y;
         Y.Parent = this;
     }
 
+    public Token StartToken { get; }
+    public Token EndToken { get; }
+    public Token CommaToken { get; }
     public ExpressionNode X { get; }
     public ExpressionNode Y { get; }
 
@@ -59,6 +65,9 @@ public sealed class CellNode : ArgumentNode
     public override bool Equals(IAstNode? other)
     {
         return other is CellNode node &&
+            node.StartToken.Equals(StartToken) &&
+            node.EndToken.Equals(EndToken) &&
+            node.CommaToken.Equals(CommaToken) &&
             node.X.Equals(X) &&
             node.Y.Equals(Y);
     }

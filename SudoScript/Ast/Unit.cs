@@ -11,11 +11,11 @@ public abstract class UnitStatementNode : IAstNode
 
 public sealed class UnitNode : UnitStatementNode
 {
-    public UnitNode(string? name,
+    public UnitNode(Token? nameToken,
         List<UnitStatementNode> unitStatements,
         List<ParameterNode> parameters)
     {
-        Name = name;
+        NameToken = nameToken;
         UnitStatements = unitStatements;
         foreach (UnitStatementNode unitStatement in UnitStatements)
         {
@@ -28,7 +28,7 @@ public sealed class UnitNode : UnitStatementNode
         }
     }
 
-    public string? Name { get; }
+    public Token? NameToken { get; }
 
     public IReadOnlyList<UnitStatementNode> UnitStatements { get; }
     public IReadOnlyList<ParameterNode> Parameters { get; }
@@ -42,7 +42,7 @@ public sealed class UnitNode : UnitStatementNode
     {
         return other is UnitNode node &&
                 (node.Parent?.Equals(Parent) ?? false) &&
-                node.Name == Name &&
+                (node.NameToken?.Equals(NameToken) ?? false) &&
                 node.Children().SequenceEqual(UnitStatements);
     }
 }
@@ -86,12 +86,12 @@ public sealed class ParameterCellNode : ParameterNode
 
 public sealed class ParameterIdentifierNode : ParameterNode
 {
-    public ParameterIdentifierNode(string name)
+    public ParameterIdentifierNode(Token nameToken)
     {
-        Name = name;
+        NameToken = nameToken;
     }
 
-    public string Name { get; }
+    public Token NameToken { get; }
 
     public override IEnumerable<IAstNode> Children()
     {
@@ -101,6 +101,6 @@ public sealed class ParameterIdentifierNode : ParameterNode
     public override bool Equals(IAstNode? other)
     {
         return other is ParameterIdentifierNode node &&
-            node.Name == Name;
+            node.NameToken.Equals(NameToken);
     }
 }
