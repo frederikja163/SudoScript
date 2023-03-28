@@ -4,7 +4,7 @@ public sealed class Board : ICloneable
 {
     private IReadOnlyDictionary<(int, int), Cell> _cells;
 
-    private Board(IReadOnlyDictionary<(int, int), Cell> cells, List<Unit> units)
+    private Board(IReadOnlyDictionary<(int, int), Cell> cells, IReadOnlyList<Unit> units)
     {
         _cells = cells;
         Units = units;
@@ -14,12 +14,12 @@ public sealed class Board : ICloneable
         }
     }
 
-    public Board(IReadOnlyList<Cell> cells, List<Unit> units)
+    public Board(IReadOnlyList<Cell> cells, IReadOnlyList<Unit> units)
         : this(cells.ToDictionary(c => (c.X, c.Y)), units)
     {
     }
 
-    public List<Unit> Units { get; }
+    public IReadOnlyList<Unit> Units { get; }
 
     public Cell this[int x, int y] => _cells[(x, y)];
 
@@ -51,13 +51,8 @@ public sealed class Board : ICloneable
     public Board Clone()
     {
         IReadOnlyDictionary<(int, int), Cell> cellsCopy = _cells.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-        Board board = new Board(cellsCopy, new List<Unit>());
-        foreach (Unit unit in Units)
-        {
-            Unit unitCopy = new Unit(unit);
-            unitCopy.Board = this;
-        }
+        List<Unit> unitsCopy = Units.Select(u => new Unit(u)).ToList();
+        Board board = new Board(cellsCopy, unitsCopy);
         return board;
     }
 
