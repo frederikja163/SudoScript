@@ -2,7 +2,7 @@
 
 namespace SudoScript.Visitors;
 
-public interface Visitor
+public interface IVisitor
 {
     public void Visit(IAstNode node);
     public void Visit(ProgramNode node);
@@ -23,7 +23,7 @@ public interface Visitor
     public void Visit(GivensStatementNode node);
 }
 
-public abstract class VisitorBase : Visitor
+public abstract class VisitorBase : IVisitor
 {
     public virtual void Visit(IAstNode node)
     {
