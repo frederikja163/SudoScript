@@ -79,6 +79,15 @@ public sealed class TokenStream : IEnumerator<Token>
     {
         throw new NotImplementedException();
     }
+    public Token Peek(int i = 0)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal bool HasNext()
+    {
+        throw new NotImplementedException();
+    }
 
     public Token Current => throw new NotImplementedException();
 
