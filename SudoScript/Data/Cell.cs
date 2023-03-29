@@ -2,6 +2,8 @@
 
 public sealed class Cell
 {
+    public const int EmptyDigit = 0;
+    
     public Cell(int x, int y, int given)
     {
         X = x;
@@ -15,6 +17,7 @@ public sealed class Cell
     {
         X = x;
         Y = y;
+        _digit = EmptyDigit;
         Candidates = new HashSet<int>()
         {
         1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -26,7 +29,7 @@ public sealed class Cell
 
     public bool IsGiven { get; }
 
-    private int _digit = 0;
+    private int _digit;
 
     public int Digit
     {
