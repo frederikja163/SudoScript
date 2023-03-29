@@ -25,7 +25,7 @@ public sealed class OneRule : IRule
         HashSet<int> seenDigits = new HashSet<int>();
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.Digit == 0)
+            if (cell.Digit == Cell.EmptyDigit)
             {
                 // Remove all seen digits from the candidates of this cell.
                 cell.Candidates.RemoveWhere(x => seenDigits.Contains(x));
@@ -46,7 +46,7 @@ public sealed class OneRule : IRule
         HashSet<int> seenDigits = new HashSet<int>();
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.Digit != 0)
+            if (cell.Digit != Cell.EmptyDigit)
             {
                 if (seenDigits.Contains(cell.Digit))
                 {
