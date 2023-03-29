@@ -45,4 +45,6 @@ public sealed class Cell
     }
 
     public HashSet<int> Candidates { get; }
+
+    public int CandidateCount => Candidates.Count;
 }

@@ -21,6 +21,26 @@ public static class Solver
     {
         // Get a list of all cells with the least amount of candidates.
 
+        IEnumerable<Cell> orderedCells = board.Cells()
+            .OrderBy(c => c.CandidateCount);
+        if (orderedCells.FirstOrDefault()?.CandidateCount < 1)
+        {
+            solvedBoard = null;
+            return false;
+        }
+        // Skip all cells with less than 2 candidates.
+        orderedCells = orderedCells.SkipWhile(c => c.CandidateCount <= 1);
+        // The first cell contains the smallest amount of candidates.
+        int lowestCandidateCount = orderedCells.FirstOrDefault()?.CandidateCount ?? 1;
+        // Take all cells with the least amount of candidates.
+        orderedCells = orderedCells.TakeWhile(c => c.CandidateCount == lowestCandidateCount);
+        // If there are no cells with more than 1 candidate, the board is solved.
+        if (lowestCandidateCount == 1)
+        {
+            solvedBoard = board;
+            return true;
+        }
+
         // Choose one of the cells.
 
         // Create a clone of the board for backtracking.
@@ -31,6 +51,11 @@ public static class Solver
 
         // Call solve on the new board.
         throw new NotImplementedException();
+    }
+
+    private static int GetCandidateCount(Cell cell)
+    {
+        return cell.CandidateCount;
     }
 
     public static Board GenerateSolveable(Board board)
