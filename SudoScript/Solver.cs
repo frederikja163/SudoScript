@@ -40,17 +40,30 @@ public static class Solver
             solvedBoard = board;
             return true;
         }
+        // TODO: Try with randomized list.
 
         // Choose one of the cells.
+        Cell cell = orderedCells.First();
 
         // Create a clone of the board for backtracking.
+        // TODO: Implement backtracking later.
 
         // Collapse the cell with a digit.
+        CollapseCellWithDigit(cell);
 
         // Eliminate candidates from all rules.
+        board.EliminateCandidates();
 
         // Call solve on the new board.
-        throw new NotImplementedException();
+        return SolveRec(board, out solvedBoard);
+    }
+
+    private static void CollapseCellWithDigit(Cell cell)
+    {
+        int digit = cell.Candidates.First();
+        cell.Candidates.Clear();
+        cell.Candidates.Add(digit);
+        cell.Digit = digit;
     }
 
     private static int GetCandidateCount(Cell cell)

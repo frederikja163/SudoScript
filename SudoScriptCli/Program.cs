@@ -80,7 +80,7 @@ internal static class Program
             List<CellReference> cells = new List<CellReference>();
             for (int x1 = 0; x1 < 3; x1++)
             {
-                for (int y1 = 0; y1 < 9; y1++)
+                for (int y1 = 0; y1 < 3; y1++)
                 {
                     cells.Add(new CellReference(x + x1, y + y1));
                 }
