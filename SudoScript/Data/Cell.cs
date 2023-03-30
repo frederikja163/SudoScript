@@ -3,6 +3,7 @@
 public sealed class Cell
 {
     public const int EmptyDigit = 0;
+    private readonly HashSet<int> _candidates;
     
     public Cell(int x, int y, int given)
     {
@@ -10,7 +11,7 @@ public sealed class Cell
         Y = y;
         IsGiven = true;
         _digit = given;
-        Candidates = new HashSet<int>();
+        _candidates = new HashSet<int>() { _digit };
     }
 
     public Cell(int x, int y)
@@ -18,9 +19,9 @@ public sealed class Cell
         X = x;
         Y = y;
         _digit = EmptyDigit;
-        Candidates = new HashSet<int>()
+        _candidates = new HashSet<int>()
         {
-        1, 2, 3, 4, 5, 6, 7, 8, 9,
+            1, 2, 3, 4, 5, 6, 7, 8, 9,
         };
     }
 
@@ -41,12 +42,40 @@ public sealed class Cell
                 throw new InvalidOperationException("Cannot set the digit of a cell that is a given.");
             }
             _digit = value;
+            if (value != EmptyDigit)
+            {
+                _candidates.Clear();
+                _candidates.Add(value);
+            }
         }
     }
 
-    public HashSet<int> Candidates { get; }
 
-    public int CandidateCount => Candidates.Count;
+    public int CandidateCount => _candidates.Count;
+
+    public void EliminateCandidate(IEnumerable<int> candidates)
+    {
+
+        _candidates.RemoveWhere(c => candidates.Contains(c));
+        if (_candidates.Count == 1)
+        {
+            Digit = _candidates.First();
+        }
+        else if (_candidates.Count != 1)
+        {
+            Digit = EmptyDigit;
+        }
+    }
+
+    public bool HasCandidate(int candidate)
+    {
+        return _candidates.Contains(candidate);
+    }
+
+    public IEnumerable<int> Candidates()
+    {
+        return _candidates;
+    }
 
     public override string ToString()
     {

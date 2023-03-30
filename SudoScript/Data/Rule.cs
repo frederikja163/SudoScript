@@ -22,21 +22,18 @@ public sealed class OneRule : IRule
 {
     public void EliminateCandidates(Unit unit)
     {
-        HashSet<int> seenDigits = new HashSet<int>();
+        // Get a list of all digits in the unit.
+        HashSet<int> digits = unit.Cells()
+            .Select(c => c.Digit)
+            .Where(d => d != Cell.EmptyDigit)
+            .ToHashSet();
+
         foreach (Cell cell in unit.Cells())
         {
             if (cell.Digit == Cell.EmptyDigit)
             {
                 // Remove all seen digits from the candidates of this cell.
-                cell.Candidates.RemoveWhere(x => seenDigits.Contains(x));
-            }
-            else
-            {
-                if (seenDigits.Contains(cell.Digit))
-                {
-                    throw new RuleException(unit, cell, $"One rule is not followed, multiple instances of {cell.Digit} found.");
-                }
-                seenDigits.Add(cell.Digit);
+                cell.EliminateCandidate(digits);
             }
         }
     }

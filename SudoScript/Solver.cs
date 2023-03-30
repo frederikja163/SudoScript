@@ -58,11 +58,23 @@ public static class Solver
         return SolveRec(board, out solvedBoard);
     }
 
+    public static string BoardToString(Board board)
+    {
+        string str = "";
+        for (int i = 1; i <= 9; i++)
+        {
+            for (int j = 1; j <= 9; j++)
+            {
+                str += board[i, j];
+            }
+            str += "\n";
+        }
+        return str;
+    }
+
     private static void CollapseCellWithDigit(Cell cell)
     {
-        int digit = cell.Candidates.First();
-        cell.Candidates.Clear();
-        cell.Candidates.Add(digit);
+        int digit = cell.Candidates().First();
         cell.Digit = digit;
     }
 
