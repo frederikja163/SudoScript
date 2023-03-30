@@ -28,8 +28,6 @@ public static class Parser
     }
     private static UnitStatementNode ParseUnitStatement(TokenStream stream)
     {
-        //List<IAstNode> children = new List<IAstNode>() { ParseUnitStatement(stream) };
-
         if (stream.MoveNext())
         {
             switch (stream.Peek().Type)
@@ -51,22 +49,82 @@ public static class Parser
 
     private static UnitNode ParseUnit(TokenStream stream)
     {
-        if (stream.MoveNext())
+        stream.Accept(TokenType.Unit, out Token? _);
+        List<ParameterNode> paramChildren = new List<ParameterNode>();
+        if (stream.Accept(TokenType.Identifier, out Token? identifier))
         {
-            switch (stream.Peek().Type)
-            {
-                case TokenType.Identifier:
-                    stream.Accept(TokenType.Identifier, out Token? identifier);
-                    break;
-                case TokenType.LeftBrace:
-                    break; // left off here, return something good
-                default:
-                    throw new Exception("{ expected");
-            }
+            if(stream.Peek().Type == TokenType.Identifier)
+                paramChildren.AddRange(ParseParameters(stream));
         }
 
-        throw new Exception("{ expected");
+        if (!stream.Accept(TokenType.LeftBrace, out Token? _)) 
+            throw new Exception("{ expected");
+
+
+        UnitNode unitNode = new UnitNode(identifier,ParseUnitStatements(stream), paramChildren);
+        if(stream.Accept(TokenType.RightBrace, out Token? rightBrace))
+            {
+                return unitNode;
+            }
+
+        throw new Exception("} expected");
     }
+
+    private static List<ParameterNode> ParseParameters(TokenStream stream)
+    {
+        List<ParameterNode> paramChildren = new List<ParameterNode>();
+        // Check if it is a identifier or cell param
+        while(!stream.Accept(TokenType.LeftBrace, out Token _))
+        {
+            if(stream.Peek().Type == TokenType.LeftParenthesis)
+            {
+                paramChildren.Add(ParseParameterCell(stream));
+            }
+
+            if(stream.Peek().Type == TokenType.Identifier) 
+                paramChildren.Add(ParseParameterIdentifier(stream));
+
+        }
+
+        return paramChildren;
+    }
+
+    private static ParameterIdentifierNode ParseParameterIdentifier(TokenStream stream)
+    {
+        if (!stream.Accept(TokenType.Identifier, out Token? identifier)) 
+            throw new Exception("Expected identifier");
+            
+        return new ParameterIdentifierNode(identifier);
+    }
+
+    private static ParameterCellNode ParseParameterCell(TokenStream stream)
+    {
+        ParameterIdentifierNode x;
+        ParameterIdentifierNode y;
+            
+        stream.Accept(TokenType.LeftParenthesis, out Token? _);
+
+        // You could probably do this better
+        if (!(stream.Peek().Type == TokenType.Identifier)) 
+            throw new Exception("Expected identifier");
+
+        x = ParseParameterIdentifier(stream);
+
+        if (!stream.Accept(TokenType.Comma, out Token? _))
+            throw new Exception(", expected");
+
+        if (!(stream.Peek().Type == TokenType.Identifier)) 
+            throw new Exception("Expected identifier");
+
+        y = ParseParameterIdentifier(stream);
+
+        if (!stream.Accept(TokenType.RightParenthesis, out Token? _))
+            throw new Exception(") expected");
+
+        return new ParameterCellNode(x, y);
+
+    }
+
     private static FunctionCallNode ParseFunctionCall(TokenStream stream)
     {
         throw new NotImplementedException();
