@@ -54,6 +54,12 @@ public static class Solver
         // Eliminate candidates from all rules.
         board.EliminateCandidates();
 
+        if (!board.ValidateRules())
+        {
+            solvedBoard = null;
+            return false;
+        }
+
         // Call solve on the new board.
         return SolveRec(board, out solvedBoard);
     }

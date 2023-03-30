@@ -40,7 +40,7 @@ public sealed class Board : ICloneable
     {
         foreach (Unit unit in Units)
         {
-            if (unit.ValidateRules())
+            if (!unit.ValidateRules())
             {
                 return false;
             }
