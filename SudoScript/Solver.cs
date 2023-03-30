@@ -49,11 +49,13 @@ public static class Solver
         // TODO: Implement backtracking later.
 
         // Collapse the cell with a digit.
-        CollapseCellWithDigit(cell);
+        int digit = cell.Candidates().First();
+        cell.Digit = digit;
 
-        // Eliminate candidates from all rules.
-        board.EliminateCandidates();
+        // Eliminate candidates from all rules untill nothing changes.
+        while (board.EliminateCandidates()) ;
 
+        // We hit an invalid state, and must backtrack.
         if (!board.ValidateRules())
         {
             solvedBoard = null;
@@ -62,31 +64,6 @@ public static class Solver
 
         // Call solve on the new board.
         return SolveRec(board, out solvedBoard);
-    }
-
-    public static string BoardToString(Board board)
-    {
-        string str = "";
-        for (int i = 1; i <= 9; i++)
-        {
-            for (int j = 1; j <= 9; j++)
-            {
-                str += board[i, j];
-            }
-            str += "\n";
-        }
-        return str;
-    }
-
-    private static void CollapseCellWithDigit(Cell cell)
-    {
-        int digit = cell.Candidates().First();
-        cell.Digit = digit;
-    }
-
-    private static int GetCandidateCount(Cell cell)
-    {
-        return cell.CandidateCount;
     }
 
     public static Board GenerateSolveable(Board board)

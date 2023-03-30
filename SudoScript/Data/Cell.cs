@@ -53,10 +53,17 @@ public sealed class Cell
 
     public int CandidateCount => _candidates.Count;
 
-    public void EliminateCandidate(IEnumerable<int> candidates)
+    public bool EliminateCandidate(IEnumerable<int> candidates)
     {
-
-        _candidates.RemoveWhere(c => candidates.Contains(c));
+        bool somethingEliminated = false;
+        foreach (int candidate in candidates)
+        {
+            if (_candidates.Contains(candidate))
+            {
+                somethingEliminated = true;
+                _candidates.Remove(candidate);
+            }
+        }
         if (_candidates.Count == 1)
         {
             Digit = _candidates.First();
@@ -65,6 +72,7 @@ public sealed class Cell
         {
             Digit = EmptyDigit;
         }
+        return somethingEliminated;
     }
 
     public bool HasCandidate(int candidate)

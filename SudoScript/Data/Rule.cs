@@ -14,13 +14,13 @@ public sealed class RuleException : Exception
 
 public interface IRule
 {
-    public abstract void EliminateCandidates(Unit unit);
+    public abstract bool EliminateCandidates(Unit unit);
     public abstract bool ValidateRules(Unit unit);
 }
 
 public sealed class OneRule : IRule
 {
-    public void EliminateCandidates(Unit unit)
+    public bool EliminateCandidates(Unit unit)
     {
         // Get a list of all digits in the unit.
         HashSet<int> digits = unit.Cells()
@@ -28,14 +28,19 @@ public sealed class OneRule : IRule
             .Where(d => d != Cell.EmptyDigit)
             .ToHashSet();
 
+        bool somethingEliminated = false;
         foreach (Cell cell in unit.Cells())
         {
             if (cell.Digit == Cell.EmptyDigit)
             {
                 // Remove all seen digits from the candidates of this cell.
-                cell.EliminateCandidate(digits);
+                if (cell.EliminateCandidate(digits))
+                {
+                    somethingEliminated = true;
+                }
             }
         }
+        return somethingEliminated;
     }
 
     public bool ValidateRules(Unit unit)
