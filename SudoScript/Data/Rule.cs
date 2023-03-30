@@ -45,6 +45,14 @@ public sealed class OneRule : IRule
 
     public bool ValidateRules(Unit unit)
     {
+        // One rule requires all symbols, in order for that it needs a specific size of unit.
+        // TODO: Remember to change this if updating amount of symbols.
+        // .ToHashSet is needed to ensure all the cells are unique (seperate coordinates)
+        if (unit.Cells().ToHashSet().Count() != 9)
+        {
+            return false;
+        }
+
         HashSet<int> seenDigits = new HashSet<int>();
         foreach (Cell cell in unit.Cells())
         {
