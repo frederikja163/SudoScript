@@ -1,4 +1,4 @@
-﻿using SudoScript.Data;
+using SudoScript.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,10 +44,11 @@ internal static class Util
         return new Unit(cells, _oneRuleRules);
     }
 
-    public static Board CreateStandardEmpty()
+    public static Board CreateStandardEmpty(params Unit[] units)
     {
         List<Cell> allCells = new List<Cell>();
-        List<Unit> units = new List<Unit>();
+        List<Unit> allUnits = new List<Unit>();
+        allUnits.AddRange(units);
 
         for (int x = 1; x <= 9; x++)
         {
@@ -56,37 +57,36 @@ internal static class Util
                 allCells.Add(new Cell(x, y));
             }
         }
+        allUnits.Add(CreateRow(1));
+        allUnits.Add(CreateRow(2));
+        allUnits.Add(CreateRow(3));
+        allUnits.Add(CreateRow(4));
+        allUnits.Add(CreateRow(5));
+        allUnits.Add(CreateRow(6));
+        allUnits.Add(CreateRow(7));
+        allUnits.Add(CreateRow(8));
+        allUnits.Add(CreateRow(9));
 
-        units.Add(CreateRow(1));
-        units.Add(CreateRow(2));
-        units.Add(CreateRow(3));
-        units.Add(CreateRow(4));
-        units.Add(CreateRow(5));
-        units.Add(CreateRow(6));
-        units.Add(CreateRow(7));
-        units.Add(CreateRow(8));
-        units.Add(CreateRow(9));
+        allUnits.Add(CreateColumn(1));
+        allUnits.Add(CreateColumn(2));
+        allUnits.Add(CreateColumn(3));
+        allUnits.Add(CreateColumn(4));
+        allUnits.Add(CreateColumn(5));
+        allUnits.Add(CreateColumn(6));
+        allUnits.Add(CreateColumn(7));
+        allUnits.Add(CreateColumn(8));
+        allUnits.Add(CreateColumn(9));
 
-        units.Add(CreateColumn(1));
-        units.Add(CreateColumn(2));
-        units.Add(CreateColumn(3));
-        units.Add(CreateColumn(4));
-        units.Add(CreateColumn(5));
-        units.Add(CreateColumn(6));
-        units.Add(CreateColumn(7));
-        units.Add(CreateColumn(8));
-        units.Add(CreateColumn(9));
+        allUnits.Add(CreateBox(1, 1));
+        allUnits.Add(CreateBox(1, 4));
+        allUnits.Add(CreateBox(1, 7));
+        allUnits.Add(CreateBox(4, 1));
+        allUnits.Add(CreateBox(4, 4));
+        allUnits.Add(CreateBox(4, 7));
+        allUnits.Add(CreateBox(7, 1));
+        allUnits.Add(CreateBox(7, 4));
+        allUnits.Add(CreateBox(7, 7));
 
-        units.Add(CreateBox(1, 1));
-        units.Add(CreateBox(1, 4));
-        units.Add(CreateBox(1, 7));
-        units.Add(CreateBox(4, 1));
-        units.Add(CreateBox(4, 4));
-        units.Add(CreateBox(4, 7));
-        units.Add(CreateBox(7, 1));
-        units.Add(CreateBox(7, 4));
-        units.Add(CreateBox(7, 7));
-
-        return new Board(allCells, units);
+        return new Board(allCells, allUnits);
     }
 }
