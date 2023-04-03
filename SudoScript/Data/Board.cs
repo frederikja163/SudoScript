@@ -55,7 +55,7 @@ public sealed class Board : ICloneable
 
     public Board Clone()
     {
-        IReadOnlyDictionary<(int, int), Cell> cellsCopy = _cells.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        IReadOnlyDictionary<(int, int), Cell> cellsCopy = _cells.ToDictionary(kvp => kvp.Key, kvp => new Cell(kvp.Value));
         List<Unit> unitsCopy = Units.Select(u => new Unit(u)).ToList();
         Board board = new Board(cellsCopy, unitsCopy);
         return board;
