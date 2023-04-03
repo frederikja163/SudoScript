@@ -111,10 +111,10 @@ internal sealed class GeneratorTests
 
         // Assert
         Assert.That(board.Units.Count, Is.EqualTo(2));
-        Assert.That(board[9, 5], Is.EqualTo(6));
-        Assert.That(board[3, 6], Is.EqualTo(2));
-        Assert.That(board[5, 7], Is.EqualTo(0));
-        Assert.That(board[2, 4], Is.EqualTo(0));
+        Assert.That(board[9, 5].Digit, Is.EqualTo(6));
+        Assert.That(board[3, 6].Digit, Is.EqualTo(2));
+        Assert.That(board[5, 7].Digit, Is.EqualTo(0));
+        Assert.That(board[2, 4].Digit, Is.EqualTo(0));
         
     }
 }
