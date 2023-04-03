@@ -55,8 +55,7 @@ public record Token(TokenType Type, string Match, string Line, int Row, int Colu
 
 
 // The token stream should read the tokens one at a time, so it doesn't use too much memory.
-public sealed class TokenStream
-{
+public sealed class TokenStream {
 
     private readonly TextReader _reader;
 
@@ -65,18 +64,27 @@ public sealed class TokenStream
     public TokenStream(TextReader reader) {
         _reader = reader;
         _carry = new();
-        HasNext = true;
+        _hasNext = true;
     }
 
-    public TokenStream(string s) : this(new StringReader(s)){
+    public TokenStream(string s) : this(new StringReader(s)) {
     }
 
     private Token? Next;
 
-    public bool HasNext { get; private set; }
+    private bool _hasNext;
+    public bool HasNext {
+        get {
+            Peek(out _);
+            return _hasNext;
+        }
+        private set {
+            _hasNext = value;
+        }
+    }
 
     public bool Peek([NotNullWhen(true)] out Token? nextToken) {
-        if(!HasNext) {
+        if(!_hasNext) {
             nextToken = null;
             return false;
         } else if(Next != null) {
@@ -88,23 +96,19 @@ public sealed class TokenStream
             return true;
         } else {
             nextToken = null;
-            HasNext = false;
+            _hasNext = false;
             return false;
         }
     }
 
     public bool Expect(TokenType type, [NotNullWhen(true)] out Token? token) {
         if(Next == null) {
+            bool b = Peek(out token);
+            Next = null;
+            return b;
+        } else if(!Next.Type.Equals(type)) {
             token = null;
             return false;
-        }
-
-        if(!Next.Type.Equals(type)) {
-            throw new ArgumentException("The next type did not match with the expected type.");
-        }
-
-        if(Next == null) {
-            return Peek(out token);
         } else {
             token = Next;
             Next = null;
