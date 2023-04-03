@@ -9,7 +9,8 @@ public static class Solver
     // Perhaps a multithreading solver instead of actual back tracking to calculate multiple paths at once.
     public static Board Solve(Board board)
     {
-        if (!SolveRec(board, out Board? newBoard))
+        Board? newBoard = board.Clone();
+        if (!SolveRec(newBoard, out newBoard))
         {
             throw new Exception("Board is not solveable");
         }
