@@ -87,7 +87,7 @@ public sealed class TokenStream {
         if(!_hasNext) {
             nextToken = null;
             return false;
-        } else if(Next != null) {
+        } else if(Next is not null) {
             nextToken = Next;
             return true;
         } else if(GetToken(out Token? result)) {
@@ -102,7 +102,7 @@ public sealed class TokenStream {
     }
 
     public bool Expect(TokenType type, [NotNullWhen(true)] out Token? token) {
-        if(Next == null) {
+        if(Next is null) {
             bool b = Peek(out token);
             Next = null;
             return b;
@@ -150,7 +150,6 @@ public sealed class TokenStream {
 
         string match = "";
 
-        //read comment
         if(character == '/' && GetNextCharacter(out char secondCharacter)) {
             List<char> matchList = new() { character, secondCharacter };
 
@@ -172,8 +171,6 @@ public sealed class TokenStream {
                 } while(flag);
                 type = TokenType.BlockComment;
             }
-
-            match = new string(match.ToArray());
 
         } else if(Char.IsLetter(character)) {
             match = character + MatchWhile(c => char.IsLetterOrDigit(c));
@@ -199,7 +196,7 @@ public sealed class TokenStream {
             return true;
         }
 
-        throw new ArgumentException($"The next character: '{character}' was not recognized as a token!");
+        throw new ArgumentException($"Unrecognized character: {character} is not a recognised token");
     }
 
     private string MatchWhile(Func<char, bool> condition) {
@@ -215,7 +212,7 @@ public sealed class TokenStream {
     }
 
     private bool GetNextCharacter(out char character) {
-        if(_carry != null) {
+        if(_carry is not null) {
             character = (char)_carry;
             _carry = null;
             return true;
