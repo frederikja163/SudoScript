@@ -10,7 +10,7 @@ internal sealed class SolverTests
     public void CanSolveEmptySudoku()
     {
         Board board = Util.CreateStandardEmpty();
-        Assert.DoesNotThrow(() => board = Solver.Solve(board));
+        Assert.DoesNotThrow(() => board = Solver.Solve(board, false));
         Assert.IsTrue(board.ValidateRules());
         Assert.IsFalse(board.Cells().Any(c => c.Digit == Cell.EmptyDigit));
     }
@@ -58,7 +58,7 @@ internal sealed class SolverTests
         board[6, 9].Digit = 8;
         board[7, 9].Digit = 9;
         board[8, 9].Digit = 7;
-        Assert.DoesNotThrow(() => board = Solver.Solve(board));
+        Assert.DoesNotThrow(() => board = Solver.Solve(board, true));
         Assert.IsTrue(board.ValidateRules());
         Assert.IsFalse(board.Cells().Any(c => c.Digit == Cell.EmptyDigit));
     }

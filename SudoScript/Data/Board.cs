@@ -65,4 +65,16 @@ public sealed class Board : ICloneable
     {
         return Clone();
     }
+
+    public override int GetHashCode()
+    {
+        return string.Join("", _cells.Select(kvp => kvp.Value.Digit)).GetHashCode();
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Board board &&
+               _cells.All(kvp => board._cells[kvp.Key].Equals(kvp.Value)) &&
+               Units.SequenceEqual(board.Units);
+    }
 }
