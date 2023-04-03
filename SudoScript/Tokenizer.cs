@@ -62,13 +62,13 @@ public sealed class TokenStream
 
     private char? _carry;
 
-    internal TokenStream(TextReader reader) {
+    public TokenStream(TextReader reader) {
         _reader = reader;
         _carry = new();
         HasNext = true;
     }
 
-    internal TokenStream(string s) : this(new StringReader(s)){
+    public TokenStream(string s) : this(new StringReader(s)){
     }
 
     private Token? Next;
@@ -191,6 +191,22 @@ public sealed class TokenStream
             }
             _carry = currentCharacter;
             type = TokenType.Number;
+        }else if(character == '\n') {
+            //read newlines
+            char currentCharacter;
+            while(GetNextCharacter(out currentCharacter) && currentCharacter == '\n') {
+                match.Add(currentCharacter);
+            }
+            _carry = currentCharacter;
+            type = TokenType.Newline;
+        } else if(char.IsWhiteSpace(character)){
+            //read other whitespace
+            char currentCharacter;
+            while(GetNextCharacter(out currentCharacter) && char.IsWhiteSpace(currentCharacter)) {
+                match.Add(currentCharacter);
+            }
+            _carry = currentCharacter;
+            type = TokenType.Space;
         }
 
         if(type != 0) {
