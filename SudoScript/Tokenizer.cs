@@ -63,7 +63,7 @@ public sealed class TokenStream {
 
     public TokenStream(TextReader reader) {
         _reader = reader;
-        _carry = new();
+        _carry = null;
         _hasNext = true;
     }
 
@@ -148,12 +148,11 @@ public sealed class TokenStream {
             return true;
         }
 
-        List<char> match = new() { character };
-        
+        string match = "";
+
         //read comment
         if(character == '/' && GetNextCharacter(out char secondCharacter)) {
-            type = 0;
-            List<char> matchList = new();
+            List<char> matchList = new() { character, secondCharacter };
 
             if(secondCharacter == '/') {
                 bool flag;
@@ -173,52 +172,46 @@ public sealed class TokenStream {
                 } while(flag);
                 type = TokenType.BlockComment;
             }
-        } else if(Char.IsLetter(character)) {
-            //read as text
-            char currentCharacter;
-            while(GetNextCharacter(out currentCharacter) && char.IsLetterOrDigit(currentCharacter)) {
-                match.Add(currentCharacter);
-            }
-            _carry = currentCharacter;
 
-            type = new string(match.ToArray()) switch {
+            match = new string(match.ToArray());
+
+        } else if(Char.IsLetter(character)) {
+            match = character + MatchWhile(c => char.IsLetterOrDigit(c));
+            type = match switch {
                 "unit" =>  TokenType.Unit,
                 "givens" => TokenType.Unit,
                 "rules" => TokenType.Unit,
                 _ => TokenType.Identifier,
             };
         } else if(Char.IsDigit(character)) {
-            //read as digit
-            char currentCharacter;
-            while(GetNextCharacter(out currentCharacter) && Char.IsDigit(character)) {
-                match.Add(currentCharacter);
-            }
-            _carry = currentCharacter;
+            match = character + MatchWhile(c => Char.IsDigit(c));
             type = TokenType.Number;
         }else if(character == '\n') {
-            //read newlines
-            char currentCharacter;
-            while(GetNextCharacter(out currentCharacter) && currentCharacter == '\n') {
-                match.Add(currentCharacter);
-            }
-            _carry = currentCharacter;
+            match = character + MatchWhile(c => c == '\n');
             type = TokenType.Newline;
         } else if(char.IsWhiteSpace(character)){
-            //read other whitespace
-            char currentCharacter;
-            while(GetNextCharacter(out currentCharacter) && char.IsWhiteSpace(currentCharacter)) {
-                match.Add(currentCharacter);
-            }
-            _carry = currentCharacter;
+            match = character + MatchWhile(c => char.IsWhiteSpace(c) && c != '\n');
             type = TokenType.Space;
         }
 
         if(type != 0) {
-            nextToken = new Token(type, new string(match.ToArray()), "", 0, 0, "");
+            nextToken = new Token(type, match, "", 0, 0, "");
             return true;
         }
 
         throw new ArgumentException($"The next character: '{character}' was not recognized as a token!");
+    }
+
+    private string MatchWhile(Func<char, bool> condition) {
+        List<char> match = new();
+
+        char currentCharacter;
+        while(GetNextCharacter(out currentCharacter) && condition.Invoke(currentCharacter)) {
+            match.Add(currentCharacter);
+        }
+        _carry = currentCharacter;
+
+        return new string(match.ToArray());
     }
 
     private bool GetNextCharacter(out char character) {
@@ -229,7 +222,7 @@ public sealed class TokenStream {
         } else {
             int r = _reader.Read();
             character = (char)r;
-            return r == -1;
+            return r != -1;
         }
     }
 
