@@ -110,7 +110,7 @@ internal sealed class GeneratorTests
         var board = Generator.GetBoardFromAST(program);
 
         // Assert
-        Assert.That(board.Units.Count, Is.EqualTo(2));
+        Assert.That(board.Units.Count, Is.EqualTo(3));
         Assert.That(board[9, 5].Digit, Is.EqualTo(6));
         Assert.That(board[3, 6].Digit, Is.EqualTo(2));
         Assert.That(board[5, 7].Digit, Is.EqualTo(0));
