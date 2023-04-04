@@ -97,16 +97,4 @@ public sealed class Cell
     {
         return Digit.ToString();
     }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is Cell cell &&
-               _candidates.SequenceEqual(cell._candidates) &&
-               X == cell.X &&
-               Y == cell.Y &&
-               IsGiven == cell.IsGiven &&
-               _digit == cell._digit &&
-               Digit == cell.Digit &&
-               CandidateCount == cell.CandidateCount;
-    }
 }

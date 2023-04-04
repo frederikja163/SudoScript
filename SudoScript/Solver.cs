@@ -1,6 +1,4 @@
-﻿using ConcurrentCollections;
-using SudoScript.Data;
-using System.Collections.Concurrent;
+﻿using SudoScript.Data;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SudoScript;
@@ -9,25 +7,18 @@ public static class Solver
 {
     // Solve using Wave Function collapse algorithm with clone based back tracking.
     // Perhaps a multithreading solver instead of actual back tracking to calculate multiple paths at once.
-    public static Board Solve(Board board, bool isAsync = false)
+    public static Board Solve(Board board)
     {
         Board? newBoard = board.Clone();
-        ConcurrentHashSet<Board> solved = new ConcurrentHashSet<Board>();
-        if (!SolveRec(newBoard, solved, new Config() { IsAsync = isAsync}))
+        if (!SolveRec(newBoard, out newBoard))
         {
             throw new Exception("Board is not solveable");
         }
 
-        return solved.First();
+        return newBoard;
     }
 
-    private class Config
-    {
-        public int SolutionCount { get; init; } = 1;
-        public bool IsAsync { get; init; } = false;
-    }
-
-    private static bool SolveRec(Board board, ConcurrentHashSet<Board> solvedBoards, Config config)
+    private static bool SolveRec(Board board, [NotNullWhen(true)] out Board? solvedBoard)
     {
         // Eliminate candidates from all rules untill nothing changes.
         while (board.EliminateCandidates()) ;
@@ -35,6 +26,7 @@ public static class Solver
         // We hit an invalid state, and must backtrack.
         if (!board.ValidateRules())
         {
+            solvedBoard = null;
             return false;
         }
 
@@ -43,6 +35,7 @@ public static class Solver
             .OrderBy(c => c.CandidateCount);
         if (orderedCells.FirstOrDefault()?.CandidateCount < 1)
         {
+            solvedBoard = null;
             return false;
         }
         // Skip all cells with less than 2 candidates.
@@ -54,55 +47,30 @@ public static class Solver
         // If there are no cells with more than 1 candidate, the board is solved.
         if (lowestCandidateCount == 1)
         {
-            solvedBoards.Add(board);
+            solvedBoard = board;
             return true;
         }
 
-        Cell cell = orderedCells.OrderBy(_ => Random.Shared.Next()).First();
-        Loop(config.IsAsync, cell.Candidates(), candidate =>
+        foreach (Cell cell in orderedCells)
         {
-            if (solvedBoards.Count >= config.SolutionCount)
+            foreach (int candidate in cell.Candidates())
             {
-                return true;
-            }
-            // Create a clone of the board for backtracking.
-            Board clonedBoard = board.Clone();
-            Cell clonedCell = clonedBoard[cell.X, cell.Y];
+                // Create a clone of the board for backtracking.
+                Board clonedBoard = board.Clone();
+                Cell clonedCell = clonedBoard[cell.X, cell.Y];
 
-            // Collapse the cell with a digit.
-            clonedCell.Digit = candidate;
+                // Collapse the cell with a digit.
+                clonedCell.Digit = candidate;
 
-            // Call solve on the new board.
-            SolveRec(clonedBoard, solvedBoards, config);
-            return false;
-        });
-
-        return solvedBoards.Count >= config.SolutionCount;
-    }
-
-    private static void Loop<TSource>(bool isAsync, IEnumerable<TSource> enumerable, Func<TSource, bool> body)
-    {
-        if (isAsync)
-        {
-            Parallel.ForEach(enumerable, (i, state) =>
-            {
-                if (body.Invoke(i))
+                // Call solve on the new board.
+                if (SolveRec(clonedBoard, out solvedBoard))
                 {
-                    state.Break();
-                }
-            });
-        }
-        else
-        {
-
-            foreach (TSource item in enumerable)
-            {
-                if (body.Invoke(item))
-                {
-                    break;
+                    return true;
                 }
             }
         }
+        solvedBoard = null;
+        return false;
     }
 
     public static Board GenerateSolveable(Board board)
