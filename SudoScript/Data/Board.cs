@@ -88,18 +88,24 @@ public sealed class Board : ICloneable
         for(int row = 0; row < height; row++) {
             for(int col = 0; col < width; col++) {
 
-                string digitString = "   ";
+                string cellString;
                 if(orderedCellList[i].X == col + minX && orderedCellList[i].Y == row + minY) {
+                    string digitString;
                     if(orderedCellList[i].Digit != Cell.EmptyDigit) {
-                        digitString = Center(orderedCellList[i].Digit.ToString(), cellSize); 
+                        digitString = Center(orderedCellList[i].Digit.ToString(), cellSize);
+                    } else {
+                        digitString = new string(' ', cellSize);
                     }
+                    cellString = $"[{digitString}]";
                     i++;
+                } else {
+                    cellString = new(' ', cellSize + 2);
                 }
 
                 string space = col == width - 1 ? "\t" : "";
-                s += $"[{digitString}]" + space;
+                s += cellString + space;
             }
-            s += row == maxY - minY - 1 ? "\n\n" : "";
+            s += row == maxY - minY - 1 ? new string('\n', 3) : "";
         }
 
         return s;
