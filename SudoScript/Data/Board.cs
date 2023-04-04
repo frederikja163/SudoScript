@@ -61,7 +61,7 @@ public sealed class Board : ICloneable
         return Clone();
     }
 
-    public string Stringify() {
+    public string Stringify(int cellSize = 3) {
 
         int minX = int.MaxValue;
         int maxX = int.MinValue;
@@ -88,10 +88,10 @@ public sealed class Board : ICloneable
         for(int row = 0; row < height; row++) {
             for(int col = 0; col < width; col++) {
 
-                string digitString = " ";
+                string digitString = "   ";
                 if(orderedCellList[i].X == col + minX && orderedCellList[i].Y == row + minY) {
                     if(orderedCellList[i].Digit != Cell.EmptyDigit) {
-                        digitString = orderedCellList[i].Digit.ToString();
+                        digitString = Center(orderedCellList[i].Digit.ToString(), cellSize); 
                     }
                     i++;
                 }
@@ -103,5 +103,15 @@ public sealed class Board : ICloneable
         }
 
         return s;
+    }
+
+    private static string Center(string s, int length) {
+        int left = Math.Abs((int)((length - s.Length) / 2d));
+        if(s.Length < length) {
+            int rightPad = (int)Math.Ceiling((length - s.Length) / 2d);
+            return new string(' ', left) + s + new string(' ', rightPad);
+        } else {
+            return s.Substring(left, length);
+        }
     }
 }
