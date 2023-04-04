@@ -28,19 +28,24 @@ public sealed class Board : ICloneable
         return _cells.Values;
     }
 
-    public void EliminateCandidates()
+    public bool EliminateCandidates()
     {
+        bool somethingEliminated = false;
         foreach (Unit unit in Units)
         {
-            unit.EliminateCandidates();
+            if (unit.EliminateCandidates())
+            {
+                somethingEliminated = true;
+            }
         }
+        return somethingEliminated;
     }
 
     public bool ValidateRules()
     {
         foreach (Unit unit in Units)
         {
-            if (unit.ValidateRules())
+            if (!unit.ValidateRules())
             {
                 return false;
             }
