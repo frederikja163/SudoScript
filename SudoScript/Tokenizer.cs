@@ -176,8 +176,8 @@ public sealed class TokenStream {
             match = character + MatchWhile(c => char.IsLetterOrDigit(c));
             type = match switch {
                 "unit" =>  TokenType.Unit,
-                "givens" => TokenType.Unit,
-                "rules" => TokenType.Unit,
+                "givens" => TokenType.Givens,
+                "rules" => TokenType.Rules,
                 _ => TokenType.Identifier,
             };
         } else if(Char.IsDigit(character)) {
