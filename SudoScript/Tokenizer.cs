@@ -100,15 +100,6 @@ public sealed class TokenStream {
             return false;
         }
     }
-    public Token Peek(int i = 0)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal bool HasNext()
-    {
-        throw new NotImplementedException();
-    }
 
     public bool Expect(TokenType type, [NotNullWhen(true)] out Token? token) {
         if(Next is null) {
