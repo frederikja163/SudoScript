@@ -1,11 +1,8 @@
-﻿using System.Collections;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace SudoScript;
 
-public enum TokenType
-{
+public enum TokenType {
     LineComment,
     BlockComment,
     Unit,
@@ -31,15 +28,12 @@ public enum TokenType
     Power,
 }
 
-public static class Tokenizer
-{
-    public static TokenStream GetStream(string src)
-    {
+public static class Tokenizer {
+    public static TokenStream GetStream(string src) {
         return new TokenStream(src);
     }
 
-    public static TokenStream GetStream(StreamReader reader)
-    {
+    public static TokenStream GetStream(StreamReader reader) {
         return new TokenStream(reader);
     }
 }
@@ -61,38 +55,38 @@ public sealed class TokenStream {
 
     private char? _carry;
 
+    private readonly LinkedList<Token> _next;
+
+    private bool _hasNext;
+
     public TokenStream(TextReader reader) {
         _reader = reader;
         _carry = null;
         _hasNext = true;
+        _next = new();
     }
 
     public TokenStream(string s) : this(new StringReader(s)) {
     }
 
-    private Token? Next;
-
-    private bool _hasNext;
     public bool HasNext {
         get {
-            Peek(out _);
+            _ = Peek(true, out _);
             return _hasNext;
         }
-        private set {
-            _hasNext = value;
-        }
+        private set => _hasNext = value;
     }
 
-    public bool Peek([NotNullWhen(true)] out Token? nextToken) {
+    public bool Peek(bool ignoreSpecialTokens, [NotNullWhen(true)] out Token? nextToken) {
         if(!_hasNext) {
             nextToken = null;
             return false;
-        } else if(Next is not null) {
-            nextToken = Next;
+        } else if(_next.First is not null && _next.Last is not null) {
+            nextToken = ignoreSpecialTokens ? _next.Last.Value : _next.First.Value;
             return true;
-        } else if(GetToken(out Token? result)) {
+        } else if(RetriveToken(ignoreSpecialTokens, out Token? result)) {
             nextToken = result;
-            Next = result;
+            _ = _next.AddLast(result);
             return true;
         } else {
             nextToken = null;
@@ -102,28 +96,56 @@ public sealed class TokenStream {
     }
 
     public bool Expect(TokenType type, [NotNullWhen(true)] out Token? token) {
-        if(Next is null) {
-            bool b = Peek(out token);
-            Next = null;
-            return b;
-        } else if(!Next.Type.Equals(type)) {
-            token = null;
+        bool ignoreSpecial = !IsSpecialToken(type);
+
+        if(_next.First is not null && _next.Last is not null) {
+            token = ignoreSpecial ? _next.Last.Value : _next.First.Value;
+            if(token.Type.Equals(type)) {
+                if(ignoreSpecial) {
+                    _next.Clear();
+                } else {
+                    _next.RemoveFirst();
+                }
+                return true;
+            }
             return false;
-        } else {
-            token = Next;
-            Next = null;
-            return true;
         }
+
+        bool b = Peek(ignoreSpecial, out token) && token.Type.Equals(type);
+        _next.Clear();
+        return b;
+    }
+
+    private bool RetriveToken(bool ignoreSpecialToken, [NotNullWhen(true)] out Token? nextToken) {
+        bool flag;
+        do {
+            if(!GetToken(out nextToken)) {
+                return false;
+            }
+
+            flag = ignoreSpecialToken && IsSpecialToken(nextToken.Type);
+            if(flag) {
+                _ = _next.AddLast(nextToken);
+            }
+        } while(flag);
+
+        return true;
+    }
+
+    private static bool IsSpecialToken(TokenType type) {
+        return type is not (not TokenType.LineComment
+                and not TokenType.BlockComment
+                and not TokenType.Space
+                and not TokenType.Newline);
     }
 
     private bool GetToken([NotNullWhen(true)] out Token? nextToken) {
-        
+
         if(!GetNextCharacter(out char character)) {
             nextToken = null;
             return false;
         }
 
-        //read any single digit character
         TokenType type = character switch {
             '{' => TokenType.LeftBrace,
             '}' => TokenType.RightBrace,
@@ -142,15 +164,11 @@ public sealed class TokenStream {
             _ => 0,
         };
 
+        string match;
+
         if(type != 0) {
-            //TODO: Add line, row, column, filename.
-            nextToken = new Token(type, character.ToString(), "", 0, 0, "");
-            return true;
-        }
-
-        string match = "";
-
-        if(character == '/' && GetNextCharacter(out char secondCharacter)) {
+            match = character.ToString();
+        } else if(character == '/' && GetNextCharacter(out char secondCharacter)) {
             List<char> matchList = new() { character, secondCharacter };
 
             if(secondCharacter == '/') {
@@ -171,32 +189,30 @@ public sealed class TokenStream {
                 } while(flag);
                 type = TokenType.BlockComment;
             }
-
-        } else if(Char.IsLetter(character)) {
+            match = new string(matchList.ToArray());
+        } else if(char.IsLetter(character)) {
             match = character + MatchWhile(c => char.IsLetterOrDigit(c));
             type = match switch {
-                "unit" =>  TokenType.Unit,
+                "unit" => TokenType.Unit,
                 "givens" => TokenType.Givens,
                 "rules" => TokenType.Rules,
                 _ => TokenType.Identifier,
             };
-        } else if(Char.IsDigit(character)) {
-            match = character + MatchWhile(c => Char.IsDigit(c));
+        } else if(char.IsDigit(character)) {
+            match = character + MatchWhile(c => char.IsDigit(c));
             type = TokenType.Number;
-        }else if(character == '\n') {
+        } else if(character == '\n') {
             match = character + MatchWhile(c => c == '\n');
             type = TokenType.Newline;
-        } else if(char.IsWhiteSpace(character)){
+        } else if(char.IsWhiteSpace(character)) {
             match = character + MatchWhile(c => char.IsWhiteSpace(c) && c != '\n');
             type = TokenType.Space;
+        } else {
+            throw new ArgumentException($"Unrecognized character: {character} is not a recognised token");
         }
 
-        if(type != 0) {
-            nextToken = new Token(type, match, "", 0, 0, "");
-            return true;
-        }
-
-        throw new ArgumentException($"Unrecognized character: {character} is not a recognised token");
+        nextToken = new Token(type, match, "", 0, 0, "");
+        return true;
     }
 
     private string MatchWhile(Func<char, bool> condition) {
