@@ -32,12 +32,17 @@ public class Unit
         }
     }
 
-    public void EliminateCandidates()
+    public bool EliminateCandidates()
     {
+        bool somethingEliminated = false;
         foreach (IRule rule in _rules)
         {
-            rule.EliminateCandidates(this);
+            if (rule.EliminateCandidates(this))
+            {
+                somethingEliminated = true;
+            }
         }
+        return somethingEliminated;
     }
 
     public bool ValidateRules()

@@ -28,19 +28,24 @@ public sealed class Board: ICloneable
         return _cells.Values;
     }
 
-    public void EliminateCandidates()
+    public bool EliminateCandidates()
     {
-        foreach(Unit unit in Units)
+        bool somethingEliminated = false;
+        foreach (Unit unit in Units)
         {
-            unit.EliminateCandidates();
+            if (unit.EliminateCandidates())
+            {
+                somethingEliminated = true;
+            }
         }
+        return somethingEliminated;
     }
 
     public bool ValidateRules()
     {
         foreach(Unit unit in Units)
         {
-            if(unit.ValidateRules())
+            if (!unit.ValidateRules())
             {
                 return false;
             }
@@ -50,7 +55,7 @@ public sealed class Board: ICloneable
 
     public Board Clone()
     {
-        IReadOnlyDictionary<(int, int), Cell> cellsCopy = _cells.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        IReadOnlyDictionary<(int, int), Cell> cellsCopy = _cells.ToDictionary(kvp => kvp.Key, kvp => new Cell(kvp.Value));
         List<Unit> unitsCopy = Units.Select(u => new Unit(u)).ToList();
         Board board = new Board(cellsCopy, unitsCopy);
         return board;

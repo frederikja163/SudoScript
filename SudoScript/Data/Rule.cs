@@ -14,35 +14,45 @@ public sealed class RuleException : Exception
 
 public interface IRule
 {
-    public abstract void EliminateCandidates(Unit unit);
+    public abstract bool EliminateCandidates(Unit unit);
     public abstract bool ValidateRules(Unit unit);
 }
 
 public sealed class OneRule : IRule
 {
-    public void EliminateCandidates(Unit unit)
+    public bool EliminateCandidates(Unit unit)
     {
-        HashSet<int> seenDigits = new HashSet<int>();
+        // Get a list of all digits in the unit.
+        HashSet<int> digits = unit.Cells()
+            .Select(c => c.Digit)
+            .Where(d => d != Cell.EmptyDigit)
+            .ToHashSet();
+
+        bool somethingEliminated = false;
         foreach (Cell cell in unit.Cells())
         {
             if (cell.Digit == Cell.EmptyDigit)
             {
                 // Remove all seen digits from the candidates of this cell.
-                cell.Candidates.RemoveWhere(x => seenDigits.Contains(x));
-            }
-            else
-            {
-                if (seenDigits.Contains(cell.Digit))
+                if (cell.EliminateCandidate(digits))
                 {
-                    throw new RuleException(unit, cell, $"One rule is not followed, multiple instances of {cell.Digit} found.");
+                    somethingEliminated = true;
                 }
-                seenDigits.Add(cell.Digit);
             }
         }
+        return somethingEliminated;
     }
 
     public bool ValidateRules(Unit unit)
     {
+        // One rule requires all symbols, in order for that it needs a specific size of unit.
+        // TODO: Remember to change this if updating amount of symbols.
+        // .ToHashSet is needed to ensure all the cells are unique (seperate coordinates)
+        if (unit.Cells().ToHashSet().Count() != 9)
+        {
+            return false;
+        }
+
         HashSet<int> seenDigits = new HashSet<int>();
         foreach (Cell cell in unit.Cells())
         {
