@@ -20,8 +20,17 @@ public static class Solver
 
     private static bool SolveRec(Board board, [NotNullWhen(true)] out Board? solvedBoard)
     {
-        // Get a list of all cells with the least amount of candidates.
+        // Eliminate candidates from all rules untill nothing changes.
+        while (board.EliminateCandidates()) ;
 
+        // We hit an invalid state, and must backtrack.
+        if (!board.ValidateRules())
+        {
+            solvedBoard = null;
+            return false;
+        }
+
+        // Get a list of all cells with the least amount of candidates.
         IEnumerable<Cell> orderedCells = board.Cells()
             .OrderBy(c => c.CandidateCount);
         if (orderedCells.FirstOrDefault()?.CandidateCount < 1)
@@ -41,30 +50,27 @@ public static class Solver
             solvedBoard = board;
             return true;
         }
-        // TODO: Try with randomized list.
 
-        // Choose one of the cells.
-        Cell cell = orderedCells.First();
-
-        // Create a clone of the board for backtracking.
-        // TODO: Implement backtracking later.
-
-        // Collapse the cell with a digit.
-        int digit = cell.Candidates().First();
-        cell.Digit = digit;
-
-        // Eliminate candidates from all rules untill nothing changes.
-        while (board.EliminateCandidates()) ;
-
-        // We hit an invalid state, and must backtrack.
-        if (!board.ValidateRules())
+        foreach (Cell cell in orderedCells)
         {
-            solvedBoard = null;
-            return false;
-        }
+            foreach (int candidate in cell.Candidates())
+            {
+                // Create a clone of the board for backtracking.
+                Board clonedBoard = board.Clone();
+                Cell clonedCell = clonedBoard[cell.X, cell.Y];
 
-        // Call solve on the new board.
-        return SolveRec(board, out solvedBoard);
+                // Collapse the cell with a digit.
+                clonedCell.Digit = candidate;
+
+                // Call solve on the new board.
+                if (SolveRec(clonedBoard, out solvedBoard))
+                {
+                    return true;
+                }
+            }
+        }
+        solvedBoard = null;
+        return false;
     }
 
     public static Board GenerateSolveable(Board board)
