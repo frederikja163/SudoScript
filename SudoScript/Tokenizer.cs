@@ -150,7 +150,6 @@ public sealed class TokenStream {
             return false;
         }
 
-        //read any single digit character
         TokenType type = character switch {
             '{' => TokenType.LeftBrace,
             '}' => TokenType.RightBrace,

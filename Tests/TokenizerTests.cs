@@ -39,4 +39,32 @@ internal sealed class TokenizerTests {
 
     }
 
+    [Test]
+    public void IgnoresSpecialTokens() {
+
+        string s = "unit /*This is a comment!*/{ (1, 7 + 5) }";
+
+        TokenStream tokenizer = new(s);
+
+        (TokenType type, string match)[] expected = new (TokenType type, string match)[] {
+            (TokenType.Unit, "unit"),
+            (TokenType.LeftBrace, "{"),
+            (TokenType.LeftParenthesis, "("),
+            (TokenType.Number, "1"),
+            (TokenType.Comma, ","),
+            (TokenType.Number, "7"),
+            (TokenType.Space, " "),
+            (TokenType.Plus, "+"),
+            (TokenType.Number, "5"),
+            (TokenType.RightParenthesis, ")"),
+            (TokenType.RightBrace, "}"),
+        };
+
+        for(int i = 0; i < expected.Length || tokenizer.HasNext; i++) {
+            Assert.That(tokenizer.Expect(expected[i].type, out Token? token));
+            Assert.That(token?.Match, Is.EqualTo(expected[i].match));
+        }
+
+    }
+
 }
