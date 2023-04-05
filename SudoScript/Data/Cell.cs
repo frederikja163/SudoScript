@@ -1,4 +1,4 @@
-﻿namespace SudoScript.Data;
+namespace SudoScript.Data;
 
 public sealed class Cell
 {
