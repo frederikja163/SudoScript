@@ -25,6 +25,14 @@ public sealed class Cell
         };
     }
 
+    public Cell(Cell cell)
+    {
+        X = cell.X;
+        Y = cell.Y;
+        _digit = cell.Digit;
+        _candidates = cell._candidates.ToHashSet();
+    }
+
     public int X { get; }
     public int Y { get; }
 
