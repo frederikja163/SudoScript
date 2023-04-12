@@ -97,7 +97,7 @@ public sealed class Board: ICloneable
             {
                 s += Center(VisualizeCellAt(col, row), cellSize);
             }
-            s += row == 0 ? "" : newlines;
+            s += row == minY ? "" : newlines;
         }
 
         return s;
