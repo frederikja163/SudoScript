@@ -11,6 +11,11 @@ namespace StandardLibrary
     {
         public Row(IReadOnlyList<CellReference> cells, IReadOnlyList<IRule> rules) : base(cells, rules)
         {
+            if (!validateRow(cells))
+            {
+                throw new Exception("Attepted to place row in invalid position");
+            }
+
         }
 
         private bool validateRow(IReadOnlyList<CellReference> cells)
