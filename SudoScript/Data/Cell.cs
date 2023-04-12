@@ -97,4 +97,5 @@ public sealed class Cell
     {
         return Digit.ToString();
     }
+
 }
