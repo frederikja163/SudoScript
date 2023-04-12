@@ -70,10 +70,10 @@ public sealed class Board: ICloneable
 
     public override string ToString()
     {
-        return ToString(3);
+        return ToString();
     }
 
-    public string ToString(int cellSize = 3)
+    public string ToString(int cellSize = 2)
     {
         int minX = int.MaxValue;
         int maxX = int.MinValue;
@@ -89,7 +89,7 @@ public sealed class Board: ICloneable
         }
 
         string s = "";
-        string newlines = new('\n', cellSize);
+        string newlines = new('\n', cellSize / 3 + 1);
 
         for(int row = maxX; row >= minX; row--)
         {
@@ -107,7 +107,7 @@ public sealed class Board: ICloneable
     {
         if(_cells.TryGetValue((x, y), out Cell? cell))
         {
-            return cell.Digit.ToString();
+            return cell.ToString();
         }
         else
         {
