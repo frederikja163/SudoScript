@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 using Tests;
 
 namespace StandardLibrary.Tests;
-internal sealed class UniqueRuleTests
+internal sealed class UniqueTests
 {
     [Test]
     public void ValidUniqueRuleUnit()
@@ -21,7 +21,7 @@ internal sealed class UniqueRuleTests
             (7, 7),
         }, new List<IRule>
         {
-            new UniqueRule()
+            new Unique()
         });
 
         Board board = Util.CreateStandardEmpty(unit);
@@ -51,7 +51,7 @@ internal sealed class UniqueRuleTests
             (7, 7),
         }, new List<IRule>
         {
-            new UniqueRule()
+            new Unique()
         });
 
         Board board = Util.CreateStandardEmpty(unit);
@@ -81,7 +81,7 @@ internal sealed class UniqueRuleTests
             (7, 7),
         }, new List<IRule>
         {
-            new UniqueRule()
+            new Unique()
         });
 
         Board board = Util.CreateStandardEmpty(unit);

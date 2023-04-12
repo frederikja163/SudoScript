@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StandardLibrary
 {
-    public sealed class UniqueRule : IRule
+    public sealed class Unique : IRule
     {
         public bool EliminateCandidates(Unit unit)
         {
