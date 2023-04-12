@@ -1,38 +1,43 @@
-﻿using SudoScript.Ast;
+using SudoScript.Ast;
 using SudoScript.Data;
 
 namespace SudoScript;
 
 public static class Generator
 {
-    // Implement this using some sort of visitor pattern perhaps?
-    // Maybe the generator itself should be a visitor.
+    // Takes the program node as input, and creates the initial symboltable (WIP),
+    // and returns the Board with cells and units
     public static Board GetBoardFromAST(ProgramNode node)
     {
         SymbolTable symbolTable = new SymbolTable(node);
         return GenerateBoard(node, symbolTable);
     }
 
+    // Generates the Board using lists of cells and units
     public static Board GenerateBoard(ProgramNode node, SymbolTable symbolTable)
     {
         List<Cell> cells = new List<Cell>();
         List<Unit> units = new List<Unit>();
+        List<IRule> rules = new List<IRule>();
 
-        GetUnits(node.Child, symbolTable, out cells, out units);
+        GetUnits(node.Child, symbolTable, out cells, out units, out rules);
 
         return new Board(cells, units);
     }
 
-    private static void GetUnits(UnitNode node, SymbolTable symbolTable, out List<Cell> cells, out List<Unit> units)
+    // Takes the primary node, and travles its children to find units
+    private static void GetUnits(UnitNode node, SymbolTable symbolTable, out List<Cell> cells, out List<Unit> units, out List<IRule> rules)
     {
         cells = new List<Cell>();
         units = new List<Unit>();
+        rules = new List<IRule>();
 
         foreach (UnitStatementNode child in node.UnitStatements)
         {
-            GetFromUnitStatement(child, symbolTable, out List<Cell> childCells, out List<Unit> childUnits);
+            GetFromUnitStatement(child, symbolTable, out List<Cell> childCells, out List<Unit> childUnits, out List<IRule> childRules);
             cells.AddRange(childCells);
             units.AddRange(childUnits);
+            rules.AddRange(childRules);
         }
 
         CellReference[] cellReferences = cells
@@ -41,48 +46,103 @@ public static class Generator
         units.Add(new Unit(cellReferences, new List<IRule>()));
     }
 
-    private static void GetFromUnitStatement(UnitStatementNode node, SymbolTable symbolTable, out List<Cell> cells, out List<Unit> units)
+    // Travels the UnitStatementNode nodes, and handles them according to type
+    private static void GetFromUnitStatement(UnitStatementNode node, SymbolTable symbolTable, out List<Cell> cells, out List<Unit> units, out List<IRule> rules)
     {
         cells = new List<Cell>();
         units = new List<Unit>();
+        rules = new List<IRule>();
 
         switch (node)
         {
-            case UnitNode unitNode:
-                GetUnits(unitNode, symbolTable, out cells, out units);
+            case UnitNode unitNode:                 // In case of a UnitNode, it recursively calls the GetUnits function
+                GetUnits(unitNode, symbolTable, out cells, out units, out rules);
                 break;
-            case RulesNode rulesNode:
+            case RulesNode rulesNode:               // A RulesNode is handled by the RulesHandler function
+                RulesHandler(rulesNode, symbolTable, out rules);
                 break;
-            case GivensNode givensNode:
+            case GivensNode givensNode:             // Since a given is a cell with a digit, a function is made to attach a digit to the cell
                 InsertGivenDigit(givensNode, symbolTable, out cells);
                 break;
-            case FunctionCallNode functionCallNode:
+            case FunctionCallNode functionCallNode: // Lastly, a function is used to extract cells and units from functioncalls
                 GetCellsAndUnitsFromFunction(functionCallNode, symbolTable, out cells, out Unit unit);
                 units.Add(unit);
                 break;
         }
     }
 
+    private static void RulesHandler(RulesNode node, SymbolTable symbolTable, out List<IRule> rules)
+    {
+        // Rules will be handled like ranges, so [1;3] will output 3 different lists of arguments
+        rules = new List<IRule>();
+
+        foreach (FunctionCallNode child in node.Children())
+        {
+            // A list containing the integers and cell references as arguments to the rule.
+            List<List<object>> argumentCombinations = new List<List<object>>();
+            
+            foreach (ArgumentNode argument in child.Arguments)
+            {
+                List<object> arguments = new List<object>();
+                if (argument is CellNode cellNode)
+                {
+                    arguments = ExpressionToCells(cellNode.X, cellNode.Y, symbolTable).Cast<object>().ToList();
+                }
+                else if (argument is ExpressionNode expressionNode){
+                    arguments = ExpressionToInts(expressionNode, symbolTable).Cast<object>().ToList();
+                }
+                else
+                {
+                    throw new NotSupportedException("Arguments must be either expressions or cells.");
+                }
+
+                List<List<object>> oldArgumentCombinations = argumentCombinations;
+                argumentCombinations = new List<List<object>>();
+                foreach (List<object> oldArguments in oldArgumentCombinations)
+                {
+                    List<List<object>> newArguments = CombineListsWithFunction(oldArguments, arguments, (l, r) => new List<object>() { l, r });
+                    argumentCombinations.AddRange(newArguments);
+                }
+            }
+
+            foreach(List<object> arguments in argumentCombinations)
+            {
+                IRule rule = CreateRule(child.Name.Match, arguments.ToArray());
+                rules.Add(rule);
+            }
+        }
+    }
+
+    private static IRule CreateRule(string name, params object[] args)
+    {
+        throw new NotImplementedException();
+    }
+
+    // A function to retrieve cells and their given digits, from the AST
     private static void InsertGivenDigit(GivensNode node, SymbolTable symbolTable, out List<Cell> cells)
     {
         cells = new List<Cell>();
 
         foreach (GivensStatementNode child in node.GivensStatements)
         {
+            // Check if the digit is a usable value
             if (!ExpressionToInt(child.Digit, symbolTable, out int digit))
             {
                 throw new Exception("Givens must contain one, and only one digit.");
             }
-            List<Cell> newCells = ExpressionNodeToCells(child.Cell.X, child.Cell.Y, symbolTable, digit);
+
+            List<Cell> newCells = ExpressionToCells(child.Cell.X, child.Cell.Y, symbolTable, digit);
+
+            // Check if there only exists one cell
             if (newCells.Count != 1)
             {
                 throw new Exception("Givens must contain one, and only one cell.");
-            }
+            } 
             cells.Add(newCells[0]);
         }
     }
 
-    private static void GetCellsAndUnitsFromFunction(FunctionCallNode node, SymbolTable symbolTable,  out List<Cell> cells, out Unit units)
+    private static void GetCellsAndUnitsFromFunction(FunctionCallNode node, SymbolTable symbolTable, out List<Cell> cells, out Unit units)
     {
         cells = new List<Cell>();
         
@@ -96,7 +156,7 @@ public static class Generator
                     throw new ArgumentException("Union function only accepts cell arguments.");
                 }
 
-                cells.AddRange(ExpressionNodeToCells(cellNode.X, cellNode.Y, symbolTable));
+                cells.AddRange(ExpressionToCells(cellNode.X, cellNode.Y, symbolTable));
             }
 
             CellReference[] cellReferences = cells
@@ -108,7 +168,7 @@ public static class Generator
         }
     }
 
-    private static List<Cell> ExpressionNodeToCells(ExpressionNode nodeX, ExpressionNode nodeY, SymbolTable symbolTable, int digit = Cell.EmptyDigit)
+    private static List<Cell> ExpressionToCells(ExpressionNode nodeX, ExpressionNode nodeY, SymbolTable symbolTable, int digit = Cell.EmptyDigit)
     {
         List<int> xs = ExpressionToInts(nodeX, symbolTable);
         List<int> ys = ExpressionToInts(nodeY, symbolTable);
@@ -222,14 +282,14 @@ public static class Generator
         throw new NotImplementedException();
     }
 
-    private static List<T> CombineListsWithFunction<T>(List<int> left, List<int> right, Func<int, int, T> func)
+    private static List<T1> CombineListsWithFunction<T1, T2>(List<T2> left, List<T2> right, Func<T2, T2, T1> func)
     {
-        HashSet<T> values = new HashSet<T>(left.Count * right.Count);
+        HashSet<T1> values = new HashSet<T1>(left.Count * right.Count);
         for (int i = 0; i < left.Count; i++)
         {
             for (int j = 0; j < right.Count; j++)
             {
-                T value = func.Invoke(left[i], right[j]);
+                T1 value = func.Invoke(left[i], right[j]);
                 if (!values.Contains(value))
                 {
                     values.Add(value);
