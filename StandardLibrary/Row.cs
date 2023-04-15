@@ -11,9 +11,19 @@ namespace StandardLibrary
     {
         public Row(IReadOnlyList<CellReference> cells, IReadOnlyList<IRule> rules) : base(cells, rules)
         {
+            {
+                throw new Exception("Invalid Row placement");
+            }
+            List<CellReference> rowCells = new List<CellReference>();
+            for (int i = 0; i < 9; i++) 
+            {
+                rowCells.Add(new CellReference(cells[0].X , cells[0].Y));
+            }
+            cells = rowCells.ToArray();
+
         }
 
-        private bool validateRow(IReadOnlyList<CellReference> cells)
+        private bool ValidateRow(IReadOnlyList<CellReference> cells)
         {
             if (cells == null) { return false; }
             if (cells.Count != 9) { return false; }
