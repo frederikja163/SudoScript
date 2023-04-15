@@ -11,9 +11,6 @@ namespace StandardLibrary
     {
         public Row(IReadOnlyList<CellReference> cells, IReadOnlyList<IRule> rules) : base(cells, rules)
         {
-            {
-                throw new Exception("Invalid Row placement");
-            }
             List<CellReference> rowCells = new List<CellReference>();
             for (int i = 0; i < 9; i++) 
             {
