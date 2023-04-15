@@ -14,18 +14,14 @@ namespace StandardLibrary
             bool somethingEliminated = false;
             //Get a list of all digits in unit
             List<int> digits = new List<int>();
-            foreach (Cell cell in unit.Cells())
-            {
-                if (!digits.Contains(cell.Digit)) //If them digit is not already in list
-                {
-                    digits.Add(cell.Digit);
-                }
-            }
-            //Get a list of all empty cell in this unit
             List<Cell> emptyCells = new List<Cell>();
             foreach (Cell cell in unit.Cells())
             {
-                if (cell.Digit == Cell.EmptyDigit)
+                if (!digits.Contains(cell.Digit)) //If the digit is not already in list
+                {
+                    digits.Add(cell.Digit);
+                }
+                if (cell.Digit == Cell.EmptyDigit) //Add any cell without a digit to emptyCells
                 {
                     emptyCells.Add(cell);
                 }
@@ -55,7 +51,7 @@ namespace StandardLibrary
             //Check for dublicates
             for (int i = 1; i < digits.Count; i++)
             {
-                if (digits[i] != 0) {
+                if (digits[i] != Cell.EmptyDigit) {
                     if (digits[i] == digits[i - 1])
                     {
                         return false;
