@@ -131,21 +131,15 @@ public sealed class TokenStream : IDisposable
 
         if(!_next.Any())
         {
-            Resupply();
-        }
-    }
-
-
-private void Resupply()
-    {
-        Token? token;
-        do
-        {
-            if(GetToken(out token))
+            Token? token;
+            do
             {
-                _next.AddLast(token);
-            }
-        } while(token is not null && IsSpecialToken(token.Type));
+                if(GetToken(out token))
+                {
+                    _next.AddLast(token);
+                }
+            } while(token is not null && IsSpecialToken(token.Type));
+        }
     }
 
     private bool GetToken([NotNullWhen(true)] out Token? nextToken)
