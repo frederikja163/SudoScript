@@ -72,12 +72,12 @@ public sealed class TokenStream : IDisposable
 
     public bool HasNext { get => _next.Any(); }
 
-    public IEnumerable<Token> Next(bool IgnoreSpecial, Func<TokenType, bool>? stopCondition = null)
+    public IEnumerable<Token> Next(bool ignoreSpecial, Func<TokenType, bool>? stopCondition = null)
     {
-        while(Peek(IgnoreSpecial, out Token ? next) && (stopCondition is null || stopCondition.Invoke(next.Type))) 
+        while(Peek(ignoreSpecial, out Token ? next) && (stopCondition is null || stopCondition.Invoke(next.Type))) 
         { 
             yield return next;
-            Continue(IgnoreSpecial);
+            Continue(ignoreSpecial);
         }
     }
 
@@ -104,13 +104,13 @@ public sealed class TokenStream : IDisposable
                 or TokenType.Newline);
     }
 
-    public bool Peek(bool IgnoreSpecial, [NotNullWhen(true)] out Token? token)
+    public bool Peek(bool ignoreSpecial, [NotNullWhen(true)] out Token? token)
     {
         if(_next is null || !_next.Any())
         {
             token = null;
         }
-        else if(IgnoreSpecial)
+        else if(ignoreSpecial)
         {
             token = _next.Last();
         }
@@ -122,14 +122,14 @@ public sealed class TokenStream : IDisposable
         return token is not null;
     }
 
-    public void Continue(bool IgnoreSpecial)
+    public void Continue(bool ignoreSpecial)
     {
         // Next contains zero or more special tokens and might contain one non special
         // token in the end.
         // To continue to the next token, we remove either the next token, or the next
         // non special token (including all special tokens that presceed it.)
 
-        if(IgnoreSpecial)
+        if(ignoreSpecial)
         {
             _next.Clear();
         }
@@ -269,13 +269,29 @@ public sealed class TokenStream : IDisposable
     {
         List<char> match = new();
 
-        char currentCharacter;
-        while(GetNextCharacter(out currentCharacter) && condition.Invoke(currentCharacter))
+        bool flag = true;
+        while(flag)
         {
-            match.Add(currentCharacter);
+            if(GetNextCharacter(out char currentCharacter))
+            {
+                if(condition.Invoke(currentCharacter))
+                {
+                    flag = true;
+                    match.Add(currentCharacter);
+                }
+                else
+                {
+                    _carry = currentCharacter;
+                    flag = false;
+                }
+            }
+            else
+            {
+                _carry = null;
+                flag = false;
+            }
         }
-        _carry = currentCharacter;
-
+        
         return new string(match.ToArray());
     }
 
