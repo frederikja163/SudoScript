@@ -52,6 +52,15 @@ public sealed class Board: ICloneable
                 return false;
             }
         }
+
+        foreach((_, Cell cell) in _cells)
+        {
+            if(cell.CandidateCount == 0 && cell.Digit == Cell.EmptyDigit)
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 
