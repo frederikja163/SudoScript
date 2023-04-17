@@ -57,14 +57,12 @@ public sealed class TokenStream : IDisposable
 
     private char? _carry;
 
-    private bool _endIsFound;
 
     public TokenStream(TextReader reader)
     {
         _reader = reader;
         _next = new();
         _carry = null;
-        _endIsFound = false;
 
         Continue(false);
     }
@@ -102,7 +100,7 @@ public sealed class TokenStream : IDisposable
 
     public bool Peek(bool IgnoreSpecial, [NotNullWhen(true)] out Token? token)
     {
-        if(_next.First is null || _endIsFound)
+        if(_next.First() is null)
         {
             token = null;
         }
