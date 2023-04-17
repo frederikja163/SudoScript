@@ -1,6 +1,8 @@
-﻿namespace SudoScript.Data;
+﻿using System.Runtime.CompilerServices;
 
-public sealed class Board : ICloneable
+namespace SudoScript.Data;
+
+public sealed class Board: ICloneable
 {
     private readonly IReadOnlyDictionary<(int, int), Cell> _cells;
 
@@ -8,7 +10,7 @@ public sealed class Board : ICloneable
     {
         _cells = cells;
         Units = units;
-        foreach (Unit unit in units)
+        foreach(Unit unit in units)
         {
             unit.Board = this;
         }
@@ -43,7 +45,7 @@ public sealed class Board : ICloneable
 
     public bool ValidateRules()
     {
-        foreach (Unit unit in Units)
+        foreach(Unit unit in Units)
         {
             if (!unit.ValidateRules())
             {
@@ -64,5 +66,65 @@ public sealed class Board : ICloneable
     object ICloneable.Clone()
     {
         return Clone();
+    }
+
+    public override string ToString()
+    {
+        return ToString();
+    }
+
+    public string ToString(int cellSize = 2)
+    {
+        int minX = int.MaxValue;
+        int maxX = int.MinValue;
+        int minY = int.MaxValue;
+        int maxY = int.MinValue;
+
+        foreach(Cell cell in _cells.Values)
+        {
+            if(cell.X > maxX) maxX = cell.X;
+            if(cell.X < minX) minX = cell.X;
+            if(cell.Y > maxY) maxY = cell.Y;
+            if(cell.Y < minY) minY = cell.Y;
+        }
+
+        string s = "";
+        string newlines = new('\n', cellSize / 3 + 1);
+
+        for(int row = maxX; row >= minX; row--)
+        {
+            for(int col = minX; col <= maxX; col++)
+            {
+                s += Center(VisualizeCellAt(col, row), cellSize);
+            }
+            s += row == minY ? "" : newlines;
+        }
+
+        return s;
+    }
+
+    private string VisualizeCellAt(int x, int y)
+    {
+        if(_cells.TryGetValue((x, y), out Cell? cell))
+        {
+            return cell.ToString();
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private static string Center(string s, int length)
+    {
+        int left = Math.Abs((int)((length - s.Length) / 2d));
+        if(s.Length < length)
+        {
+            int rightPad = (int)Math.Ceiling((length - s.Length) / 2d);
+            return new string(' ', left) + s + new string(' ', rightPad);
+        } else
+        {
+            return s.Substring(left, length);
+        }
     }
 }

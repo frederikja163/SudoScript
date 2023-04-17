@@ -95,6 +95,14 @@ public sealed class Cell
 
     public override string ToString()
     {
-        return Digit.ToString();
+        if(Digit == EmptyDigit)
+        {
+            return ".";
+        }
+        else
+        {
+            return Digit.ToString();
+        }
     }
+
 }
