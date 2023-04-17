@@ -4,7 +4,7 @@ namespace Tests;
 
 internal static class Util
 {
-    private static readonly IReadOnlyList<IRule> _oneRuleRules = new List<IRule>() { new OneRule() };
+    private static readonly List<IRule> _oneRuleRules = new List<IRule>() { new OneRule() };
 
     public static Unit CreateRow(int y)
     {

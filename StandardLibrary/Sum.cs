@@ -38,7 +38,7 @@ namespace StandardLibrary
             //If there is only one empty cell
             if (emptyCells.Count == 1)
             {
-                EliminateCandidatesFromSingleCell(emptyCells[0], remainder);
+                emptyCells[0].EliminateCandidate(a => a != remainder);
             }
             //Test each candidate in each cell to see if it is possible to get the sum
             foreach (Cell cell in emptyCells)
@@ -53,19 +53,6 @@ namespace StandardLibrary
                         cell.EliminateCandidate(candidate);
                         somethingEliminated = true;
                     }
-                }
-            }
-            return somethingEliminated;
-        }
-
-        private bool EliminateCandidatesFromSingleCell(Cell cell, int remainder)
-        {
-            bool somethingEliminated = false;
-            foreach (int candidate in cell.Candidates()) 
-            { 
-                if (candidate != remainder)
-                {
-                    cell.EliminateCandidate(candidate);
                 }
             }
             return somethingEliminated;
@@ -92,7 +79,7 @@ namespace StandardLibrary
                 { 
                     return false; 
                 }
-                if (RecursiveValidSumSearch(remainder, emptyCells, runningSum + candidate))
+                if (RecursiveValidSumSearch(remainder, emptyCells.ToList(), runningSum + candidate))
                 {
                     return true;
                 }
