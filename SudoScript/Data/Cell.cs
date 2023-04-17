@@ -100,6 +100,12 @@ public sealed class Cell
         }
         return somethingEliminated;
     }
+
+    public bool EliminateCandidate(Func<int, bool> predicate)
+    {
+        return EliminateCandidate(_candidates.Where(predicate));
+    }
+
     public bool HasCandidate(int candidate)
     {
         return _candidates.Contains(candidate);
@@ -112,6 +118,14 @@ public sealed class Cell
 
     public override string ToString()
     {
-        return Digit.ToString();
+        if(Digit == EmptyDigit)
+        {
+            return ".";
+        }
+        else
+        {
+            return Digit.ToString();
+        }
     }
+
 }
