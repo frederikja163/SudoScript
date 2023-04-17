@@ -57,7 +57,6 @@ public sealed class TokenStream : IDisposable
 
     private char? _carry;
 
-
     public TokenStream(TextReader reader)
     {
         _reader = reader;
@@ -85,9 +84,16 @@ public sealed class TokenStream : IDisposable
     public bool Expect(TokenType expected, [NotNullWhen(true)]out Token? token)
     {
         bool ignoreSpecial = !IsSpecialToken(expected);
-        bool b = Peek(ignoreSpecial, out token) && token.Type.Equals(expected);
-        if(b) Continue(ignoreSpecial);
-        return b;
+       
+        if(Peek(ignoreSpecial, out token) && token.Type.Equals(expected))
+        {
+            Continue(ignoreSpecial);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private static bool IsSpecialToken(TokenType type)
