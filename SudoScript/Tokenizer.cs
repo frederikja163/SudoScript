@@ -124,6 +124,7 @@ public sealed class TokenStream : IDisposable
 
     public void Continue(bool IgnoreSpecial)
     {
+        //If 
         if(IgnoreSpecial)
         {
             _next.Clear();
@@ -135,14 +136,14 @@ public sealed class TokenStream : IDisposable
 
         if(!_next.Any())
         {
-            Token? token;
-            do
+            Token? token = null;
+            while(token is not null && IsSpecialToken(token.Type))
             {
                 if(GetToken(out token))
                 {
                     _next.Enqueue(token);
                 }
-            } while(token is not null && IsSpecialToken(token.Type));
+            } 
         }
     }
 
@@ -186,25 +187,25 @@ public sealed class TokenStream : IDisposable
 
             if(secondCharacter == '/')
             {
-                bool flag;
-                do
+                bool flag = true;
+                while(flag)
                 {
                     flag = GetNextCharacter(out char currentCharacter) && currentCharacter != '\n';
                     matchList.Add(currentCharacter);
-                } while(flag);
+                }
                 type = TokenType.LineComment;
             }
             else if(secondCharacter == '*')
             {
                 char lastCharacter = default;
 
-                bool flag;
-                do
+                bool flag = true;
+                while(flag)
                 {
                     flag = GetNextCharacter(out char currentCharacter) && lastCharacter != '*' && currentCharacter != '/';
                     matchList.Add(currentCharacter);
                     lastCharacter = currentCharacter;
-                } while(flag);
+                }
                 type = TokenType.BlockComment;
             }
             match = new string(matchList.ToArray());
