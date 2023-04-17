@@ -51,13 +51,18 @@ public static class Parser {
         List<ParameterNode> paramChildren = new List<ParameterNode>();
 
         stream.Expect(TokenType.Unit, out Token? unit);
+        Token identifier = null;
 
-        if (stream.Expect(TokenType.Identifier, out Token? identifier)) // left off here, tokenizer expects identifier but gets leftBrace and still moves on
+        if (stream.Peek(true, out Token? identifier1) && identifier1.Type == TokenType.Identifier) // left off here, tokenizer expects identifier but gets leftBrace and still moves on
         {
+            stream.Expect(TokenType.Identifier, out identifier);
             if (stream.Peek(true, out Token? paramId) && paramId.Type == TokenType.Identifier)
+            {
+                stream.Peek(true, out Token? fuckyou);
                 paramChildren.AddRange(ParseParameters(stream));
+            }
         }
-
+        stream.Peek(true, out Token? testing2);
         if (!stream.Expect(TokenType.LeftBrace, out Token? test))
             throw new Exception("{ expected");
 
@@ -76,7 +81,7 @@ public static class Parser {
     private static List<ParameterNode> ParseParameters(TokenStream stream) {
         List<ParameterNode> paramChildren = new List<ParameterNode>();
         // Check if it is a identifier or cell param
-        while (!stream.Expect(TokenType.LeftBrace, out Token? _)) {
+        while (stream.Peek(true ,out Token? endToken) && endToken.Type != TokenType.LeftBrace) {
             if (!stream.Expect(TokenType.Space, out Token _))
                 throw new Exception("Params are expected to be separated by space");
 
