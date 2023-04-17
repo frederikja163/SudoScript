@@ -32,6 +32,11 @@ public class Unit
         _cells.Add(cell);
     }
 
+    public void AddUnit(Unit unit)
+    {
+        _cells.AddRange(unit._cells);
+    }
+
     public Board? Board { get; internal set; }
 
     public IEnumerable<Cell> Cells()
