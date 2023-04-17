@@ -27,6 +27,12 @@ public class TestRule2 : IRule
         Cell = cell;
         Digit = digit;
     }
+    
+    public TestRule2(int digit, CellReference cell)
+    {
+        Cell = cell;
+        Digit = digit;
+    }
 
     public bool EliminateCandidates(Unit unit)
     {
@@ -56,6 +62,12 @@ public class TestUnit2 : Unit
         Cell = cell;
         Digit = digit;
     }
+    
+    public TestUnit2(int digit, CellReference cell)
+    {
+        Cell = cell;
+        Digit = digit;
+    }
 }
 
 internal sealed class PluginTests
@@ -71,6 +83,17 @@ internal sealed class PluginTests
     public void CreateRuleWithCellAndDigitTest()
     {
         IRule rule = Plugins.CreateRule("TestRule2", new CellReference(1, 2), 3);
+        Assert.IsInstanceOf<TestRule2>(rule);
+        TestRule2 rule2 = (TestRule2)rule;
+        Assert.That(rule2.Cell.X, Is.EqualTo(1));
+        Assert.That(rule2.Cell.Y, Is.EqualTo(2));
+        Assert.That(rule2.Digit, Is.EqualTo(3));
+    }
+    
+    [Test]
+    public void CreateRuleWithDigitAndCellTest()
+    {
+        IRule rule = Plugins.CreateRule("TestRule2", 3, new CellReference(1, 2));
         Assert.IsInstanceOf<TestRule2>(rule);
         TestRule2 rule2 = (TestRule2)rule;
         Assert.That(rule2.Cell.X, Is.EqualTo(1));
@@ -94,12 +117,23 @@ internal sealed class PluginTests
     [Test]
     public void CreateUnitWithCellAndDigitTest()
     {
-        Unit rule = Plugins.CreateUnit("TestUnit2", new CellReference(1, 2), 3);
-        Assert.IsInstanceOf<TestUnit2>(rule);
-        TestUnit2 rule2 = (TestUnit2)rule;
-        Assert.That(rule2.Cell.X, Is.EqualTo(1));
-        Assert.That(rule2.Cell.Y, Is.EqualTo(2));
-        Assert.That(rule2.Digit, Is.EqualTo(3));
+        Unit unit = Plugins.CreateUnit("TestUnit2", new CellReference(1, 2), 3);
+        Assert.IsInstanceOf<TestUnit2>(unit);
+        TestUnit2 unit2 = (TestUnit2)unit;
+        Assert.That(unit2.Cell.X, Is.EqualTo(1));
+        Assert.That(unit2.Cell.Y, Is.EqualTo(2));
+        Assert.That(unit2.Digit, Is.EqualTo(3));
+    }
+    
+    [Test]
+    public void CreateUnitWithDigitAndCellTest()
+    {
+        Unit unit = Plugins.CreateUnit("TestUnit2", 3, new CellReference(1, 2));
+        Assert.IsInstanceOf<TestUnit2>(unit);
+        TestUnit2 unit2 = (TestUnit2)unit;
+        Assert.That(unit2.Cell.X, Is.EqualTo(1));
+        Assert.That(unit2.Cell.Y, Is.EqualTo(2));
+        Assert.That(unit2.Digit, Is.EqualTo(3));
     }
 
     [Test]
