@@ -206,9 +206,24 @@ public sealed class TokenStream : IDisposable
                 bool flag = true;
                 while(flag)
                 {
-                    flag = GetNextCharacter(out char currentCharacter) && lastCharacter != '*' && currentCharacter != '/';
-                    matchList.Add(currentCharacter);
-                    lastCharacter = currentCharacter;
+                    if(GetNextCharacter(out char currentCharacter))
+                    {
+                        if(lastCharacter != '*' && currentCharacter != '/')
+                        {
+                            matchList.Add(currentCharacter);
+                            flag = true;
+                            lastCharacter = currentCharacter;
+                        }
+                        else
+                        {
+                            flag = false;
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"Unrecognized character: {character} is not a recognised token");
+                    }
+
                 }
                 type = TokenType.BlockComment;
             }
