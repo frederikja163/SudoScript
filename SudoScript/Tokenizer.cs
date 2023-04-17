@@ -120,16 +120,13 @@ public sealed class TokenStream : IDisposable
 
     public void Continue(bool IgnoreSpecial)
     {
-        if(_next.Any())
+        if(IgnoreSpecial)
         {
-            if(IgnoreSpecial)
-            {
-                _next.Clear();
-            }
-            else
-            {
-                _next.RemoveFirst();
-            }
+            _next.Clear();
+        }
+        else if(_next.Any())
+        {
+            _next.RemoveFirst();
         }
 
         if(!_next.Any())
