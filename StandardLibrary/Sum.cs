@@ -7,9 +7,14 @@ using System.Threading.Tasks;
 
 namespace StandardLibrary
 {
-    internal class Sum : IRule
+    public class Sum : IRule
     {
-        internal int SumVal { get; set; }
+        public Sum(int sumVal)
+        {
+            SumVal = sumVal;
+        }
+
+        internal int SumVal { get; private init; }
 
 
         public bool EliminateCandidates(Unit unit)
@@ -23,20 +28,44 @@ namespace StandardLibrary
             int remainder = SumVal - currentTotal;
             //Make a list of empty cells
             IList<Cell> emptyCells = new List<Cell>();
-            foreach (Cell cell in unit.Cells()) { if (cell.Digit == Cell.EmptyDigit) { emptyCells.Add(cell); } }
+            foreach (Cell cell in unit.Cells()) 
+            { 
+                if (cell.Digit == Cell.EmptyDigit) 
+                { 
+                    emptyCells.Add(cell); 
+                } 
+            }
+            //If there is only one empty cell
+            if (emptyCells.Count == 1)
+            {
+                EliminateCandidatesFromSingleCell(emptyCells[0], remainder);
+            }
             //Test each candidate in each cell to see if it is possible to get the sum
             foreach (Cell cell in emptyCells)
             {
                 //Create a list of all other cells
-                List<Cell> otherCells = new List<Cell>();
-                foreach (Cell c in emptyCells) { if (c != cell) { otherCells.Add(c); } }
+                List<Cell> otherCells = emptyCells.ToList();
+                otherCells.Remove(cell);
                 foreach (int candidate in cell.Candidates())
                 {
-                    if (!RecursiveValidSumSearch(remainder, otherCells, candidate))
+                    if (!RecursiveValidSumSearch(remainder, otherCells.ToList(), candidate))
                     {
                         cell.EliminateCandidate(candidate);
                         somethingEliminated = true;
                     }
+                }
+            }
+            return somethingEliminated;
+        }
+
+        private bool EliminateCandidatesFromSingleCell(Cell cell, int remainder)
+        {
+            bool somethingEliminated = false;
+            foreach (int candidate in cell.Candidates()) 
+            { 
+                if (candidate != remainder)
+                {
+                    cell.EliminateCandidate(candidate);
                 }
             }
             return somethingEliminated;
@@ -55,15 +84,15 @@ namespace StandardLibrary
                         return true;
                     }
                 }
+                return false;
             }
-            foreach (int candidate in currentCell.Candidates())
+            foreach (int candidate in currentCell.Candidates()) //Tests each candidate
             {
-                runningSum += candidate;
-                if (runningSum > remainder) 
+                if (runningSum + candidate > remainder) 
                 { 
                     return false; 
                 }
-                if (RecursiveValidSumSearch(remainder, emptyCells, runningSum))
+                if (RecursiveValidSumSearch(remainder, emptyCells, runningSum + candidate))
                 {
                     return true;
                 }
