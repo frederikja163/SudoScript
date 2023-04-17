@@ -49,7 +49,7 @@ public static class Plugins
                         functions = new List<FunctionDef>();
                         _rules.Add(type.Name, functions);
                     }
-                    functions.AddRange(CreateFunctionDefs(type));
+                    functions.AddRange(function);
                 }
                 if (type.IsSubclassOf(typeof(Unit)))
                 {
@@ -62,7 +62,7 @@ public static class Plugins
                         functions = new List<FunctionDef>();
                         _units.Add(type.Name, functions);
                     }
-                    functions.AddRange(CreateFunctionDefs(type));
+                    functions.AddRange(function);
                 }
             }
         }
