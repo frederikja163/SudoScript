@@ -1,0 +1,5 @@
+﻿unit {
+	rules {
+	myRule 1 (3,4)
+	}
+}
