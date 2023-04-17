@@ -19,9 +19,4 @@
   <ItemGroup>
     <ProjectReference Include="..\SudoScript\SudoScript.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SudoScript\SudoScript.csproj" />
-  </ItemGroup>
-  
 </Project>

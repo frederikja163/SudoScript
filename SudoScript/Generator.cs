@@ -141,7 +141,8 @@ public static class Generator
             cells.Add(newCells[0]);
         }
     }
-
+    
+    // Extract list of cells and units
     private static void GetCellsAndUnitsFromFunction(FunctionCallNode node, SymbolTable symbolTable, out List<Cell> cells, out Unit units)
     {
         cells = new List<Cell>();
@@ -168,6 +169,8 @@ public static class Generator
         }
     }
 
+    //Converts ExpressionNode objects into list of integers.
+    //Then creates a list of cell using integer list to create a digit parameter.
     private static List<Cell> ExpressionToCells(ExpressionNode nodeX, ExpressionNode nodeY, SymbolTable symbolTable, int digit = Cell.EmptyDigit)
     {
         List<int> xs = ExpressionToInts(nodeX, symbolTable);
