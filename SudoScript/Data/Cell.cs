@@ -82,7 +82,24 @@ public sealed class Cell
         }
         return somethingEliminated;
     }
-
+    public bool EliminateCandidate(int candidate)
+    {
+        bool somethingEliminated = false;
+        if (_candidates.Contains(candidate))
+        {
+            somethingEliminated = true;
+            _candidates.Remove(candidate);
+        }
+        if (_candidates.Count == 1)
+        {
+            Digit = _candidates.First();
+        }
+        else if (_candidates.Count != 1)
+        {
+            Digit = EmptyDigit;
+        }
+        return somethingEliminated;
+    }
     public bool HasCandidate(int candidate)
     {
         return _candidates.Contains(candidate);
