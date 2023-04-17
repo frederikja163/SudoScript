@@ -113,11 +113,6 @@ public static class Generator
         }
     }
 
-    private static IRule CreateRule(string name, params object[] args)
-    {
-        throw new NotImplementedException();
-    }
-
     // A function to retrieve cells and their given digits, from the AST
     private static void InsertGivenDigit(GivensNode node, SymbolTable symbolTable, out List<Cell> cells)
     {
