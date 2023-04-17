@@ -1,4 +1,6 @@
-﻿namespace SudoScript.Data;
+﻿using System.Runtime.CompilerServices;
+
+namespace SudoScript.Data;
 
 public sealed class Board: ICloneable
 {
@@ -68,10 +70,10 @@ public sealed class Board: ICloneable
 
     public override string ToString()
     {
-        return ToString(3);
+        return ToString();
     }
 
-    public string ToString(int cellSize = 3)
+    public string ToString(int cellSize = 2)
     {
         int minX = int.MaxValue;
         int maxX = int.MinValue;
@@ -86,51 +88,31 @@ public sealed class Board: ICloneable
             if(cell.Y < minY) minY = cell.Y;
         }
 
-        List<Cell> orderedCellList = _cells.Values
-            .OrderBy(c => c.X)
-            .ThenBy(c => c.Y)
-            .ToList();
-
         string s = "";
+        string newlines = new('\n', cellSize / 3 + 1);
 
-        int i = 0;
-        int width = maxX - minX;
-        int height = maxY - minY;
-
-        string newlines = new('\n', cellSize);
-        string spaces = new(' ', cellSize);
-        string spaces2 = new(' ', cellSize + 2);
-
-        for(int row = 0; row < height; row++)
+        for(int row = maxX; row >= minX; row--)
         {
-            for(int col = 0; col < width; col++)
+            for(int col = minX; col <= maxX; col++)
             {
-
-                string cellString;
-                if(orderedCellList[i].X == col + minX && orderedCellList[i].Y == row + minY)
-                {
-                    string digitString;
-                    if(orderedCellList[i].Digit != Cell.EmptyDigit)
-                    {
-                        digitString = Center(orderedCellList[i].Digit.ToString(), cellSize);
-                    } else
-                    {
-                        digitString = spaces;
-                    }
-                    cellString = $"[{digitString}]";
-                    i++;
-                } else
-                {
-                    cellString = spaces2;
-                }
-
-                string space = col == width - 1 ? "\t" : "";
-                s += cellString + space;
+                s += Center(VisualizeCellAt(col, row), cellSize);
             }
-            s += row == maxY - minY - 1 ? newlines : "";
+            s += row == minY ? "" : newlines;
         }
 
         return s;
+    }
+
+    private string VisualizeCellAt(int x, int y)
+    {
+        if(_cells.TryGetValue((x, y), out Cell? cell))
+        {
+            return cell.ToString();
+        }
+        else
+        {
+            return "";
+        }
     }
 
     private static string Center(string s, int length)
