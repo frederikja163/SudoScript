@@ -43,7 +43,7 @@ internal sealed class TokenizerTests
     [Test]
     public void IgnoresSpecialTokens()
     {
-        string s = "unit /*This is a comment!*/{ (1, 7 + 5) }";
+        string s = "unit /*This is a comment!*/{ (1, 7 + 5) } ";
 
         TokenStream tokenizer = new(s);
 

@@ -53,7 +53,7 @@ public sealed class TokenStream : IDisposable
 
     private readonly TextReader _reader;
 
-    private readonly Queue<Token> _next; //TODO: Check if linkedlist or list is faster than queue.
+    private readonly List<Token> _next; //TODO: Check if linkedlist or queue is faster than queue.
 
     private char? _carry;
 
@@ -106,7 +106,7 @@ public sealed class TokenStream : IDisposable
 
     public bool Peek(bool IgnoreSpecial, [NotNullWhen(true)] out Token? token)
     {
-        if(_next.First() is null)
+        if(_next is null || !_next.Any())
         {
             token = null;
         }
@@ -124,26 +124,25 @@ public sealed class TokenStream : IDisposable
 
     public void Continue(bool IgnoreSpecial)
     {
-        //If 
         if(IgnoreSpecial)
         {
             _next.Clear();
         }
         else if(_next.Any())
         {
-            _next.Dequeue();
+            _next.RemoveAt(0);
         }
 
         if(!_next.Any())
         {
-            Token? token = null;
-            while(token is not null && IsSpecialToken(token.Type))
+            Token? token;
+            do
             {
                 if(GetToken(out token))
                 {
-                    _next.Enqueue(token);
+                    _next.Add(token);
                 }
-            } 
+            } while(token is not null && IsSpecialToken(token.Type));
         }
     }
 
