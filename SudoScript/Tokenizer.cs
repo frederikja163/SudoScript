@@ -124,6 +124,11 @@ public sealed class TokenStream : IDisposable
 
     public void Continue(bool IgnoreSpecial)
     {
+        // Next contains zero or more special tokens and might contain one non special
+        // token in the end.
+        // To continue to the next token, we remove either the next token, or the next
+        // non special token (including all special tokens that presceed it.)
+
         if(IgnoreSpecial)
         {
             _next.Clear();
