@@ -9,14 +9,19 @@ namespace StandardLibrary
 {
     internal class Row : Unit
     {
-        public Row(IReadOnlyList<CellReference> cells, IReadOnlyList<IRule> rules) : base(cells, rules)
+        public Row(int a) : base(InitCells(a), new IRule[] { new OneRule() }) //X automatically becomes 1
+        {
+            
+        }
+
+        private static IReadOnlyList<CellReference> InitCells(int a)
         {
             List<CellReference> rowCells = new List<CellReference>();
-            for (int i = 0; i < 9; i++) 
+            for (int i = 0; i < 9; i++)
             {
-                rowCells.Add(new CellReference(cells[0].X , cells[0].Y));
+                rowCells.Add(new CellReference(cells[0].X, cells[0].Y));
             }
-            cells = rowCells.ToArray();
+            return rowCells.ToArray();
 
         }
 
