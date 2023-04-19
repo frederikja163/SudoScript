@@ -35,7 +35,7 @@ namespace StandardLibrary.Tests
             {
                 for (int j = 1; j <= 2; j++)
                 {
-                    Assert.That(board[i, j].Candidates(), Has.Member(j));
+                    Assert.That(board[i, i].Candidates(), Has.Member(j));
                 }
                 for (int j = 3; j <=9; j++)
                 {
