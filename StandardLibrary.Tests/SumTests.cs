@@ -39,7 +39,7 @@ namespace StandardLibrary.Tests
                 }
                 for (int j = 3; j <=9; j++)
                 {
-                    Assert.IsFalse(board[i, i].Candidates().Contains(j));
+                    Assert.That(board[i, i].Candidates(), Has.No.Member(j));
                 }
             }
         }

@@ -1,6 +1,7 @@
 ﻿using SudoScript.Data;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,14 +47,16 @@ namespace StandardLibrary
                 //Create a list of all other cells
                 List<Cell> otherCells = emptyCells.ToList();
                 otherCells.Remove(cell);
-                foreach (int candidate in cell.Candidates())
+                int[] candidatesArr = cell.Candidates().ToArray();
+                for (int i = 0; i < candidatesArr.Length; i++)
                 {
-                    if (!RecursiveValidSumSearch(remainder, otherCells.ToList(), candidate))
+                    if (!RecursiveValidSumSearch(remainder, otherCells.ToList(), candidatesArr[i]))
                     {
-                        cell.EliminateCandidate(candidate);
+                        cell.EliminateCandidate(candidatesArr[i]);
                         somethingEliminated = true;
                     }
                 }
+
             }
             return somethingEliminated;
         }
@@ -66,7 +69,7 @@ namespace StandardLibrary
             {
                 foreach (int candidate in currentCell.Candidates())
                 {
-                    if (!(runningSum + candidate => remainder))
+                    if (runningSum + candidate <= remainder)
                     {
                         return true;
                     }
@@ -77,7 +80,7 @@ namespace StandardLibrary
             {
                 if (runningSum + candidate > remainder) 
                 { 
-                    return false; 
+                    continue; 
                 }
                 if (RecursiveValidSumSearch(remainder, emptyCells.ToList(), runningSum + candidate))
                 {
