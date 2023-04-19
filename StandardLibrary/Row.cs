@@ -9,7 +9,10 @@ namespace StandardLibrary
 {
     internal class Row : Unit
     {
-        public Row(IReadOnlyList<CellReference> cells, IReadOnlyList<IRule> rules) : base(cells, rules)
+        public Row(int y) : base(InitCells(1, y), new IRule[] { new OneRule() }) //X is assumed to be 1
+        {
+        }
+        public Row(int x, int y) : base(InitCells(x, y), new IRule[] { new OneRule() })
         {
             if (!validateRow(cells))
             {
@@ -18,22 +21,14 @@ namespace StandardLibrary
 
         }
 
-        private bool validateRow(IReadOnlyList<CellReference> cells)
+        private static IReadOnlyList<CellReference> InitCells(int x, int y)
         {
-            if (cells == null) { return false; }
-            if (cells.Count != 9) { return false; }
-            for (int i = 0; i < cells.Count-1; i++) //We do not want to check the last cell since it has already been compared to the previous cell
+            List<CellReference> rowCells = new List<CellReference>();
+            for (int i = x; i <= i + 9; i++)
             {
-                if (cells[i].X+1 != cells[i + 1].X) //Test if the cells are adjacent
-                {
-                    return false;
-                }
-                if (cells[i].Y != cells[i + 1].Y)
-                {
-                    return false;
-                }
+                rowCells.Add(new CellReference(i, y));
             }
-            return true;
+            return rowCells.ToArray();
         }
     }
 }
