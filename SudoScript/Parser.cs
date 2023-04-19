@@ -58,12 +58,10 @@ public static class Parser {
             stream.Expect(TokenType.Identifier, out identifier);
             if (stream.Peek(true, out Token? paramId) && paramId.Type == TokenType.Identifier)
             {
-                stream.Peek(true, out Token? fuckyou);
                 paramChildren.AddRange(ParseParameters(stream));
             }
         }
-        stream.Peek(true, out Token? testing2);
-        if (!stream.Expect(TokenType.LeftBrace, out Token? test))
+        if (!stream.Expect(TokenType.LeftBrace, out Token? _))
             throw new Exception("{ expected");
 
         if (stream.Peek(true, out Token? id) && id.Type == TokenType.RightBrace)
@@ -155,7 +153,7 @@ public static class Parser {
         if (stream.Expect(TokenType.Space, out Token? _))
             throw new Exception("Multiple spaces in expression");
 
-        if (stream.Peek(false, out Token? identifier) && identifier.Type == TokenType.Identifier)
+        if (stream.Peek(false, out Token? identifier) && (identifier.Type == TokenType.Identifier || identifier.Type == TokenType.LeftParenthesis))
             arguments.AddRange(ParseArguments(stream));
 
         return arguments;
@@ -165,7 +163,7 @@ public static class Parser {
         // Has to be rewritten to accomodate (-2) +2 and expressions
         if (stream.Peek(false, out Token? argId) && argId.Type != TokenType.LeftParenthesis)
             return ParseElement(stream);
-        return ParseArgCell(stream);
+        return ParseCell(stream);
     }
 
     private static ArgumentNode ParseElement(TokenStream stream) {

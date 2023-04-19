@@ -80,6 +80,15 @@ internal sealed class ParserTests
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
     }
+    
+    [Test]
+    public void ParseFunctionCallNoArgs() 
+    {
+        using StreamReader stream = new StreamReader("./TestData/CallFunctionNoArgs.txt");
+        var tree = Parser.ParseProgram(stream);
+
+        Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
+    }
 
     [Test]
     public void ParseGivensWithGiven() 
@@ -90,4 +99,11 @@ internal sealed class ParserTests
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(1));
     }
 
+    [Test]
+    public void ParseFunctionCallWithArgs() {
+        using StreamReader stream = new StreamReader("./TestData/CallFunctionWithArgs.txt");
+        var tree = Parser.ParseProgram(stream);
+
+        Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(2));
+    }
 }
