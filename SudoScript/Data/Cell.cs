@@ -82,6 +82,29 @@ public sealed class Cell
         }
         return somethingEliminated;
     }
+    public bool EliminateCandidate(int candidate)
+    {
+        bool somethingEliminated = false;
+        if (_candidates.Contains(candidate))
+        {
+            somethingEliminated = true;
+            _candidates.Remove(candidate);
+        }
+        if (_candidates.Count == 1)
+        {
+            Digit = _candidates.First();
+        }
+        else if (_candidates.Count != 1)
+        {
+            Digit = EmptyDigit;
+        }
+        return somethingEliminated;
+    }
+
+    public bool EliminateCandidate(Func<int, bool> predicate)
+    {
+        return EliminateCandidate(_candidates.Where(predicate));
+    }
 
     public bool HasCandidate(int candidate)
     {
@@ -95,6 +118,14 @@ public sealed class Cell
 
     public override string ToString()
     {
-        return Digit.ToString();
+        if(Digit == EmptyDigit)
+        {
+            return ".";
+        }
+        else
+        {
+            return Digit.ToString();
+        }
     }
+
 }

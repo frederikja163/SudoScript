@@ -43,7 +43,7 @@ internal sealed class TokenizerTests
     [Test]
     public void IgnoresSpecialTokens()
     {
-        string s = "unit /*This is a comment!*/{ (1, 7 + 5) }";
+        string s = "unit /*This is a comment!*/{ (1, 7 + 5) } ";
 
         TokenStream tokenizer = new(s);
 
@@ -61,10 +61,12 @@ internal sealed class TokenizerTests
             (TokenType.RightBrace, "}"),
         };
 
-        for(int i = 0; i < expected.Length || tokenizer.HasNext; i++)
+        for(int i = 0; i < expected.Length; i++)
         {
             Assert.That(tokenizer.Expect(expected[i].type, out Token? token));
             Assert.That(token?.Match, Is.EqualTo(expected[i].match));
         }
+
+        Assert.That(tokenizer.HasNext, Is.True);
     }
 }
