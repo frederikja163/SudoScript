@@ -14,11 +14,6 @@ namespace StandardLibrary
         }
         public Row(int x, int y) : base(InitCells(x, y), new IRule[] { new OneRule() })
         {
-            if (!validateRow(cells))
-            {
-                throw new Exception("Attepted to place row in invalid position");
-            }
-
         }
 
         private static IReadOnlyList<CellReference> InitCells(int x, int y)
