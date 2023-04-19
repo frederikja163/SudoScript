@@ -66,7 +66,7 @@ namespace StandardLibrary
             {
                 foreach (int candidate in currentCell.Candidates())
                 {
-                    if (!(runningSum + candidate > remainder))
+                    if (!(runningSum + candidate => remainder))
                     {
                         return true;
                     }
