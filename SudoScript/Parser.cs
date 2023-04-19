@@ -327,9 +327,14 @@ public static class Parser {
         if (stream.Peek(true, out Token? token) && token.Type != TokenType.LeftBrace) throw new Exception("Expected { after rules keyword");
         stream.Expect(TokenType.LeftBrace, out _);
 
-        if (stream.Peek(true, out Token? token1) && token1.Type != TokenType.RightBrace) throw new Exception("Expected } to end rules statement");
+        if (stream.Peek(true, out Token? token1) && token1.Type == TokenType.RightBrace) 
+        {
+            stream.Expect(TokenType.RightBrace, out _);
+            return new GivensNode(new List<GivensStatementNode>());
+        }
+        List<GivensStatementNode> children = ParseGivensStatements(stream);
         stream.Expect(TokenType.RightBrace, out _);
-        return new GivensNode(ParseGivensStatements(stream));
+        return new GivensNode(children);
     }
 
     private static List<GivensStatementNode> ParseGivensStatements(TokenStream stream) {
@@ -345,13 +350,11 @@ public static class Parser {
     private static GivensStatementNode ParseGivensStatement(TokenStream stream)
     {
         if (stream.Peek(true, out Token? token) && token.Type != TokenType.LeftParenthesis)
-        {
-            CellNode cellNode = ParseCell(stream);
-            ExpressionNode value = ParseFunctionElement(stream);
-            return new GivensStatementNode(cellNode, value);
-        }
+            throw new Exception("expected a cell");
 
-        throw new Exception("expected a cell");
+        CellNode cellNode = ParseCell(stream);
+        ExpressionNode value = ParseExpression(stream);
+        return new GivensStatementNode(cellNode, value);
     }
 
     private static List<ArgumentNode> ParseFuncArguments(TokenStream stream) {
