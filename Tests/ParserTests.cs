@@ -73,12 +73,30 @@ internal sealed class ParserTests
     }
 
     [Test]
+    public void ParseGivensNoGivens() 
+    {
+        using StreamReader stream = new StreamReader("./TestData/GivensNoGiven.txt");
+        var tree = Parser.ParseProgram(stream);
+
+        Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
+    }
+    
+    [Test]
     public void ParseFunctionCallNoArgs() 
     {
         using StreamReader stream = new StreamReader("./TestData/CallFunctionNoArgs.txt");
         var tree = Parser.ParseProgram(stream);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void ParseGivensWithGiven() 
+    {
+        using StreamReader stream = new StreamReader("./TestData/GivensWithGiven.txt");
+        var tree = Parser.ParseProgram(stream);
+
+        Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(1));
     }
 
     [Test]
