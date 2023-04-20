@@ -45,8 +45,41 @@ public static class Generator
         return new Board(cells.Values.ToList(), units);
     }
 
-    // Takes the primary node, and travles its children to find units
+    // Takes the primary node, and travels its children to find units
     private static void GetUnits(UnitNode node, SymbolTable symbolTable, Dictionary<CellReference, Cell> cells, List<Unit> units)
+    {
+        if (node.NameToken is Token token){
+            Plugins.AddUnitFunction(token.Match, (args) =>
+            {
+                SymbolTable table = new SymbolTable(symbolTable);
+                for (int i = 0; i < args.Length; i++)
+                {
+                    object arg = args[i];
+                    ParameterNode param = node.Parameters[i];
+                    if (arg is CellReference cell && param is ParameterCellNode paramCell)
+                    {
+                        table.Add(paramCell.X.NameToken.Match, cell.X);
+                        table.Add(paramCell.Y.NameToken.Match, cell.Y);
+                    }
+                    else if (arg is int digit && param is ParameterIdentifierNode paramDigit)
+                    {
+                        table.Add(paramDigit.NameToken.Match, digit);
+                    }
+                    else
+                    {
+                        throw new Exception($"Invalid parameter type.");
+                    }
+                }
+                GetUnitFromStatements(node, symbolTable, cells, units);
+            });
+        }
+        else
+        {
+            GetUnitFromStatements(node, symbolTable, cells, units);
+        }
+    }
+
+    private static void GetUnitFromStatements(UnitNode node, SymbolTable symbolTable, Dictionary<CellReference, Cell> cells, List<Unit> units)
     {
         Unit unit = new Unit();
 
@@ -71,9 +104,7 @@ public static class Generator
                     }
                     break;
             }
-
         }
-        
     }
 
     private static void GetRules(RulesNode node, SymbolTable symbolTable, Unit unit)
