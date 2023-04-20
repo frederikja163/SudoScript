@@ -52,6 +52,11 @@ public class Unit
         }
     }
 
+    public IEnumerable<CellReference> References()
+    {
+        return _cells;
+    }
+
     public bool EliminateCandidates()
     {
         bool somethingEliminated = false;

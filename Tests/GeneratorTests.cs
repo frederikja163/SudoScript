@@ -64,7 +64,7 @@ internal sealed class GeneratorTests
                                 }
                             ),
                             new FunctionCallNode(
-                                new Token(TokenType.Identifier, "union", "", 0, 0, ""),
+                                new Token(TokenType.Identifier, "Union", "", 0, 0, ""),
                                 new List<ArgumentNode> 
                                 {
                                     new CellNode ( // ([2 ; 4], 7)
@@ -102,10 +102,10 @@ internal sealed class GeneratorTests
                                 }
                             ),
                              new FunctionCallNode(
-                                new Token(TokenType.Identifier, "union", "", 0, 0, ""),
+                                new Token(TokenType.Identifier, "Union", "", 0, 0, ""),
                                 new List<ArgumentNode>
                                 {
-                                    new CellNode ( // ([2 ; 4], 7)
+                                    new CellNode ( // ([5 ; 8], 2)
                                         new Token(0, "", "", 0, 0, ""),
                                         new Token(0, "", "", 0, 0, ""),
                                         new Token(0, "", "", 0, 0, ""),
@@ -126,7 +126,7 @@ internal sealed class GeneratorTests
                                             new Token(TokenType.Number, "2", "", 0, 0, "")
                                         )
                                     ),
-                                    new CellNode ( // (2, 4)
+                                    new CellNode ( // (9, 2)
                                         new Token(0, "", "", 0, 0, ""),
                                         new Token(0, "", "", 0, 0, ""),
                                         new Token(0, "", "", 0, 0, ""),
@@ -151,7 +151,8 @@ internal sealed class GeneratorTests
         var board = Generator.GetBoardFromAST(program);
 
         // Assert
-        Assert.That(board.Units.Count, Is.EqualTo(4));
+        Console.WriteLine(board.ToString());
+        Assert.That(board.Units.Count, Is.EqualTo(5));
         Assert.That(board[9, 5].Digit, Is.EqualTo(6));
         Assert.That(board[3, 6].Digit, Is.EqualTo(2));
         Assert.That(board[2, 7].Digit, Is.EqualTo(0));

@@ -1,10 +1,31 @@
 using SudoScript.Ast;
 using SudoScript.Data;
+using System.Reflection.Metadata.Ecma335;
 
 namespace SudoScript;
 
 public static class Generator
 {
+    static Generator()
+    {
+        Plugins.AddUnitFunction("Union", (object[] args) =>
+        {
+            Unit unit = new Unit();
+            foreach (object arg in args)
+            {
+                if (arg is CellReference cell)
+                {
+                    unit.AddCell(cell);
+                }
+                else
+                {
+                    throw new Exception("Union only accepts Cells as arguments.");
+                }
+            }
+            return unit;
+        });
+    }
+
     // Takes the program node as input, and creates the initial symboltable (WIP),
     // and returns the Board with cells and units
     public static Board GetBoardFromAST(ProgramNode node)
@@ -43,9 +64,11 @@ public static class Generator
                     InsertGivenDigit(givensNode, symbolTable, cells);
                     break;
                 case FunctionCallNode functionCallNode: // Lastly, a function is used to extract cells and units from functioncalls
-                    Unit newUnit = GetCellsAndUnitsFromFunction(functionCallNode, symbolTable, cells);
-                    units.Add(newUnit);
-                    unit.AddUnit(newUnit);
+                    foreach (Unit newUnit in GetCellsAndUnitsFromFunction(functionCallNode, symbolTable, cells))
+                    {
+                        units.Add(newUnit);
+                        unit.AddUnit(newUnit);
+                    }
                     break;
             }
 
@@ -59,32 +82,7 @@ public static class Generator
 
         foreach (FunctionCallNode child in node.Children())
         {
-            // A list containing the integers and cell references as arguments to the rule.
-            List<List<object>> argumentCombinations = new List<List<object>>();
-            
-            foreach (ArgumentNode argument in child.Arguments)
-            {
-                List<object> arguments = new List<object>();
-                if (argument is CellNode cellNode)
-                {
-                    arguments = ExpressionToCells(cellNode.X, cellNode.Y, symbolTable).Cast<object>().ToList();
-                }
-                else if (argument is ExpressionNode expressionNode){
-                    arguments = ExpressionToInts(expressionNode, symbolTable).Cast<object>().ToList();
-                }
-                else
-                {
-                    throw new NotSupportedException("Arguments must be either expressions or cells.");
-                }
-
-                List<List<object>> oldArgumentCombinations = argumentCombinations;
-                argumentCombinations = new List<List<object>>();
-                foreach (List<object> oldArguments in oldArgumentCombinations)
-                {
-                    List<List<object>> newArguments = CombineListsWithFunction(oldArguments, arguments, (l, r) => new List<object>() { l, r });
-                    argumentCombinations.AddRange(newArguments);
-                }
-            }
+            List<List<object>> argumentCombinations = ArgumentToArgumentCombinations(child.Arguments, symbolTable);
 
             foreach(List<object> arguments in argumentCombinations)
             {
@@ -92,6 +90,44 @@ public static class Generator
                 unit.AddRule(rule);
             }
         }
+    }
+
+    private static List<List<object>> ArgumentToArgumentCombinations(IReadOnlyList<ArgumentNode> argumentNodes, SymbolTable symbolTable)
+    {
+        List<List<object>> argumentCombinations = new List<List<object>>();
+
+        foreach (ArgumentNode argument in argumentNodes)
+        {
+            List<object> arguments = new List<object>();
+            if (argument is CellNode cellNode)
+            {
+                arguments = ExpressionToCells(cellNode.X, cellNode.Y, symbolTable).Cast<object>().ToList();
+            }
+            else if (argument is ExpressionNode expressionNode)
+            {
+                arguments = ExpressionToInts(expressionNode, symbolTable).Cast<object>().ToList();
+            }
+            else
+            {
+                throw new NotSupportedException("Arguments must be either expressions or cells.");
+            }
+
+            if (argumentCombinations.Count == 0)
+            {
+                argumentCombinations.Add(arguments);
+                continue;
+            }
+
+            List<List<object>> oldArgumentCombinations = argumentCombinations;
+            argumentCombinations = new List<List<object>>();
+            foreach (List<object> oldArguments in oldArgumentCombinations)
+            {
+                List<List<object>> newArguments = CombineListsWithFunction(oldArguments, arguments, (l, r) => new List<object>() { l, r });
+                argumentCombinations.AddRange(newArguments);
+            }
+        }
+
+        return argumentCombinations;
     }
 
     // A function to retrieve cells and their given digits, from the AST
@@ -105,7 +141,9 @@ public static class Generator
                 throw new Exception("Givens must contain one, and only one digit.");
             }
 
-            List<Cell> newCells = ExpressionToCells(child.Cell.X, child.Cell.Y, symbolTable, digit);
+            List<Cell> newCells = ExpressionToCells(child.Cell.X, child.Cell.Y, symbolTable)
+                .Select(c => new Cell(c.X, c.Y, digit))
+                .ToList();
 
             // Check if there only exists one cell
             if (newCells.Count != 1)
@@ -126,53 +164,31 @@ public static class Generator
     }
     
     // Extract list of cells and units
-    private static Unit GetCellsAndUnitsFromFunction(FunctionCallNode node, SymbolTable symbolTable, Dictionary<CellReference, Cell> cells)
+    private static List<Unit> GetCellsAndUnitsFromFunction(FunctionCallNode node, SymbolTable symbolTable, Dictionary<CellReference, Cell> cells)
     {
-        if(node.Name.Match == "union")
+        List<Unit> units = new List<Unit>();
+        List<List<object>> argumentCombinations = ArgumentToArgumentCombinations(node.Arguments, symbolTable);
+        foreach (List<object> arguments in argumentCombinations)
         {
-            Unit unit = new Unit();
-            foreach (ArgumentNode child in node.Children())
+            Unit unit = Plugins.CreateUnit(node.Name.Match, arguments.ToArray());
+            units.Add(unit);
+            foreach (CellReference reference in unit.References())
             {
-                if(child is not CellNode cellNode)
-                {
-                    throw new ArgumentException("Union function only accepts cell arguments.");
-                }
-
-                List<Cell> newCells = ExpressionToCells(cellNode.X, cellNode.Y, symbolTable);
-                foreach (Cell cell in newCells)
-                {
-                    CellReference cellReference = (cell.X, cell.Y);
-                    if (!cells.ContainsKey(cellReference))
-                    {
-                        cells.Add(cellReference, cell);
-                    }
-
-                    unit.AddCell(cellReference);
-                }
+                cells.TryAdd(reference, new Cell(reference.X, reference.Y));
             }
-            return unit;
-        } else {
-            throw new ArgumentException($"Function {node.Name.Match} is not supported.");
         }
+        return units;
     }
 
     //Converts ExpressionNode objects into list of integers.
     //Then creates a list of cell using integer list to create a digit parameter.
-    private static List<Cell> ExpressionToCells(ExpressionNode nodeX, ExpressionNode nodeY, SymbolTable symbolTable, int digit = Cell.EmptyDigit)
+    private static List<CellReference> ExpressionToCells(ExpressionNode nodeX, ExpressionNode nodeY, SymbolTable symbolTable)
     {
         List<int> xs = ExpressionToInts(nodeX, symbolTable);
         List<int> ys = ExpressionToInts(nodeY, symbolTable);
 
-        List<Cell> cells;
-        if (digit == Cell.EmptyDigit)
-        {
-            cells = CombineListsWithFunction(xs, ys, (x, y) => new Cell(x, y));
-        }
-        else
-        {
-            cells = CombineListsWithFunction(xs, ys, (x, y) => new Cell(x, y, digit));
-        }
-
+        List<CellReference> cells;
+        cells = CombineListsWithFunction(xs, ys, (x, y) => new CellReference(x, y));
         return cells;
     }
 
@@ -260,7 +276,7 @@ public static class Generator
         {
             case UnaryType.Plus:
                 return ExpressionToInts(node.Expression, symbolTable);
-                //If the UnaryType is minus, convert the expression to list 
+                //If the UnaryType is minus, convert the expression to a list of ints and then negate each element.
             case UnaryType.Minus:
                 return ExpressionToInts(node.Expression, symbolTable).Select(i => -i).ToList();
             default:
@@ -272,6 +288,7 @@ public static class Generator
     {
         throw new NotImplementedException();
     }
+
     //Method takes in two lists of T2 and a function for two arguments to return T1 value.
     private static List<T1> CombineListsWithFunction<T1, T2>(List<T2> left, List<T2> right, Func<T2, T2, T1> func)
     {
