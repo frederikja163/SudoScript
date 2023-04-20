@@ -6,50 +6,73 @@ namespace Tests;
 
 internal sealed class ParserTests
 {
+    // Unit
     [Test]
     public void ParseUnitTestWithoutName()
     {
         using StreamReader stream = new StreamReader("./TestData/UnitWithoutName.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
-        Assert.That(tree.Child?.NameToken, Is.EqualTo(null));
-        Assert.That(tree.Child?.Parameters?.Count, Is.EqualTo(0));
+        if (tree.Child.UnitStatements.First() is UnitNode unitNode)
+        {
+            Assert.That(unitNode.NameToken, Is.EqualTo(null));
+            Assert.That(unitNode.Parameters.Count, Is.EqualTo(0));
+        }
+        else
+        {
+            Assert.Fail();
+        }
     }
 
     [Test]
     public void ParseUnitTestWithName()
     {
         using StreamReader stream = new StreamReader("./TestData/UnitWithName.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
-        Assert.That(tree.Child?.NameToken.Match, Is.EqualTo("UnitName"));
-        Assert.That(tree.Child?.Parameters?.Count, Is.EqualTo(0));
+        if (tree.Child.UnitStatements.First() is UnitNode unitNode)
+        {
+            Assert.That(unitNode.NameToken?.Match, Is.EqualTo("UnitName"));
+            Assert.That(unitNode.Parameters.Count, Is.EqualTo(0));
+        }
+        else
+        {
+            Assert.Fail();
+        }
     }
 
     [Test]
     public void ParseUnitTestWithParams()
     {
         using StreamReader stream = new StreamReader("./TestData/UnitWithParams.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
-        Assert.That(tree.Child?.NameToken.Match, Is.EqualTo("UnitName"));
-        Assert.That(tree.Child?.Parameters?.Count, Is.EqualTo(2));
+        if (tree.Child.UnitStatements.First() is UnitNode unitNode)
+        {
+            Assert.That(unitNode.NameToken?.Match, Is.EqualTo("UnitName"));
+            Assert.That(unitNode.Parameters.Count, Is.EqualTo(2));
+        }
+        else
+        {
+            Assert.Fail();
+        }
     }
 
+    // Rules
     [Test]
-    public void ParseRuleTest() 
+    public void ParseRuleTest()
     {
         using StreamReader stream = new StreamReader("./TestData/EmptyRuleUnit.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
-        Assert.That(tree.Child.UnitStatements.Count, Is.EqualTo(1));
+        Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
     }
 
     [Test]
     public void ParseRuleTestWithFunctionNoArgs()
     {
         using StreamReader stream = new StreamReader("./TestData/RuleUnitWithFuncNoArgs.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(1));
     }
@@ -58,7 +81,7 @@ internal sealed class ParserTests
     public void ParseRuleTestWithFunctionWithArgs()
     {
         using StreamReader stream = new StreamReader("./TestData/RuleUnitWithFuncWithArgs.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(1));
     }
@@ -67,43 +90,76 @@ internal sealed class ParserTests
     public void ParseRuleTestWithFunctionMultipleArgs()
     {
         using StreamReader stream = new StreamReader("./TestData/RuleUnitWithFuncMultipleArgs.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(2));
     }
 
+    // Givens
     [Test]
-    public void ParseGivensNoGivens() 
+    public void ParseGivensNoGivens()
     {
         using StreamReader stream = new StreamReader("./TestData/GivensNoGiven.txt");
-        var tree = Parser.ParseProgram(stream);
-
-        Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
-    }
-    
-    [Test]
-    public void ParseFunctionCallNoArgs() 
-    {
-        using StreamReader stream = new StreamReader("./TestData/CallFunctionNoArgs.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
     }
 
     [Test]
-    public void ParseGivensWithGiven() 
+    public void ParseGivensWithGiven()
     {
         using StreamReader stream = new StreamReader("./TestData/GivensWithGiven.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(1));
     }
 
+    // FunctionCall
     [Test]
-    public void ParseFunctionCallWithArgs() {
+    public void ParseFunctionCallNoArgs()
+    {
+        using StreamReader stream = new StreamReader("./TestData/CallFunctionNoArgs.txt");
+        ProgramNode tree = Parser.ParseProgram(stream);
+
+        Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void ParseFunctionCallWithArgs()
+    {
         using StreamReader stream = new StreamReader("./TestData/CallFunctionWithArgs.txt");
-        var tree = Parser.ParseProgram(stream);
+        ProgramNode tree = Parser.ParseProgram(stream);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    public void ParseCellFunctionCall()
+    {
+        using StreamReader stream = new StreamReader("./TestData/CellFunctionCall.txt");
+        ProgramNode tree = Parser.ParseProgram(stream);
+
+        if (tree.Child.UnitStatements[0] is UnitNode unitNode)
+        {
+            if(unitNode.UnitStatements[0] is FunctionCallNode callNode) 
+            {
+                if (callNode.Arguments[0] is CellNode cellNode)
+                {
+                    Assert.Pass();
+                }
+                else
+                {
+                    Assert.Fail();
+                }
+            }
+            else 
+            {
+                Assert.Fail();
+            }
+        }
+        else
+        {
+            Assert.Fail();
+        }
     }
 }
