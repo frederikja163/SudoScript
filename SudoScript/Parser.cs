@@ -22,7 +22,7 @@ public static class Parser {
             if (!stream.HasNext || (stream.Peek(true, out rightBrace) && rightBrace.Type == TokenType.RightBrace))
                 return children;
 
-            stream.Expect(TokenType.Newline, out Token? _);
+            stream.Expect(TokenType.Newline, out _);
             children.AddRange(ParseUnitStatements(stream));
         }
 
@@ -67,7 +67,7 @@ public static class Parser {
                 paramChildren.AddRange(ParseParameters(stream));
             }
         }
-        if (!stream.Expect(TokenType.LeftBrace, out Token? _))
+        if (!stream.Expect(TokenType.LeftBrace, out _))
             throw new Exception("{ expected");
 
         if (stream.Peek(true, out Token? id) && id.Type == TokenType.RightBrace)
@@ -94,7 +94,6 @@ public static class Parser {
 
             if (stream.Peek(true, out Token? identifier) && identifier.Type == TokenType.Identifier)
                 paramChildren.Add(ParseParameterIdentifier(stream));
-
         }
 
         return paramChildren;
@@ -111,14 +110,14 @@ public static class Parser {
         ParameterIdentifierNode x;
         ParameterIdentifierNode y;
 
-        stream.Expect(TokenType.LeftParenthesis, out Token? _);
+        stream.Expect(TokenType.LeftParenthesis, out _);
 
         if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Identifier)
             throw new Exception("Expected identifier");
 
         x = ParseParameterIdentifier(stream);
 
-        if (!stream.Expect(TokenType.Comma, out Token? _))
+        if (!stream.Expect(TokenType.Comma, out _))
             throw new Exception(", expected");
 
         if (stream.Peek(true, out identifier) && identifier.Type != TokenType.Identifier)
@@ -126,7 +125,7 @@ public static class Parser {
 
         y = ParseParameterIdentifier(stream);
 
-        if (!stream.Expect(TokenType.RightParenthesis, out Token? _))
+        if (!stream.Expect(TokenType.RightParenthesis, out _))
             throw new Exception(") expected");
 
         return new ParameterCellNode(x, y);
@@ -138,8 +137,8 @@ public static class Parser {
 
         if (stream.Expect(TokenType.Identifier, out Token? funcCall)) {
             stream.Expect(TokenType.Space, out _);
-            if (stream.Peek(false, out Token? identifier) && identifier.Type == TokenType.Number || identifier.Type == TokenType.LeftParenthesis
-                || identifier.Type == TokenType.Plus || identifier.Type == TokenType.Minus) {
+            if (stream.Peek(false, out Token? identifier) && identifier.Type == TokenType.Number || identifier?.Type == TokenType.LeftParenthesis
+                || identifier?.Type == TokenType.Plus || identifier?.Type == TokenType.Minus) {
                 arguments.AddRange(ParseArguments(stream));
             }
 
@@ -162,9 +161,9 @@ public static class Parser {
 
         arguments.Add(ParseArgument(stream));
 
-        if (!stream.Expect(TokenType.Space, out Token? _)) return arguments;
+        if (!stream.Expect(TokenType.Space, out _)) return arguments;
 
-        if (stream.Expect(TokenType.Space, out Token? _))
+        if (stream.Expect(TokenType.Space, out _))
             throw new Exception("Multiple spaces in expression");
 
         if (stream.Peek(false, out Token? identifier) && (identifier.Type == TokenType.Identifier || identifier.Type == TokenType.LeftParenthesis))
@@ -182,7 +181,7 @@ public static class Parser {
 
     private static ArgumentNode ParseElement(TokenStream stream) {
         stream.Peek(true, out Token? token);
-        switch (token.Type) {
+        switch (token?.Type) {
             case TokenType.Identifier:
                 if (stream.Expect(TokenType.Identifier, out Token? identifierToken))
                     return new IdentifierNode(identifierToken);
@@ -190,8 +189,9 @@ public static class Parser {
             case TokenType.Minus: // maybe handle error if no number after minus
             case TokenType.Plus:
             case TokenType.Number:
-                stream.Expect(TokenType.Number, out Token? valueToken);
-                return new ValueNode(valueToken);
+                if(stream.Expect(TokenType.Number, out Token? valueToken))
+                    return new ValueNode(valueToken);
+                throw new NullReferenceException();
             case TokenType.LeftBracket:
             case TokenType.RightBracket: // range
                 return ParseRange(stream);
@@ -202,29 +202,33 @@ public static class Parser {
         throw new Exception("Argument not identified");
     }
 
-    private static CellNode ParseArgCell(TokenStream stream) {
+    private static CellNode ParseArgCell(TokenStream stream)
+    {
         ExpressionNode x;
         ExpressionNode y;
 
-        stream.Expect(TokenType.LeftParenthesis, out Token? startToken);
+        if (stream.Expect(TokenType.LeftParenthesis, out Token? startToken))
+        {
+            if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Identifier)
+                throw new Exception("Expected identifier");
 
-        if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Identifier)
-            throw new Exception("Expected identifier");
+            x = ParseExpression(stream);
 
-        x = ParseExpression(stream);
+            if (!stream.Expect(TokenType.Comma, out Token? commaToken))
+                throw new Exception(", expected");
 
-        if (!stream.Expect(TokenType.Comma, out Token? commaToken))
-            throw new Exception(", expected");
+            if (stream.Peek(true, out identifier) && identifier.Type != TokenType.Identifier)
+                throw new Exception("Expected identifier");
 
-        if (stream.Peek(true, out identifier) && identifier.Type != TokenType.Identifier)
-            throw new Exception("Expected identifier");
+            y = ParseExpression(stream);
 
-        y = ParseExpression(stream);
+            if (!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
+                throw new Exception(") expected");
 
-        if (!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
-            throw new Exception(") expected");
+            return new CellNode(startToken, endToken, commaToken, x, y);
+        }
 
-        return new CellNode(startToken, endToken, commaToken, x, y);
+        throw new NullReferenceException();
     }
 
     private static ExpressionNode ParseExpression(TokenStream stream) {
@@ -256,8 +260,10 @@ public static class Parser {
         //}
 
         // Temp solution
-        stream.Expect(TokenType.Number, out Token? value);
-        return new ValueNode(value);
+        if(stream.Expect(TokenType.Number, out Token? value))
+            return new ValueNode(value);
+
+        throw new NullReferenceException();
     }
 
     /*
@@ -302,14 +308,15 @@ public static class Parser {
     }
 
     private static RulesNode ParseRules(TokenStream stream) {
-        stream.Expect(TokenType.Rules, out Token? rulesToken);
+        if (!stream.Expect(TokenType.Rules, out Token? rulesToken)) throw new Exception("Expected token 'rules'");
         if (stream.Peek(true, out Token? token) && token.Type != TokenType.LeftBrace) throw new Exception("Expected { after rules keyword");
-        stream.Expect(TokenType.LeftBrace, out Token? startToken);
+        if (!stream.Expect(TokenType.LeftBrace, out Token? startToken)) throw new Exception("Exptected left brace");
 
         List<FunctionCallNode> children = ParseRuleStatements(stream);
 
         if (stream.Peek(true, out Token? token1) && token1.Type != TokenType.RightBrace) throw new Exception("Expected } to end rules statement");
-        stream.Expect(TokenType.RightBrace, out Token? endToken);
+        if (!stream.Expect(TokenType.RightBrace, out Token? endToken)) throw new Exception("Expected right brace");
+
         return new RulesNode(rulesToken, startToken, endToken, children);
     }
 
@@ -324,13 +331,17 @@ public static class Parser {
 
     private static FunctionCallNode ParseRuleStatement(TokenStream stream) 
     {
-        stream.Expect(TokenType.Identifier, out Token? nameToken);
-        stream.Expect(TokenType.Space, out _);
+        if (stream.Expect(TokenType.Identifier, out Token? nameToken))
+        {
+            stream.Expect(TokenType.Space, out _);
 
-        if (stream.Peek(false, out Token? argumentsCheck) && (argumentsCheck.Type == TokenType.Space || argumentsCheck.Type == TokenType.Newline))
-            return new FunctionCallNode(null, new());
-        List<ArgumentNode> ruleArguments = ParseFuncArguments(stream);
-        return new FunctionCallNode(nameToken, ruleArguments);
+            if (stream.Peek(false, out Token? argumentsCheck) && (argumentsCheck.Type == TokenType.Space || argumentsCheck.Type == TokenType.Newline))
+                return new FunctionCallNode(new Token(TokenType.Identifier, "", "", 0, 0 , ""), new());
+            List<ArgumentNode> ruleArguments = ParseFuncArguments(stream);
+            return new FunctionCallNode(nameToken, ruleArguments);
+        }
+
+        throw new NullReferenceException();
     }
 
     private static GivensNode ParseGivens(TokenStream stream)
@@ -375,9 +386,9 @@ public static class Parser {
 
         arguments.Add(ParseFuncArgument(stream));
 
-        if (!stream.Expect(TokenType.Space, out Token? _)) return arguments;
+        if (!stream.Expect(TokenType.Space, out _)) return arguments;
 
-        if (stream.Expect(TokenType.Space, out Token? _))
+        if (stream.Expect(TokenType.Space, out _))
             throw new Exception("Multiple spaces in expression");
 
         if (stream.Peek(false, out Token? identifier) && (identifier.Type == TokenType.Identifier || identifier.Type == TokenType.LeftParenthesis))
@@ -397,24 +408,27 @@ public static class Parser {
         ExpressionNode x;
         ExpressionNode y;
 
-        stream.Expect(TokenType.LeftParenthesis, out Token? startToken);
+        if(stream.Expect(TokenType.LeftParenthesis, out Token? startToken))
+        {
+            if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Number)
+                throw new Exception("Expected identifier");
 
-        if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Number)
-            throw new Exception("Expected identifier");
+            x = ParseExpression(stream);
 
-        x = ParseExpression(stream);
+            if (!stream.Expect(TokenType.Comma, out Token? commaToken))
+                throw new Exception(", expected");
 
-        if (!stream.Expect(TokenType.Comma, out Token? commaToken))
-            throw new Exception(", expected");
+            if (stream.Peek(true, out identifier) && identifier.Type != TokenType.Number)
+                throw new Exception("Expected identifier");
 
-        if (stream.Peek(true, out identifier) && identifier.Type != TokenType.Number)
-            throw new Exception("Expected identifier");
+            y = ParseExpression(stream);
 
-        y = ParseExpression(stream);
+            if (!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
+                throw new Exception(") expected");
 
-        if (!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
-            throw new Exception(") expected");
+            return new CellNode(startToken, endToken, commaToken, x, y);
+        }
 
-        return new CellNode(startToken, endToken, commaToken, x, y);
+        throw new NullReferenceException();
     }
 }
