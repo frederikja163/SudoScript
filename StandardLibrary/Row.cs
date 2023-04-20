@@ -19,7 +19,7 @@ namespace StandardLibrary
         private static List<CellReference> InitCells(int x, int y)
         {
             List<CellReference> rowCells = new List<CellReference>();
-            for (int i = x; i <= i + 9; i++)
+            for (int i = x; i < x + 9; i++)
             {
                 rowCells.Add(new CellReference(i, y));
             }
