@@ -11,7 +11,8 @@ public static class Parser {
     public static ProgramNode ParseProgram(StreamReader reader) => ParseProgram(Tokenizer.GetStream(reader));
 
     private static ProgramNode ParseProgram(TokenStream stream) {
-        return new ProgramNode(ParseUnit(stream));
+        //return new ProgramNode(ParseUnit(stream));
+        return new ProgramNode(new UnitNode(null, ParseUnitStatements(stream), new()));
     }
     private static List<UnitStatementNode> ParseUnitStatements(TokenStream stream) {
         List<UnitStatementNode> children = new List<UnitStatementNode>();
@@ -29,12 +30,14 @@ public static class Parser {
     }
 
     private static UnitStatementNode ParseUnitStatement(TokenStream stream) {
-        if (stream.HasNext) {
-            stream.Peek(true, out Token? token);
+        // TODO: Has next includes special characters
+        if (stream.Peek(true, out Token? token))
+        {
             switch (token.Type) {
                 case TokenType.Unit:
                     return ParseUnit(stream);
                 case TokenType.Identifier:
+                case TokenType.LeftParenthesis:
                     return ParseFunctionCall(stream);
                 case TokenType.Rules:
                     return ParseRules(stream);
@@ -42,16 +45,19 @@ public static class Parser {
                     return ParseGivens(stream);
                 default:
                     throw new Exception("syntax error");
-            }
+            } 
         }
-        return new UnitNode(null, new(), new());
+        else
+        {
+            throw new NullReferenceException();
+        }
     }
 
     private static UnitNode ParseUnit(TokenStream stream) {
         List<ParameterNode> paramChildren = new List<ParameterNode>();
 
         stream.Expect(TokenType.Unit, out Token? unit);
-        Token identifier = null;
+        Token? identifier = null;
 
         if (stream.Peek(true, out Token? identifier1) && identifier1.Type == TokenType.Identifier) // left off here, tokenizer expects identifier but gets leftBrace and still moves on
         {
@@ -128,6 +134,7 @@ public static class Parser {
 
     private static FunctionCallNode ParseFunctionCall(TokenStream stream) {
         List<ArgumentNode> arguments = new List<ArgumentNode>();
+        Token unionToken = new Token(TokenType.Identifier, "union", "", 0, 0, "");
 
         if (stream.Expect(TokenType.Identifier, out Token? funcCall)) {
             stream.Expect(TokenType.Space, out _);
@@ -139,10 +146,17 @@ public static class Parser {
             return new FunctionCallNode(funcCall, arguments);
         }
 
+        if(stream.Peek(true, out Token? union) && union.Type == TokenType.LeftParenthesis) 
+        {
+            arguments.Add(ParseCell(stream));
+            return new FunctionCallNode(unionToken, arguments);
+        }
+
         throw new Exception("Expected function call");
     }
 
-    private static List<ArgumentNode> ParseArguments(TokenStream stream) {
+    private static List<ArgumentNode> ParseArguments(TokenStream stream) 
+    {
         // Strict rules on space
         List<ArgumentNode> arguments = new List<ArgumentNode>();
 
