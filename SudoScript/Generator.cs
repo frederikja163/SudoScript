@@ -8,78 +8,71 @@ public static class Generator
 {
     static Generator()
     {
-        Plugins.AddUnitFunction("Union", (object[] args) =>
+        Plugins.AddUnitFunction("Union", Union);
+    }
+
+    private static IEnumerable<Unit> Union(object[] args)
+    {
+        Unit unit = new Unit();
+        foreach (object arg in args)
         {
-            Unit unit = new Unit();
-            foreach (object arg in args)
+            if (arg is CellReference cell)
             {
-                if (arg is CellReference cell)
-                {
-                    unit.AddCell(cell);
-                }
-                else
-                {
-                    throw new Exception("Union only accepts Cells as arguments.");
-                }
+                unit.AddCell(cell);
             }
-            return unit;
-        });
+            else
+            {
+                throw new Exception("Union only accepts Cells as arguments.");
+            }
+        }
+        yield return unit;
     }
 
     // Takes the program node as input, and creates the initial symboltable (WIP),
     // and returns the Board with cells and units
     public static Board GetBoardFromAST(ProgramNode node)
     {
-        SymbolTable symbolTable = new SymbolTable(node);
-        return GenerateBoard(node, symbolTable);
+        SymbolTable symbolTable = null;
+        return GenerateBoard(node, symbolTable!);
     }
 
     // Generates the Board using lists of cells and units
     public static Board GenerateBoard(ProgramNode node, SymbolTable symbolTable)
     {
-        Dictionary<CellReference, Cell> cells = new Dictionary<CellReference, Cell>();
-        List<Unit> units = new List<Unit>();
+        List<Unit> units = GetUnitFromStatements(node.Child, symbolTable).ToList();
 
-        GetUnits(node.Child, symbolTable, cells, units);
-
-        return new Board(cells.Values.ToList(), units);
+        return new Board(symbolTable.GetCells(), units);
     }
 
     // Takes the primary node, and travels its children to find units
-    private static void GetUnits(UnitNode node, SymbolTable symbolTable, Dictionary<CellReference, Cell> cells, List<Unit> units)
+    private static void AddUnitFunction(UnitNode node, SymbolTable symbolTable)
     {
-        if (node.NameToken is Token token){
-            Plugins.AddUnitFunction(token.Match, (args) =>
-            {
-                SymbolTable table = new SymbolTable(symbolTable);
-                for (int i = 0; i < args.Length; i++)
-                {
-                    object arg = args[i];
-                    ParameterNode param = node.Parameters[i];
-                    if (arg is CellReference cell && param is ParameterCellNode paramCell)
-                    {
-                        table.Add(paramCell.X.NameToken.Match, cell.X);
-                        table.Add(paramCell.Y.NameToken.Match, cell.Y);
-                    }
-                    else if (arg is int digit && param is ParameterIdentifierNode paramDigit)
-                    {
-                        table.Add(paramDigit.NameToken.Match, digit);
-                    }
-                    else
-                    {
-                        throw new Exception($"Invalid parameter type.");
-                    }
-                }
-                GetUnitFromStatements(node, symbolTable, cells, units);
-            });
-        }
-        else
+        Plugins.AddUnitFunction(node.NameToken!.Match, (symbolTable, args) =>
         {
-            GetUnitFromStatements(node, symbolTable, cells, units);
-        }
+            SymbolTable table = new SymbolTable(symbolTable);
+            for (int i = 0; i < args.Length; i++)
+            {
+                object arg = args[i];
+                ParameterNode param = node.Parameters[i];
+                if (arg is CellReference cell && param is ParameterCellNode paramCell)
+                {
+                    table.AddDigit(paramCell.X.NameToken.Match, cell.X);
+                    table.AddDigit(paramCell.Y.NameToken.Match, cell.Y);
+                }
+                else if (arg is int digit && param is ParameterIdentifierNode paramDigit)
+                {
+                    table.AddDigit(paramDigit.NameToken.Match, digit);
+                }
+                else
+                {
+                    throw new Exception($"Invalid parameter type.");
+                }
+            }
+            return GetUnitFromStatements(node, symbolTable);
+        });
     }
 
-    private static void GetUnitFromStatements(UnitNode node, SymbolTable symbolTable, Dictionary<CellReference, Cell> cells, List<Unit> units)
+    private static IEnumerable<Unit> GetUnitFromStatements(UnitNode node, SymbolTable symbolTable)
     {
         Unit unit = new Unit();
 
@@ -88,26 +81,39 @@ public static class Generator
             switch (child)
             {
                 case UnitNode unitNode:                 // In case of a UnitNode, it recursively calls the GetUnits function
-                    GetUnits(unitNode, symbolTable, cells, units);
+                    if(unitNode.NameToken is not null)
+                    {
+                        AddUnitFunction(unitNode, symbolTable);
+                    }
+                    else
+                    {
+                        IEnumerable<Unit> units = GetUnitFromStatements(node, symbolTable);
+                        foreach (Unit newUnit in units)
+                        {
+                            yield return newUnit;
+                        }
+                    }
                     break;
                 case RulesNode rulesNode:               // A RulesNode is handled by the RulesHandler function
-                    GetRules(rulesNode, symbolTable, unit);
+                    unit.AddRule(GetRules(rulesNode, symbolTable));
                     break;
                 case GivensNode givensNode:             // Since a given is a cell with a digit, a function is made to attach a digit to the cell
-                    InsertGivenDigit(givensNode, symbolTable, cells);
+                    GetGivens(givensNode, symbolTable);
                     break;
                 case FunctionCallNode functionCallNode: // Lastly, a function is used to extract cells and units from functioncalls
-                    foreach (Unit newUnit in GetCellsAndUnitsFromFunction(functionCallNode, symbolTable, cells))
+                    foreach (Unit newUnit in GetCellsAndUnitsFromFunction(functionCallNode, symbolTable))
                     {
-                        units.Add(newUnit);
                         unit.AddUnit(newUnit);
+                        yield return newUnit;
                     }
                     break;
             }
         }
+
+        yield return unit;
     }
 
-    private static void GetRules(RulesNode node, SymbolTable symbolTable, Unit unit)
+    private static IEnumerable<IRule> GetRules(RulesNode node, SymbolTable symbolTable)
     {
         // Rules will be handled like ranges, so [1;3] will output 3 different lists of arguments
 
@@ -117,8 +123,7 @@ public static class Generator
 
             foreach(List<object> arguments in argumentCombinations)
             {
-                IRule rule = Plugins.CreateRule(child.Name.Match, arguments.ToArray());
-                unit.AddRule(rule);
+                yield return Plugins.CreateRule(child.Name.Match, arguments.ToArray());
             }
         }
     }
@@ -162,7 +167,7 @@ public static class Generator
     }
 
     // A function to retrieve cells and their given digits, from the AST
-    private static void InsertGivenDigit(GivensNode node, SymbolTable symbolTable, Dictionary<CellReference, Cell> cells)
+    private static void GetGivens(GivensNode node, SymbolTable symbolTable)
     {
         foreach (GivensStatementNode child in node.GivensStatements)
         {
@@ -181,34 +186,30 @@ public static class Generator
             {
                 throw new Exception("Givens must contain one, and only one cell.");
             }
-
+            
             Cell cell = newCells[0];
-            CellReference cellReference = (cell.X, cell.Y);
+            CellReference reference = (cell.X, cell.Y);
 
-            if (cells.TryGetValue(cellReference, out Cell? existingCell) && existingCell.IsGiven)
-            {
-                throw new Exception("Cell already contains a given digit");
-            }
-
-            cells[cellReference] = cell;
+            symbolTable.AddCell(reference, cell);
         }
     }
     
     // Extract list of cells and units
-    private static List<Unit> GetCellsAndUnitsFromFunction(FunctionCallNode node, SymbolTable symbolTable, Dictionary<CellReference, Cell> cells)
+    private static IEnumerable<Unit> GetCellsAndUnitsFromFunction(FunctionCallNode node, SymbolTable symbolTable)
     {
-        List<Unit> units = new List<Unit>();
         List<List<object>> argumentCombinations = ArgumentToArgumentCombinations(node.Arguments, symbolTable);
         foreach (List<object> arguments in argumentCombinations)
         {
-            Unit unit = Plugins.CreateUnit(node.Name.Match, arguments.ToArray());
-            units.Add(unit);
-            foreach (CellReference reference in unit.References())
+            IEnumerable<Unit> units = Plugins.CreateUnit(node.Name.Match, arguments.ToArray());
+            foreach (Unit unit in units)
             {
-                cells.TryAdd(reference, new Cell(reference.X, reference.Y));
+                foreach (CellReference reference in unit.References())
+                {
+                    symbolTable.AddCell(reference, new Cell(reference.X, reference.Y));
+                }
+                yield return unit;
             }
         }
-        return units;
     }
 
     //Converts ExpressionNode objects into list of integers.

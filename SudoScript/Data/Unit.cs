@@ -27,6 +27,11 @@ public class Unit
         _rules.Add(rule);
     }
 
+    public void AddRule(IEnumerable<IRule> rules)
+    {
+        _rules.AddRange(rules);
+    }
+
     public void AddCell(CellReference cell)
     {
         _cells.Add(cell);

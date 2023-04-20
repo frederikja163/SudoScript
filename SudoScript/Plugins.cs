@@ -6,11 +6,13 @@ namespace SudoScript;
 
 public static class Plugins
 {
-    public delegate T UnitFunction<T>(object[] arguments);
+    public delegate IEnumerable<T> UnitFunction<T>(SymbolTable symbolTable, object[] arguments);
 
     private static readonly Dictionary<string, List<TypeInfo>> _rules = new Dictionary<string, List<TypeInfo>>();
-    // This exists to not create unnessary dictionaries in Plugins.CreateRule.
+    // This exists to not create unnessary objects in Plugins.CreateRule.
     private static readonly Dictionary<string, UnitFunction<IRule>> _ruleFunctions = new Dictionary<string, UnitFunction<IRule>>();
+    private static readonly SymbolTable _emptyTable = new SymbolTable();
+
     private static readonly Dictionary<string, List<TypeInfo>> _units = new Dictionary<string, List<TypeInfo>>();
     // TODO: Take a list of UnitFunction here and loop over them to find the correct overload.
     private static readonly Dictionary<string, UnitFunction<Unit>> _unitFunctions = new Dictionary<string, UnitFunction<Unit>>();
@@ -65,11 +67,11 @@ public static class Plugins
 
     public static IRule CreateRule(string name, params object[] args)
     {
-        return Create<IRule>(_rules, _ruleFunctions, "Rule", name, args);
+        return Create<IRule>(_rules, _ruleFunctions, _emptyTable, "Rule", name, args).First();
     }
-    public static Unit CreateUnit(string name, params object[] args)
+    public static IEnumerable<Unit> CreateUnit(string name, SymbolTable symbolTable, params object[] args)
     {
-        return Create<Unit>(_units, _unitFunctions, "Unit", name, args);
+        return Create<Unit>(_units, _unitFunctions, symbolTable, "Unit", name, args);
     }
 
     public static void AddUnitFunction(string name, UnitFunction<Unit> unitFunction)
@@ -84,33 +86,38 @@ public static class Plugins
         }
     }
 
-    private static T Create<T>(
+    private static IEnumerable<T> Create<T>(
         IReadOnlyDictionary<string, List<TypeInfo>> typesByName,
         IReadOnlyDictionary<string, UnitFunction<T>> functions,
+        SymbolTable symbolTable,
         string typeName, string name, params object[] args)
     {
         if (typesByName.TryGetValue(name, out List<TypeInfo>? types))
         {
             foreach (TypeInfo type in types)
             {
+                T? obj = default(T);
                 try
                 {
-                    T? obj = (T?)Activator.CreateInstance(type, args);
-                    if (obj is not null)
-                    {
-                        return obj;
-                    }
+                    obj = (T?)Activator.CreateInstance(type, args);
                 }
                 catch
                 {
                     // Ignore.
+                }
+                if (obj is not null)
+                {
+                    yield return obj;
                 }
             }
         }
 
         if (functions.TryGetValue(name, out UnitFunction<T>? unitFunction))
         {
-            return unitFunction.Invoke(args);
+            foreach (T obj in unitFunction.Invoke(symbolTable, args))
+            {
+                yield return obj;
+            }
         }
 
 
