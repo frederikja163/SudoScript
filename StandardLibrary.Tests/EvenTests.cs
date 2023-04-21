@@ -4,10 +4,10 @@ using Tests;
 
 namespace StandardLibrary.Tests
 {
-    internal sealed class OddTests
+    internal sealed class EvenTests
     {
         [Test]
-        public void ValidOddUnitTest()
+        public void ValidEvenUnitTest()
         {
             Unit unit = new Unit(new List<CellReference>
             {
@@ -23,14 +23,13 @@ namespace StandardLibrary.Tests
                 new Odd()
             });
             Board board = Util.CreateStandardEmpty(unit);
-            board[1, 1].Digit = 9;
-            board[2, 2].Digit = 7;
-            board[3, 3].Digit = 5;
-            board[4, 4].Digit = 5;
+            board[1, 1].Digit = 8;
+            board[2, 2].Digit = 2;
+            board[3, 3].Digit = 2;
             Assert.IsTrue(unit.ValidateRules());
         }
         [Test]
-        public void InValidOddUnitTest()
+        public void InValidEvenUnitTest()
         {
             Unit unit = new Unit(new List<CellReference>
             {
@@ -47,9 +46,9 @@ namespace StandardLibrary.Tests
             });
             Board board = Util.CreateStandardEmpty(unit);
             board[1, 1].Digit = 9;
-            board[2, 2].Digit = 6;
-            board[3, 3].Digit = 5;
-            board[4, 4].Digit = 1;
+            board[2, 2].Digit = 4;
+            board[3, 3].Digit = 4;
+            board[4, 4].Digit = 2;
             Assert.IsFalse(unit.ValidateRules());
         }
     }
