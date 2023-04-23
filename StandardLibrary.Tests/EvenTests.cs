@@ -20,12 +20,13 @@ namespace StandardLibrary.Tests
                 (7, 7),
             }, new List<IRule>
             {
-                new Odd()
+                new Even()
             });
             Board board = Util.CreateStandardEmpty(unit);
             board[1, 1].Digit = 8;
-            board[2, 2].Digit = 2;
-            board[3, 3].Digit = 2;
+            board[2, 2].Digit = 4;
+            board[3, 3].Digit = 4;
+            board[4, 4].Digit = 2;
             Assert.IsTrue(unit.ValidateRules());
         }
         [Test]
@@ -42,7 +43,7 @@ namespace StandardLibrary.Tests
                 (7, 7),
             }, new List<IRule>
             {
-                new Odd()
+                new Even()
             });
             Board board = Util.CreateStandardEmpty(unit);
             board[1, 1].Digit = 9;

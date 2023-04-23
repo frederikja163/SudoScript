@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StandardLibrary
 {
-    internal class Even : IRule
+    public class Even : IRule
     {
         public bool EliminateCandidates(Unit unit)
         {
