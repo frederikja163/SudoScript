@@ -96,7 +96,7 @@ namespace StandardLibrary.Tests
             Assert.IsTrue(board[3, 3].Candidates().Contains(8));
             Assert.IsTrue(board[6, 6].Candidates().Contains(8));
 
-            board[3, 3].EliminateCandidate(8);
+            board[3, 3].EliminateCandidate(new List<int> { 8 });
             unit.EliminateCandidates();
 
             Assert.IsTrue(board[6, 6].CandidateCount == 1);
