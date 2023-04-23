@@ -17,7 +17,31 @@ namespace StandardLibrary
         internal int Number { get; private init; }
         public bool EliminateCandidates(Unit unit)
         {
-            throw new NotImplementedException();
+            int numCandidates = 0;
+            foreach (Cell cell in unit.Cells())
+            {
+                if (cell.Candidates().Contains(Number))
+                {
+                    numCandidates++;
+                }
+                if (numCandidates > 1)
+                {
+                    return false;
+                }
+
+            }
+            if (numCandidates == 1)
+            {
+                foreach (Cell cell in unit.Cells())
+                {
+                    if (cell.Candidates().Contains(Number))
+                    {
+                        cell.EliminateCandidate(a => a != Number);
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         public bool ValidateRules(Unit unit)
