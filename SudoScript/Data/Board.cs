@@ -52,6 +52,7 @@ public sealed class Board: ICloneable
                 return false;
             }
         }
+
         return true;
     }
 
