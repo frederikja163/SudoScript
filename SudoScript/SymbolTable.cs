@@ -5,8 +5,8 @@ namespace SudoScript;
 
 public sealed class SymbolTable 
 {
-    private Dictionary<string, int> _digitTable;
-    private Dictionary<CellReference, Cell> _cellTable;
+    private readonly Dictionary<string, int> _digitTable;
+    private readonly Dictionary<CellReference, Cell> _cellTable;
 
     public SymbolTable()
     {

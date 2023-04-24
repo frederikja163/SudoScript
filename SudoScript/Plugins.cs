@@ -67,11 +67,11 @@ public static class Plugins
 
     public static IRule CreateRule(string name, params object[] args)
     {
-        return Create<IRule>(_rules, _ruleFunctions, _emptyTable, "Rule", name, args).First();
+        return Create<IRule>(_rules, _ruleFunctions, _emptyTable, name, args).First();
     }
     public static IEnumerable<Unit> CreateUnit(string name, SymbolTable symbolTable, params object[] args)
     {
-        return Create<Unit>(_units, _unitFunctions, symbolTable, "Unit", name, args);
+        return Create<Unit>(_units, _unitFunctions, symbolTable, name, args);
     }
 
     public static void AddUnitFunction(string name, UnitFunction<Unit> unitFunction)
@@ -89,8 +89,7 @@ public static class Plugins
     private static IEnumerable<T> Create<T>(
         IReadOnlyDictionary<string, List<TypeInfo>> typesByName,
         IReadOnlyDictionary<string, UnitFunction<T>> functions,
-        SymbolTable symbolTable,
-        string typeName, string name, params object[] args)
+        SymbolTable symbolTable, string name, params object[] args)
     {
         bool foundUnits = false;
 
