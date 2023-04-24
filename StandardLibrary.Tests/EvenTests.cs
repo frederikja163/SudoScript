@@ -30,7 +30,7 @@ namespace StandardLibrary.Tests
             Assert.IsTrue(unit.ValidateRules());
         }
         [Test]
-        public void InValidEvenUnitTest()
+        public void InvalidEvenUnitTest()
         {
             Unit unit = new Unit(new List<CellReference>
             {
