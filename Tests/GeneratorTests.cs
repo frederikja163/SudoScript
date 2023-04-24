@@ -1,11 +1,104 @@
 using NUnit.Framework;
 using SudoScript.Ast;
 using SudoScript;
+using System.Linq.Expressions;
 
 namespace Tests;
 
 internal sealed class GeneratorTests
 {
+    private static Token Token(string match = "")
+    {
+        return new Token((TokenType)(-1), match, "", 0, 0, "");
+    }
+
+    private static Token Token(TokenType token, string match = "")
+    {
+        return new Token(token, match, "", 0, 0, "");
+    }
+
+    private static ProgramNode Program(UnitNode node)
+    {
+        return new ProgramNode(node);
+    }
+    
+    private static UnitNode Unit(string name, List<UnitStatementNode> statements, List<ParameterNode> parameter)
+    {
+        return new UnitNode(Token(name), statements, parameter);
+    }
+
+    private static List<UnitStatementNode> Statements(params UnitStatementNode[] statements)
+    {
+        return statements.ToList();
+    }
+
+    private static GivensNode Givens(params GivensStatementNode[] givens)
+    {
+        return new GivensNode(givens.ToList());
+    }
+
+    private static GivensStatementNode Given(CellNode cell, ExpressionNode digit)
+    {
+        return new GivensStatementNode(cell, digit);
+    }
+
+    private static RulesNode Rules(params FunctionCallNode[] functions)
+    {
+        return new RulesNode(Token(), Token(), Token(), functions.ToList());
+    }
+
+    private static FunctionCallNode Function(string name, params ArgumentNode[] arguments)
+    {
+        return new FunctionCallNode(Token(name), arguments.ToList());
+    }
+
+    private static List<ParameterNode> Parameters(params ParameterNode[] parameters)
+    {
+        return parameters.ToList();
+    }
+
+    private static ParameterCellNode ParamCell(string left, string right)
+    {
+        return new ParameterCellNode(ParamIdentifier(left), ParamIdentifier(right));
+    }
+
+    private static ParameterIdentifierNode ParamIdentifier(string name)
+    {
+        return new ParameterIdentifierNode(Token(name));
+    }
+
+    private static CellNode Cell(ExpressionNode x, ExpressionNode y)
+    {
+        return new CellNode(Token(), Token(), Token(), x, y);
+    }
+
+    private static RangeNode Range(ExpressionNode min, ExpressionNode max, bool isMinInclusive, bool isMaxInclusive)
+    {
+        return new RangeNode(Token(TokenType.LeftBracket), 
+            Token(TokenType.RightBracket), Token(TokenType.Semicolon), 
+            min, max, isMinInclusive, isMaxInclusive); 
+    }
+    
+    private static ValueNode Value(int digit)
+    {
+        return new ValueNode(Token(TokenType.Number, $"{digit}"));
+    }
+    
+    private static BinaryNode Binary(ExpressionNode left, BinaryType type, ExpressionNode right)
+    {
+        return new BinaryNode(Token(), type, left, right);
+    }
+
+    private static IdentifierNode Identifier(string name)
+    {
+        return new IdentifierNode(Token(name));
+    }
+
+    private static UnaryNode Unary(UnaryType unaryType, ExpressionNode expression)
+    {
+        return new UnaryNode(Token(), unaryType, expression);
+    }
+
     [Test]
     public void GenerateBoard() 
     {

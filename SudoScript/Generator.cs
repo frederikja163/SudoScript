@@ -11,7 +11,7 @@ public static class Generator
         Plugins.AddUnitFunction("Union", Union);
     }
 
-    private static IEnumerable<Unit> Union(object[] args)
+    private static IEnumerable<Unit> Union(SymbolTable table, object[] args)
     {
         Unit unit = new Unit();
         foreach (object arg in args)
@@ -200,7 +200,7 @@ public static class Generator
         List<List<object>> argumentCombinations = ArgumentToArgumentCombinations(node.Arguments, symbolTable);
         foreach (List<object> arguments in argumentCombinations)
         {
-            IEnumerable<Unit> units = Plugins.CreateUnit(node.Name.Match, arguments.ToArray());
+            IEnumerable<Unit> units = Plugins.CreateUnit(node.Name.Match, symbolTable, arguments.ToArray());
             foreach (Unit unit in units)
             {
                 foreach (CellReference reference in unit.References())
