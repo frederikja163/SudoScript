@@ -6,8 +6,16 @@ namespace SudoScript;
 
 public static class Plugins
 {
+    public delegate IEnumerable<T> UnitFunction<T>(SymbolTable symbolTable, object[] arguments);
+
     private static readonly Dictionary<string, List<TypeInfo>> _rules = new Dictionary<string, List<TypeInfo>>();
+    // This exists to not create unnessary objects in Plugins.CreateRule.
+    private static readonly Dictionary<string, UnitFunction<IRule>> _ruleFunctions = new Dictionary<string, UnitFunction<IRule>>();
+    private static readonly SymbolTable _emptyTable = new SymbolTable();
+
     private static readonly Dictionary<string, List<TypeInfo>> _units = new Dictionary<string, List<TypeInfo>>();
+    // TODO: Take a list of UnitFunction here and loop over them to find the correct overload.
+    private static readonly Dictionary<string, UnitFunction<Unit>> _unitFunctions = new Dictionary<string, UnitFunction<Unit>>();
 
     static Plugins()
     {
@@ -59,41 +67,77 @@ public static class Plugins
 
     public static IRule CreateRule(string name, params object[] args)
     {
-        return Create<IRule>(_rules, "Rule", name, args);
+        return Create<IRule>(_rules, _ruleFunctions, _emptyTable, name, args).First();
     }
-    public static Unit CreateUnit(string name, params object[] args)
+    public static IEnumerable<Unit> CreateUnit(string name, SymbolTable symbolTable, params object[] args)
     {
-        return Create<Unit>(_units, "Unit", name, args);
+        return Create<Unit>(_units, _unitFunctions, symbolTable, name, args);
     }
 
-    private static T Create<T>(IReadOnlyDictionary<string, List<TypeInfo>> typesByName, string typeName, string name, params object[] args)
+    public static void AddUnitFunction(string name, UnitFunction<Unit> unitFunction)
     {
-        if (!typesByName.TryGetValue(name, out List<TypeInfo>? types))
+        if (!_unitFunctions.ContainsKey(name) && !_units.ContainsKey(name))
         {
-            // TODO: Add fuzzy search here, to find the closest matching rule and output the name of that.
-            throw new Exception($"{typeName} '{name}' doesn't exist.");
+            _unitFunctions.Add(name, unitFunction);
         }
-
-        foreach (TypeInfo type in types)
+        else
         {
-            try
+            throw new Exception($"Unit function {name} already defined");
+        }
+    }
+
+    private static IEnumerable<T> Create<T>(
+        IReadOnlyDictionary<string, List<TypeInfo>> typesByName,
+        IReadOnlyDictionary<string, UnitFunction<T>> functions,
+        SymbolTable symbolTable, string name, params object[] args)
+    {
+        bool foundUnits = false;
+
+        if (typesByName.TryGetValue(name, out List<TypeInfo>? types))
+        {
+            foreach (TypeInfo type in types)
             {
-                T? obj = (T?)Activator.CreateInstance(type, args);
+                T? obj = default(T);
+                try
+                {
+                    obj = (T?)Activator.CreateInstance(type, args);
+                }
+                catch
+                {
+                    // Ignore.
+                }
                 if (obj is not null)
                 {
-                    return obj;
+                    yield return obj;
+                    foundUnits = true;
                 }
             }
-            catch
+        }
+
+        if (foundUnits)
+        {
+            yield break;
+        }
+
+        if (functions.TryGetValue(name, out UnitFunction<T>? unitFunction))
+        {
+            foreach (T obj in unitFunction.Invoke(symbolTable, args))
             {
-                // Ignore.
+                yield return obj;
+                foundUnits = true;
             }
+        }
+
+        if (foundUnits)
+        {
+            yield break;
         }
 
         IEnumerable<string> argStrings = args.Select(x =>
-            x is int ? "Digit" : x is Cell ? "Cell" : "None");
+            x is int ? "Digit" : x is CellReference ? "Cell" : "None");
         string argList = string.Join(" ", argStrings);
         string functionCall = name + " " + argList;
+        // TODO: Add fuzzy search to search fo closest matching function name.
         throw new Exception($"Found no matching function interface for function call '{functionCall}'");
     }
 }

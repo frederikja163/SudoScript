@@ -27,9 +27,19 @@ public class Unit
         _rules.Add(rule);
     }
 
+    public void AddRule(IEnumerable<IRule> rules)
+    {
+        _rules.AddRange(rules);
+    }
+
     public void AddCell(CellReference cell)
     {
         _cells.Add(cell);
+    }
+
+    public void AddUnit(Unit unit)
+    {
+        _cells.AddRange(unit._cells);
     }
 
     public Board? Board { get; internal set; }
@@ -45,6 +55,16 @@ public class Unit
         {
             yield return Board[cell.X, cell.Y];
         }
+    }
+
+    public IEnumerable<CellReference> References()
+    {
+        return _cells;
+    }
+
+    public IEnumerable<IRule> Rules()
+    {
+        return _rules;
     }
 
     public bool EliminateCandidates()
