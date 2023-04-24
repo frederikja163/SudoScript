@@ -32,7 +32,7 @@ public static class Generator
     // and returns the Board with cells and units
     public static Board GetBoardFromAST(ProgramNode node)
     {
-        SymbolTable symbolTable = null;
+        SymbolTable symbolTable = new SymbolTable();
         return GenerateBoard(node, symbolTable!);
     }
 

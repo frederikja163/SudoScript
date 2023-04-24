@@ -2,6 +2,7 @@ using NUnit.Framework;
 using SudoScript.Ast;
 using SudoScript;
 using System.Linq.Expressions;
+using SudoScript.Data;
 
 namespace Tests;
 
@@ -21,8 +22,13 @@ internal sealed class GeneratorTests
     {
         return new ProgramNode(node);
     }
-    
-    private static UnitNode Unit(string name, List<UnitStatementNode> statements, List<ParameterNode> parameter)
+
+    private static UnitNode Unit(params UnitStatementNode[] statements)
+    {
+        return new UnitNode(null, statements.ToList(), new List<ParameterNode>());
+    }
+
+    private static UnitNode Unit(string name, List<ParameterNode> parameter, List<UnitStatementNode> statements)
     {
         return new UnitNode(Token(name), statements, parameter);
     }
@@ -72,6 +78,11 @@ internal sealed class GeneratorTests
         return new CellNode(Token(), Token(), Token(), x, y);
     }
 
+    private static CellNode Cell(int x, int y)
+    {
+        return new CellNode(Token(), Token(), Token(), Value(x), Value(y));
+    }
+
     private static RangeNode Range(ExpressionNode min, ExpressionNode max, bool isMinInclusive, bool isMaxInclusive)
     {
         return new RangeNode(Token(TokenType.LeftBracket), 
@@ -100,29 +111,47 @@ internal sealed class GeneratorTests
     }
 
     [Test]
-    public void GenerateBoard() 
+    public void UnionTest()
+    {
+        /*
+         * (1, 1) (2, 2)
+         * */
+
+        ProgramNode program = Program(
+            Unit(
+                Function("Union", Cell(1,1), Cell(2, 2))
+                )
+        );
+
+        Board board = Generator.GetBoardFromAST(program);
+
+        Assert.That(board.Units.Count, Is.EqualTo(2));
+    }
+
+    [Test]
+    public void GenerateBoard()
     {
         // Arrange
         var program = new ProgramNode(
             new UnitNode(
                 null,
-                new List<UnitStatementNode>() 
+                new List<UnitStatementNode>()
                 {
                     new UnitNode(
                         null,
-                        new List<UnitStatementNode>() 
+                        new List<UnitStatementNode>()
                         {
                             new GivensNode(
-                                new List<GivensStatementNode>() 
+                                new List<GivensStatementNode>()
                                 {
                                     new GivensStatementNode( // (9, 5) 6
                                         new CellNode ( // (9, 5)
-                                            new Token(0, "", "", 0, 0, ""), 
-                                            new Token(0, "", "", 0, 0, ""), 
-                                            new Token(0, "", "", 0, 0, ""), 
+                                            new Token(0, "", "", 0, 0, ""),
+                                            new Token(0, "", "", 0, 0, ""),
+                                            new Token(0, "", "", 0, 0, ""),
                                             new BinaryNode(
-                                                new Token(TokenType.Plus, "", "", 0, 0, ""), 
-                                                BinaryType.Plus, 
+                                                new Token(TokenType.Plus, "", "", 0, 0, ""),
+                                                BinaryType.Plus,
                                                 new ValueNode(
                                                     new Token(TokenType.Number, "8", "", 0, 0, "")
                                                 ),
@@ -133,23 +162,23 @@ internal sealed class GeneratorTests
                                             new ValueNode(
                                                 new Token(TokenType.Number, "5", "", 0, 0, "")
                                             )
-                                        ), 
+                                        ),
                                         new ValueNode(
                                             new Token(TokenType.Number, "6", "", 0, 0, "")
                                         )
                                     ),
                                     new GivensStatementNode ( // (3, 6) 2
                                         new CellNode ( // (3, 6)
-                                            new Token(0, "", "", 0, 0, ""), 
-                                            new Token(0, "", "", 0, 0, ""), 
-                                            new Token(0, "", "", 0, 0, ""), 
+                                            new Token(0, "", "", 0, 0, ""),
+                                            new Token(0, "", "", 0, 0, ""),
+                                            new Token(0, "", "", 0, 0, ""),
                                             new ValueNode(
                                                 new Token(TokenType.Number, "3", "", 0, 0, "")
                                             ),
                                             new ValueNode(
                                                 new Token(TokenType.Number, "6", "", 0, 0, "")
                                             )
-                                        ), 
+                                        ),
                                         new ValueNode(
                                             new Token(TokenType.Number, "2", "", 0, 0, "")
                                         )
@@ -158,12 +187,12 @@ internal sealed class GeneratorTests
                             ),
                             new FunctionCallNode(
                                 new Token(TokenType.Identifier, "Union", "", 0, 0, ""),
-                                new List<ArgumentNode> 
+                                new List<ArgumentNode>
                                 {
                                     new CellNode ( // ([2 ; 4], 7)
-                                        new Token(0, "", "", 0, 0, ""), 
-                                        new Token(0, "", "", 0, 0, ""), 
-                                        new Token(0, "", "", 0, 0, ""), 
+                                        new Token(0, "", "", 0, 0, ""),
+                                        new Token(0, "", "", 0, 0, ""),
+                                        new Token(0, "", "", 0, 0, ""),
                                         new RangeNode(
                                             new Token(TokenType.LeftBracket, "", "", 0, 0, ""),
                                             new Token(TokenType.RightBracket, "", "", 0, 0, ""),
@@ -236,7 +265,7 @@ internal sealed class GeneratorTests
                         new List<ParameterNode>()
                     )
                 },
-                new List<ParameterNode>() 
+                new List<ParameterNode>()
             )
         );
 

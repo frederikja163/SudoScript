@@ -110,14 +110,14 @@ internal sealed class PluginTests
     [Test]
     public void CreateEmptyUnitTest()
     {
-        Unit rule = Plugins.CreateUnit("TestUnit1");
+        Unit rule = Plugins.CreateUnit("TestUnit1", new SymbolTable()).First();
         Assert.IsInstanceOf<TestUnit1>(rule);
     }
 
     [Test]
     public void CreateUnitWithCellAndDigitTest()
     {
-        Unit unit = Plugins.CreateUnit("TestUnit2", new CellReference(1, 2), 3);
+        Unit unit = Plugins.CreateUnit("TestUnit2", new SymbolTable(), new CellReference(1, 2), 3).First();
         Assert.IsInstanceOf<TestUnit2>(unit);
         TestUnit2 unit2 = (TestUnit2)unit;
         Assert.That(unit2.Cell.X, Is.EqualTo(1));
@@ -128,7 +128,7 @@ internal sealed class PluginTests
     [Test]
     public void CreateUnitWithDigitAndCellTest()
     {
-        Unit unit = Plugins.CreateUnit("TestUnit2", 3, new CellReference(1, 2));
+        Unit unit = Plugins.CreateUnit("TestUnit2", new SymbolTable(), 3, new CellReference(1, 2)).First();
         Assert.IsInstanceOf<TestUnit2>(unit);
         TestUnit2 unit2 = (TestUnit2)unit;
         Assert.That(unit2.Cell.X, Is.EqualTo(1));
