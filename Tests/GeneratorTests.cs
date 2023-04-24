@@ -115,7 +115,7 @@ internal sealed class GeneratorTests
     {
         /*
          * (1, 1) (2, 2)
-         * */
+         */
 
         ProgramNode program = Program(
             Unit(
@@ -126,163 +126,228 @@ internal sealed class GeneratorTests
         Board board = Generator.GetBoardFromAST(program);
 
         Assert.That(board.Units.Count, Is.EqualTo(2));
+        Assert.That(board.Units.All(u => u.Cells().Count() == 2), Is.True);
     }
 
     [Test]
-    public void GenerateBoard()
+    public void UnitWithMultipleCellsTest()
     {
-        // Arrange
-        var program = new ProgramNode(
-            new UnitNode(
-                null,
-                new List<UnitStatementNode>()
-                {
-                    new UnitNode(
-                        null,
-                        new List<UnitStatementNode>()
-                        {
-                            new GivensNode(
-                                new List<GivensStatementNode>()
-                                {
-                                    new GivensStatementNode( // (9, 5) 6
-                                        new CellNode ( // (9, 5)
-                                            new Token(0, "", "", 0, 0, ""),
-                                            new Token(0, "", "", 0, 0, ""),
-                                            new Token(0, "", "", 0, 0, ""),
-                                            new BinaryNode(
-                                                new Token(TokenType.Plus, "", "", 0, 0, ""),
-                                                BinaryType.Plus,
-                                                new ValueNode(
-                                                    new Token(TokenType.Number, "8", "", 0, 0, "")
-                                                ),
-                                                new ValueNode(
-                                                    new Token(TokenType.Number, "1", "", 0, 0, "")
-                                                )
-                                            ),
-                                            new ValueNode(
-                                                new Token(TokenType.Number, "5", "", 0, 0, "")
-                                            )
-                                        ),
-                                        new ValueNode(
-                                            new Token(TokenType.Number, "6", "", 0, 0, "")
-                                        )
-                                    ),
-                                    new GivensStatementNode ( // (3, 6) 2
-                                        new CellNode ( // (3, 6)
-                                            new Token(0, "", "", 0, 0, ""),
-                                            new Token(0, "", "", 0, 0, ""),
-                                            new Token(0, "", "", 0, 0, ""),
-                                            new ValueNode(
-                                                new Token(TokenType.Number, "3", "", 0, 0, "")
-                                            ),
-                                            new ValueNode(
-                                                new Token(TokenType.Number, "6", "", 0, 0, "")
-                                            )
-                                        ),
-                                        new ValueNode(
-                                            new Token(TokenType.Number, "2", "", 0, 0, "")
-                                        )
-                                    )
-                                }
-                            ),
-                            new FunctionCallNode(
-                                new Token(TokenType.Identifier, "Union", "", 0, 0, ""),
-                                new List<ArgumentNode>
-                                {
-                                    new CellNode ( // ([2 ; 4], 7)
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new RangeNode(
-                                            new Token(TokenType.LeftBracket, "", "", 0, 0, ""),
-                                            new Token(TokenType.RightBracket, "", "", 0, 0, ""),
-                                            new Token(TokenType.Semicolon, "", "", 0, 0, ""),
-                                            new ValueNode(
-                                                new Token(TokenType.Number, "2", "", 0, 0, "")
-                                                ),
-                                            new ValueNode(
-                                                new Token(TokenType.Number, "4", "", 0, 0, "")
-                                                ),
-                                            true,
-                                            true
-                                        ),
-                                        new ValueNode(
-                                            new Token(TokenType.Number, "7", "", 0, 0, "")
-                                        )
-                                    ),
-                                    new CellNode ( // (2, 4)
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new ValueNode(
-                                            new Token(TokenType.Number, "2", "", 0, 0, "")
-                                        ),
-                                        new ValueNode(
-                                            new Token(TokenType.Number, "4", "", 0, 0, "")
-                                        )
-                                    )
-                                }
-                            ),
-                             new FunctionCallNode(
-                                new Token(TokenType.Identifier, "Union", "", 0, 0, ""),
-                                new List<ArgumentNode>
-                                {
-                                    new CellNode ( // ([5 ; 8], 2)
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new RangeNode(
-                                            new Token(TokenType.LeftBracket, "", "", 0, 0, ""),
-                                            new Token(TokenType.RightBracket, "", "", 0, 0, ""),
-                                            new Token(TokenType.Semicolon, "", "", 0, 0, ""),
-                                            new ValueNode(
-                                                new Token(TokenType.Number, "5", "", 0, 0, "")
-                                                ),
-                                            new ValueNode(
-                                                new Token(TokenType.Number, "8", "", 0, 0, "")
-                                                ),
-                                            false,
-                                            false
-                                        ),
-                                        new ValueNode(
-                                            new Token(TokenType.Number, "2", "", 0, 0, "")
-                                        )
-                                    ),
-                                    new CellNode ( // (9, 2)
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new Token(0, "", "", 0, 0, ""),
-                                        new ValueNode(
-                                            new Token(TokenType.Number, "9", "", 0, 0, "")
-                                        ),
-                                        new ValueNode(
-                                            new Token(TokenType.Number, "2", "", 0, 0, "")
-                                        )
-                                    )
-                                }
-                            )
-                        },
-                        new List<ParameterNode>()
-                    )
-                },
-                new List<ParameterNode>()
+        /* 
+         * (1,1)
+         * (2,2)
+         */
+
+        ProgramNode program = Program(
+            Unit(
+                Function("Union", Cell(1, 1)),
+                Function("Union", Cell(2, 2))
             )
         );
 
-        // Act
-        var board = Generator.GetBoardFromAST(program);
+        Board board = Generator.GetBoardFromAST(program);
 
-        // Assert
-        Console.WriteLine(board.ToString());
-        Assert.That(board.Units.Count, Is.EqualTo(5));
-        Assert.That(board[9, 5].Digit, Is.EqualTo(6));
-        Assert.That(board[3, 6].Digit, Is.EqualTo(2));
-        Assert.That(board[2, 7].Digit, Is.EqualTo(0));
-        Assert.That(board[3, 7].Digit, Is.EqualTo(0));
-        Assert.That(board[4, 7].Digit, Is.EqualTo(0));
-        Assert.That(board[2, 4].Digit, Is.EqualTo(0));
-        Assert.That(board[6, 2].Digit, Is.EqualTo(0));
-        Assert.That(board[7, 2].Digit, Is.EqualTo(0));
+        Assert.That(board.Units.Count, Is.EqualTo(3));
 
+        Unit[] units = board.Units.OrderBy(u => u.Cells().Count()).ToArray();
+        Assert.That(units[0].Cells().Count(), Is.EqualTo(1));
+        Assert.That(units[1].Cells().Count(), Is.EqualTo(1));
+        Assert.That(units[2].Cells().Count(), Is.EqualTo(2));
+    }
+
+    [TestCase(BinaryType.Plus, 5)]
+    [TestCase(BinaryType.Minus, 1)]
+    [TestCase(BinaryType.Multiply, 6)]
+    [TestCase(BinaryType.Mod, 1)]
+    [TestCase(BinaryType.Power, 9)]
+    public void BinaryOperatorTest(BinaryType type, int expected)
+    {
+        /* 
+         * (3{BinaryType}2,1)
+         */
+
+        ProgramNode program = Program(
+            Unit(
+                Function("Union", Cell(
+                        Binary(Value(3), type, Value(2)), Value(1)
+                    )
+                )
+            )
+        );
+
+        Board board = Generator.GetBoardFromAST(program);
+
+        Cell cell = board.Cells().First();
+        Assert.That(cell.X, Is.EqualTo(expected));
+    }
+
+    [TestCase(UnaryType.Minus, -2)]
+    [TestCase(UnaryType.Plus, 2)]
+    public void UnaryOperatorTest(UnaryType type, int expected)
+    {
+        /* 
+         * ({UnaryType}2,1)
+         */
+
+        ProgramNode program = Program(
+            Unit(
+                Function("Union", Cell(
+                        Unary(type, Value(2)), Value(1)
+                    )
+                )
+            )
+        );
+
+        Board board = Generator.GetBoardFromAST(program);
+
+        Cell cell = board.Cells().First();
+        Assert.That(cell.X, Is.EqualTo(expected));
+    }
+
+    [TestCase(false, false, 1)]
+    [TestCase(false, true, 2)]
+    [TestCase(true, false, 2)]
+    [TestCase(true, true, 3)]
+    public void RangeInclusivityTest(bool isMinInclusive, bool isMaxInclusive, int expected)
+    {
+        /* 
+         * ([1;3],1)
+         */
+
+        ProgramNode program = Program(
+            Unit(
+                Function("Union", Cell(
+                        Range(Value(1), Value(3), isMinInclusive, isMaxInclusive), Value(1)
+                    )
+                )
+            )
+        );
+
+        Board board = Generator.GetBoardFromAST(program);
+        Assert.That(board.Cells().Count(), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void RangeTest()
+    {
+        /* 
+         * ([1;3],1)
+         */
+        ProgramNode program = Program(
+            Unit(
+                Function("Union", Cell(
+                        Range(Value(1), Value(3), true, true), Value(1)
+                    )
+                )
+            )
+        );
+
+        Board board = Generator.GetBoardFromAST(program);
+        Assert.DoesNotThrow(() => { Cell c = board[1, 1]; });
+        Assert.DoesNotThrow(() => { Cell c = board[2, 1]; });
+        Assert.DoesNotThrow(() => { Cell c = board[3, 1]; });
+    }
+
+    [Test]
+    public void GivenTest()
+    {
+        /*
+         * Givens {
+         *  (1,1) 2
+         *  (2,2) 9
+         * }
+         */
+        ProgramNode program = Program(
+                Unit(
+                        Givens(Given(Cell(1,1), Value(2))),
+                        Givens(Given(Cell(2,2), Value(9)))
+                    )
+                );
+
+        Board board = Generator.GetBoardFromAST(program);
+        Assert.That(board[1, 1].IsGiven, Is.True);
+        Assert.That(board[1, 1].Digit, Is.EqualTo(2));
+        Assert.That(board[1, 1].CandidateCount, Is.EqualTo(1));
+
+        Assert.That(board[2, 2].IsGiven, Is.True);
+        Assert.That(board[2, 2].Digit, Is.EqualTo(9));
+        Assert.That(board[2, 2].CandidateCount, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void RulesNoParametersTest()
+    {
+        /*
+         * Rules {
+         *  TestRule1
+         * }
+         */
+        ProgramNode program = Program(
+                Unit(
+                    Rules(Function(nameof(TestRule1)))
+                    )
+                );
+
+        Board board = Generator.GetBoardFromAST(program);
+        Assert.That(board.Units.First().Rules().Count(), Is.EqualTo(1));
+        Assert.IsInstanceOf<TestRule1>(board.Units.First().Rules().First());
+    }
+
+    [Test]
+    public void RulesWithParametersTest()
+    {
+        /*
+         * Rules {
+         *  TestRule2 (1,2) 3
+         * }
+         */
+        ProgramNode program = Program(
+                Unit(
+                    Rules(Function(nameof(TestRule2), Cell(1, 2), Value(3)))
+                    )
+                );
+
+        Board board = Generator.GetBoardFromAST(program);
+        Assert.That(board.Units.First().Rules().Count(), Is.EqualTo(1));
+        Assert.IsInstanceOf<TestRule2>(board.Units.First().Rules().First());
+        TestRule2 rule = (TestRule2)board.Units.First().Rules().First();
+        Assert.That(rule.Cell.X, Is.EqualTo(1));
+        Assert.That(rule.Cell.Y, Is.EqualTo(2));
+        Assert.That(rule.Digit, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void UnitFunctionsNoParametersFromPluginsTest()
+    {
+        /*
+         * UnitTest1
+         */
+        ProgramNode program = Program(
+                Unit(
+                    Function(nameof(TestUnit1))
+                    )
+                );
+
+        Board board = Generator.GetBoardFromAST(program);
+        Assert.IsInstanceOf<TestUnit1>(board.Units.First());
+    }
+
+    [Test]
+    public void UnitFunctionsWithParametersFromPluginsTest()
+    {
+        /*
+         * UnitTest2 (4,5) 6
+         */
+        ProgramNode program = Program(
+                Unit(
+                    Function(nameof(TestUnit2), Cell(4, 5), Value(6))
+                    )
+                );
+
+        Board board = Generator.GetBoardFromAST(program);
+        Assert.IsInstanceOf<TestUnit2>(board.Units.First());
+        TestUnit2 unit = (TestUnit2)board.Units.First();
+        Assert.That(unit.Cell.X, Is.EqualTo(4));
+        Assert.That(unit.Cell.Y, Is.EqualTo(5));
+        Assert.That(unit.Digit, Is.EqualTo(6));
     }
 }

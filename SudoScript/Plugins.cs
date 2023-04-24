@@ -92,6 +92,8 @@ public static class Plugins
         SymbolTable symbolTable,
         string typeName, string name, params object[] args)
     {
+        bool foundUnits = false;
+
         if (typesByName.TryGetValue(name, out List<TypeInfo>? types))
         {
             foreach (TypeInfo type in types)
@@ -108,8 +110,14 @@ public static class Plugins
                 if (obj is not null)
                 {
                     yield return obj;
+                    foundUnits = true;
                 }
             }
+        }
+
+        if (foundUnits)
+        {
+            yield break;
         }
 
         if (functions.TryGetValue(name, out UnitFunction<T>? unitFunction))
@@ -117,12 +125,17 @@ public static class Plugins
             foreach (T obj in unitFunction.Invoke(symbolTable, args))
             {
                 yield return obj;
+                foundUnits = true;
             }
         }
 
+        if (foundUnits)
+        {
+            yield break;
+        }
 
         IEnumerable<string> argStrings = args.Select(x =>
-            x is int ? "Digit" : x is Cell ? "Cell" : "None");
+            x is int ? "Digit" : x is CellReference ? "Cell" : "None");
         string argList = string.Join(" ", argStrings);
         string functionCall = name + " " + argList;
         // TODO: Add fuzzy search to search fo closest matching function name.

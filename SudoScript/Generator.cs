@@ -132,6 +132,12 @@ public static class Generator
     {
         List<List<object>> argumentCombinations = new List<List<object>>();
 
+        // If there are no arguments, instead call function with only one argument.
+        if (argumentNodes.Count == 0)
+        {
+            argumentCombinations.Add(new List<object>());
+        }
+
         foreach (ArgumentNode argument in argumentNodes)
         {
             List<object> arguments = new List<object>();

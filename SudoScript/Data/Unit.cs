@@ -62,6 +62,11 @@ public class Unit
         return _cells;
     }
 
+    public IEnumerable<IRule> Rules()
+    {
+        return _rules;
+    }
+
     public bool EliminateCandidates()
     {
         bool somethingEliminated = false;
