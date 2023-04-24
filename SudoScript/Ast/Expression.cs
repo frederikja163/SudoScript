@@ -1,4 +1,4 @@
-﻿namespace SudoScript.Ast;
+namespace SudoScript.Ast;
 
 public abstract class ExpressionNode : ArgumentNode
 {
