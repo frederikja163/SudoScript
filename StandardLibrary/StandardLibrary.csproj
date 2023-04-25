@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SudoScript\SudoScript.csproj" />
+    <ProjectReference Include="..\SudoScript.Core\SudoScript.Core.csproj" />
   </ItemGroup>
 
 </Project>
