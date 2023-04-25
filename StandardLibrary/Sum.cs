@@ -59,7 +59,7 @@ namespace StandardLibrary
         {
             Cell currentCell = emptyCells[0];
             emptyCells.RemoveAt(0);
-            if (emptyCells.Count == 0) //End recursivity if there are no more cells
+            if (emptyCells.Count == 0) //End recursion if there are no more cells
             {
                 foreach (int candidate in currentCell.Candidates())
                 {
@@ -70,7 +70,7 @@ namespace StandardLibrary
                 }
                 return false;
             }
-            foreach (int candidate in currentCell.Candidates()) //SudoScript.Core.Test each candidate
+            foreach (int candidate in currentCell.Candidates()) // Test each candidate
             {
                 if (runningSum + candidate > remainder) 
                 { 
