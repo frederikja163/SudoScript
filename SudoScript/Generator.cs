@@ -28,7 +28,7 @@ public static class Generator
         yield return unit;
     }
 
-    // Takes the program node as input, and creates the initial symboltable (WIP),
+    // Takes the program node as input, and creates the initial symboltable,
     // and returns the Board with cells and units
     public static Board GetBoardFromAST(ProgramNode node)
     {
@@ -80,7 +80,8 @@ public static class Generator
         {
             switch (child)
             {
-                case UnitNode unitNode:                 // In case of a UnitNode, it recursively calls the GetUnits function
+                case UnitNode unitNode:                 
+                    // In case of a UnitNode, it recursively calls the GetUnits function
                     if(unitNode.NameToken is not null)
                     {
                         AddUnitFunction(unitNode, symbolTable);
@@ -94,13 +95,16 @@ public static class Generator
                         }
                     }
                     break;
-                case RulesNode rulesNode:               // A RulesNode is handled by the RulesHandler function
+                case RulesNode rulesNode:               
+                    // A RulesNode is handled by the RulesHandler function
                     unit.AddRule(GetRules(rulesNode, symbolTable));
                     break;
-                case GivensNode givensNode:             // Since a given is a cell with a digit, a function is made to attach a digit to the cell
+                case GivensNode givensNode:             
+                    // Since a given is a cell with a digit, a function is made to attach a digit to the cell
                     GetGivens(givensNode, symbolTable);
                     break;
-                case FunctionCallNode functionCallNode: // Lastly, a function is used to extract cells and units from functioncalls
+                case FunctionCallNode functionCallNode: 
+                    // Lastly, a function is used to extract cells and units from functioncalls
                     foreach (Unit newUnit in GetCellsAndUnitsFromFunction(functionCallNode, symbolTable))
                     {
                         unit.AddUnit(newUnit);
