@@ -1,10 +1,4 @@
-﻿using SudoScript.Data;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SudoScript.Core.Data;
 
 namespace StandardLibrary
 {
@@ -76,7 +70,7 @@ namespace StandardLibrary
                 }
                 return false;
             }
-            foreach (int candidate in currentCell.Candidates()) //Tests each candidate
+            foreach (int candidate in currentCell.Candidates()) //SudoScript.Core.Test each candidate
             {
                 if (runningSum + candidate > remainder) 
                 { 
