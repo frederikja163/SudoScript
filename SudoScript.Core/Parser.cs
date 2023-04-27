@@ -62,8 +62,6 @@ public static class Parser {
                     return ParseRules(stream);
                 case TokenType.Givens:
                     return ParseGivens(stream);
-                case TokenType.Newline:
-
                 default:
                     throw new Exception("syntax error");
             } 
