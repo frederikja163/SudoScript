@@ -17,8 +17,10 @@ internal static class Program
         using StreamReader reader = new StreamReader(args[0]);
         ProgramNode programNode = Parser.ParseProgram(reader);
         Board board = Generator.GetBoardFromAST(programNode);
+        Console.WriteLine("Unsolved board.");
+        Console.WriteLine(board.ToString());
         Board solvedBoard = Solver.Solve(board);
-
-        // Somehow visualize the board.
+        Console.WriteLine("Solved board.");
+        Console.WriteLine(solvedBoard.ToString());
     }
 } 
