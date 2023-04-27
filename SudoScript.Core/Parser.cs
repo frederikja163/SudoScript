@@ -28,13 +28,20 @@ public static class Parser {
 
         if (stream.HasNext && stream.Peek(true, out Token? rightBrace) && rightBrace.Type != TokenType.RightBrace) 
         {
+            if(stream.Peek(true, out Token? token) && token.Type == TokenType.Newline)
+            {
+                return children;
+            }
+            
             children.Add(ParseUnitStatement(stream));
+
             if (!stream.HasNext || (stream.Peek(true, out rightBrace) && rightBrace.Type == TokenType.RightBrace))
             {
                 return children;
             }
 
             stream.Expect(TokenType.Newline, out _);
+
             children.AddRange(ParseUnitStatements(stream));
         }
 
@@ -55,6 +62,8 @@ public static class Parser {
                     return ParseRules(stream);
                 case TokenType.Givens:
                     return ParseGivens(stream);
+                case TokenType.Newline:
+
                 default:
                     throw new Exception("syntax error");
             } 

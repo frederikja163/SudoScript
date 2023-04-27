@@ -162,4 +162,20 @@ internal sealed class ParserTests
             Assert.Fail();
         }
     }
+
+    [Test]
+    public void ProgramEndsWithNewline()
+    {
+        string testString = @"
+unit UnitName a (b,c) {
+    rules {
+    
+    }
+}
+";
+
+        Parser.ParseProgram(testString);
+
+        Assert.Pass();
+    }
 }
