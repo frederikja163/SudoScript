@@ -1,5 +1,5 @@
 /* Implement a standard Sudoku, givens from:
-   https:sudoku.com
+   sudoku.com
  */
 
 // Rows for default Sudoku.
@@ -35,7 +35,7 @@ Box (1, 7)
 Box (4, 7)
 Box (7, 7)
 
-// Givens for the easy sudoku from Sudoku.Com.
+// Givens for the easy sudoku from 'sudoku.com'.
 givens {
 	// 1st row.
 	(2, 1) 3

@@ -18,10 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StandardLibrary\StandardLibrary.csproj" />
     <ProjectReference Include="..\SudoScript.Core\SudoScript.Core.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
+	
+	<ItemGroup>
     <None Update="TestData\GivensWithGiven.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

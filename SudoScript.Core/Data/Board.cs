@@ -54,6 +54,11 @@ public sealed class Board: ICloneable
         return true;
     }
 
+    public bool IsSolved()
+    {
+        return ValidateRules() && Cells().All(c => c.Digit != Cell.EmptyDigit);
+    }
+
     public Board Clone()
     {
         IReadOnlyDictionary<(int, int), Cell> cellsCopy = _cells.ToDictionary(kvp => kvp.Key, kvp => new Cell(kvp.Value));
