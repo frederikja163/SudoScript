@@ -178,4 +178,14 @@ unit UnitName a (b,c) {
 
         Assert.Pass();
     }
+
+    [Test]
+    public void EmptyFile()
+    {
+        string testString = "";
+
+        Parser.ParseProgram(testString);
+
+        Assert.Pass();
+    }
 }
