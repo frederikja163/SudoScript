@@ -118,14 +118,7 @@ public sealed class Cell
 
     public override string ToString()
     {
-        if(Digit == EmptyDigit)
-        {
-            return ".";
-        }
-        else
-        {
-            return Digit.ToString();
-        }
+        return $"({ X}, { Y}) {(Digit == EmptyDigit ? '.' : Digit)}";
     }
 
 }
