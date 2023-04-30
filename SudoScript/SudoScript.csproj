@@ -13,9 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Samples\**">
+    <Content Include="Samples/**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
 
 </Project>

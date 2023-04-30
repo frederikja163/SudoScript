@@ -15,12 +15,33 @@ public sealed class Board: ICloneable
         {
             unit.Board = this;
         }
+
+        MaxX = int.MinValue;
+        MaxY = int.MinValue;
+        MinX = int.MaxValue;
+        MinY = int.MaxValue;
+        foreach (CellReference cellReference in _cells.Keys)
+        {
+                if (cellReference.X > MaxX)
+                    MaxX = cellReference.X;
+                if (cellReference.X < MinX)
+                    MinX = cellReference.X;
+                if (cellReference.Y > MaxX)
+                    MaxY = cellReference.Y;
+                if (cellReference.Y < MinY)
+                    MinY = cellReference.Y;
+        }
     }
 
     public Board(IReadOnlyList<Cell> cells, IReadOnlyList<Unit> units)
         : this(cells.ToDictionary(c => (c.X, c.Y)), units)
     {
     }
+    
+    public int MinX { get; }
+    public int MaxX { get; }
+    public int MinY { get; }
+    public int MaxY { get; }
 
     public IReadOnlyList<Unit> Units { get; }
 
@@ -77,27 +98,10 @@ public sealed class Board: ICloneable
 
     public override string ToString()
     {
-        int minX = int.MaxValue;
-        int maxX = int.MinValue;
-        int minY = int.MaxValue;
-        int maxY = int.MinValue;
-
-        foreach (Cell cell in _cells.Values)
-        {
-            if (cell.X > maxX)
-                maxX = cell.X;
-            if (cell.X < minX)
-                minX = cell.X;
-            if (cell.Y > maxY)
-                maxY = cell.Y;
-            if (cell.Y < minY)
-                minY = cell.Y;
-        }
-
         StringBuilder s = new StringBuilder();
-        for (int row = maxX; row >= minX; row--)
+        for (int row = MaxX; row >= MinX; row--)
         {
-            for (int col = minX; col <= maxX; col++)
+            for (int col = MinX; col <= MaxX; col++)
             {
                 s.Append(_cells.TryGetValue((row, col), out Cell? cell) ? cell.Digit : '.');
             }
