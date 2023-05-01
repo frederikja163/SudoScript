@@ -249,14 +249,17 @@ public static class Generator
         return cells;
     }
 
+    //The method attempt to evaluate the expression as a integer value.
     private static bool ExpressionToInt(ExpressionNode node, SymbolTable symbolTable, out int value)
     {
         List<int> values = ExpressionToInts(node, symbolTable);
+        //Expression evaluates to be more or less than one integer value, then its invalid.
         if (values.Count != 1)
         {
             value = 0;
             return false;
         }
+        //Else expression considered valid and return single integer value.
         value = values[0];
         return true;
     }
@@ -273,6 +276,7 @@ public static class Generator
                 return CalculateUnaryNode(unaryNode, symbolTable);
             case IdentifierNode identifierNode:
                 return IdentifierRetriever(identifierNode, symbolTable);
+            //If its a valueNode parse its value as a integer, if successfull return list of integer values.
             case ValueNode valueNode:
                 if(Int32.TryParse(valueNode.ValueToken.Match, out int value))
                 {
@@ -284,8 +288,10 @@ public static class Generator
         }
     }
 
+    //Method evaluates the range and returns a list containing integer values.
     private static List<int> CalculateRange(RangeNode node, SymbolTable symbolTable)
     {
+        //Evaluate the minium and maximum expressions as integers.
         if (!ExpressionToInt(node.MinimumExpression, symbolTable, out int min) ||
             !ExpressionToInt(node.MaximumExpression, symbolTable, out int max))
         {
@@ -294,9 +300,11 @@ public static class Generator
 
         List<int> values = new List<int>();
 
+        //Calculate the starting and ending values for the range, based on inclusive or exclusive.
         int start = node.IsMinInclusive ? min : min + 1;
         int end = node.IsMaxInclusive ? max + 1 : max;
 
+        //loop through the range, adding each integer value to the list of values.
         for (int i = start; i < end; i++)
         {
             values.Add(i);
@@ -307,9 +315,11 @@ public static class Generator
 
     private static List<int> CalculateBinaryNode(BinaryNode node, SymbolTable symbolTable)
     {
+        //check right and left expressions of the binaryNode.
         List<int> left = ExpressionToInts(node.Left, symbolTable);
         List<int> right = ExpressionToInts(node.Right, symbolTable);
         
+        //Switch case to check which binary operation to pick and use.
         switch(node.BinaryType)
         {
             case BinaryType.Plus:
