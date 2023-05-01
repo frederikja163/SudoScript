@@ -180,6 +180,54 @@ unit UnitName a (b,c) {
     }
 
     [Test]
+    public void ProgramEndsWithSpace()
+    {
+        string testString = @"
+unit UnitName a (b,c) {
+    rules {
+    
+    }
+} ";
+
+        Parser.ParseProgram(testString);
+
+        Assert.Pass();
+    }
+
+    [Test]
+    public void ProgramEndsWithLineComment()
+    {
+        string testString = @"
+unit UnitName a (b,c) {
+    rules {
+    
+    }
+} //end";
+
+        Parser.ParseProgram(testString);
+
+        Assert.Pass();
+    }
+
+    [Test]
+    public void ProgramEndsWithBlockComment()
+    {
+        string testString = @"
+unit UnitName a (b,c) {
+    rules {
+    
+    }
+}
+/*
+end
+*/";
+
+        Parser.ParseProgram(testString);
+
+        Assert.Pass();
+    }
+
+    [Test]
     public void EmptyFile()
     {
         string testString = "";
