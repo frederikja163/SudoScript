@@ -27,9 +27,10 @@ public static class Parser {
     {
         List<UnitStatementNode> children = new List<UnitStatementNode>();
 
-        // While next token is not the last rightbrace of the program, continues to read UnitStatements
+        // While next token is not the last rightbrace of the program, continues to parse UnitStatements
         if (stream.HasNext && stream.Peek(true, out Token? rightBrace) && rightBrace.Type != TokenType.RightBrace) 
         {
+            // Here, a single UnitStatement is parsed.
             children.Add(ParseUnitStatement(stream));
             if (!stream.HasNext || (stream.Peek(true, out rightBrace) && rightBrace.Type == TokenType.RightBrace))
             {
@@ -37,6 +38,7 @@ public static class Parser {
             }
 
             stream.Expect(TokenType.Newline, out _);
+            // Recursively parses all subsequent UnitStatement nodes.
             children.AddRange(ParseUnitStatements(stream));
         }
         // When all UnitStatement nodes have been read, they are returned
@@ -152,14 +154,15 @@ public static class Parser {
         ParameterIdentifierNode x;
         ParameterIdentifierNode y;
 
+        // Parses LeftParenthesis.
         stream.Expect(TokenType.LeftParenthesis, out _);
 
-        // Parses x and y coordinates as identifiers.
         if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Identifier)
         {
             throw new Exception("Expected identifier");
         }
-
+        
+        // Parses x.
         x = ParseParameterIdentifier(stream);
 
         // x and y coordinates are comma separated.
@@ -173,8 +176,10 @@ public static class Parser {
             throw new Exception("Expected identifier");
         }
 
+        // Parses y.
         y = ParseParameterIdentifier(stream);
 
+        // Parses RightParenthesis
         if (!stream.Expect(TokenType.RightParenthesis, out _))
         {
             throw new Exception(") expected");
@@ -296,29 +301,6 @@ public static class Parser {
         {                                                       // Temporary Expression Solution
             return new ValueNode(value);                        //
         }                                                       //
-
-        //IEnumerable<Token> tokens = stream.Next(false, p => p == TokenType.Newline || p == TokenType.Space);
-        //Token? last = null;
-
-        //last = tokens.Last(p => p.Type == TokenType.Plus || p.Type == TokenType.Minus);
-
-        //int lastIndex = tokens.ToList().LastIndexOf(last);
-
-        //if(lastIndex == 0 || tokens.ElementAt(lastIndex-1)?.Type != TokenType.Number)
-        //{
-        //    return ParseTerm(tokens);
-        //}
-
-        //if (tokens.Any(p => p.Type != TokenType.Plus && p.Type != TokenType.Minus))
-        //{
-        //    return ParseTerm(tokens);
-        //}
-
-        //BinaryType type = last.Type == TokenType.Plus ? BinaryType.Plus : BinaryType.Minus;
-
-        //Split(tokens.ToArray(), lastIndex, out Token[] expression, out Token[] term);
-
-        //return new BinaryNode(last, type, ParseExpression(expression), ParseTerm(term));
 
         throw new NotImplementedException();
     }
@@ -521,17 +503,19 @@ public static class Parser {
         ExpressionNode x;
         ExpressionNode y;
 
-        // Checks that the cell starts with a left parenthesis.
+        // Cell grammar is as follows: Cell -> leftParenthesis Expression comma Expression rightParenthesis.
+        // Parses LeftParenthesis.
         if(stream.Expect(TokenType.LeftParenthesis, out Token? startToken))
         {
-            // Parses x and y of the cell.
             if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Number)
             {
                 throw new Exception("Expected identifier");
             }
 
+            // Parses x
             x = ParseExpression(stream);
 
+            // Since x and y are comma separated, parses comma.
             if (!stream.Expect(TokenType.Comma, out Token? commaToken))
             {
                 throw new Exception(", expected");
@@ -542,8 +526,10 @@ public static class Parser {
                 throw new Exception("Expected identifier");
             }
 
+            // Parses y.
             y = ParseExpression(stream);
 
+            // Parses RightParenthesis.
             if (!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
             {
                 throw new Exception(") expected");
