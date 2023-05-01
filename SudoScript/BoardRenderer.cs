@@ -11,9 +11,6 @@ public sealed class BoardRenderer
     public BoardRenderer(Board board)
     {
         _board = board;
-
-
-        RenderBoard();
     }
 
     private void RenderBoard()
@@ -25,11 +22,11 @@ public sealed class BoardRenderer
             // TODO: Maybe cache as many cells as possible here, and write them at once with fewer calls to Console.Write();
             for (int col = _board.MinX; col <= _board.MaxX; col++)
             {
-                Cell cell = _board[row, col];
-                if (_cellColors.TryGetValue((row, col), out ConsoleColor backgroundColor))
+                Cell cell = _board[col, row];
+                if (_cellColors.TryGetValue((col, row), out ConsoleColor backgroundColor))
                 {
                     Console.BackgroundColor = backgroundColor;
-                    Console.ForegroundColor = GetContrastColor(backgroundColor);
+                    Console.ForegroundColor = ConsoleHelper.GetContrastColor(backgroundColor);
                 }
                 else
                 {
@@ -48,6 +45,7 @@ public sealed class BoardRenderer
         {
             Console.Write(col + " ");
         }
+        Console.WriteLine();
     }
 
     public void RenderCell(CellReference cellReference)
@@ -59,9 +57,9 @@ public sealed class BoardRenderer
             backgroundColor = ConsoleColor.Black;
         }
         
-        Console.SetCursorPosition(cellReference.X * 2, _board.MaxY - _board.MinY - cellReference.Y);
+        Console.SetCursorPosition(cellReference.X * 2, _board.MaxY - _board.MinY - cellReference.Y + 2);
         Console.BackgroundColor = backgroundColor;
-        Console.ForegroundColor = GetContrastColor(backgroundColor);
+        Console.ForegroundColor = ConsoleHelper.GetContrastColor(backgroundColor);
         Console.Write((cell.Digit == Cell.EmptyDigit ? "." : cell.Digit.ToString()) + " ");
         Console.ResetColor();
         Console.SetCursorPosition(left, top);
@@ -73,33 +71,9 @@ public sealed class BoardRenderer
         RenderBoard();
     }
 
-    public void SetHighlight(CellReference cellReference, ConsoleColor color = ConsoleColor.Black)
+    public void SetHighlight(CellReference cellReference, ConsoleColor color = (ConsoleColor)-1)
     {
         _cellColors[cellReference] = color;
         RenderCell(cellReference);
-    }
-
-    private ConsoleColor GetContrastColor(ConsoleColor backgroundColor)
-    {
-        return backgroundColor switch
-        {
-            ConsoleColor.Black => ConsoleColor.White,
-            ConsoleColor.DarkBlue => ConsoleColor.White,
-            ConsoleColor.DarkGreen => ConsoleColor.White,
-            ConsoleColor.DarkCyan => ConsoleColor.White,
-            ConsoleColor.DarkRed => ConsoleColor.White,
-            ConsoleColor.DarkMagenta => ConsoleColor.White,
-            ConsoleColor.DarkYellow => ConsoleColor.White,
-            ConsoleColor.Gray => ConsoleColor.Black,
-            ConsoleColor.DarkGray => ConsoleColor.Black,
-            ConsoleColor.Blue => ConsoleColor.Black,
-            ConsoleColor.Green => ConsoleColor.Black,
-            ConsoleColor.Cyan => ConsoleColor.Black,
-            ConsoleColor.Red => ConsoleColor.Black,
-            ConsoleColor.Magenta => ConsoleColor.Black,
-            ConsoleColor.Yellow => ConsoleColor.Black,
-            ConsoleColor.White => ConsoleColor.Black,
-            _ => throw new ArgumentOutOfRangeException(nameof(backgroundColor), backgroundColor, null)
-        };
     }
 }

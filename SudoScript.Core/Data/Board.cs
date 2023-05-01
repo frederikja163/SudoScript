@@ -26,7 +26,7 @@ public sealed class Board: ICloneable
                     MaxX = cellReference.X;
                 if (cellReference.X < MinX)
                     MinX = cellReference.X;
-                if (cellReference.Y > MaxX)
+                if (cellReference.Y > MaxY)
                     MaxY = cellReference.Y;
                 if (cellReference.Y < MinY)
                     MinY = cellReference.Y;
