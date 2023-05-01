@@ -26,13 +26,8 @@ public static class Parser {
     {
         List<UnitStatementNode> children = new List<UnitStatementNode>();
 
-        if (stream.HasNext && stream.Peek(true, out Token? rightBrace) && rightBrace.Type != TokenType.RightBrace) 
+        if (stream.HasNonSpecialNext && stream.Peek(true, out Token? rightBrace) && rightBrace.Type != TokenType.RightBrace) 
         {
-            if(stream.Peek(true, out Token? token) && token.Type == TokenType.Newline)
-            {
-                return children;
-            }
-            
             children.Add(ParseUnitStatement(stream));
 
             if (!stream.HasNext || (stream.Peek(true, out rightBrace) && rightBrace.Type == TokenType.RightBrace))
