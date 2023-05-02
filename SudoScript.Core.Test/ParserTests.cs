@@ -174,9 +174,7 @@ unit UnitName a (b,c) {
 }
 ";
 
-        Parser.ParseProgram(testString);
-
-        Assert.Pass();
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
     }
 
     [Test]
@@ -189,9 +187,7 @@ unit UnitName a (b,c) {
     }
 } ";
 
-        Parser.ParseProgram(testString);
-
-        Assert.Pass();
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
     }
 
     [Test]
@@ -204,9 +200,7 @@ unit UnitName a (b,c) {
     }
 } //end";
 
-        Parser.ParseProgram(testString);
-
-        Assert.Pass();
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
     }
 
     [Test]
@@ -222,9 +216,7 @@ unit UnitName a (b,c) {
 end
 */";
 
-        Parser.ParseProgram(testString);
-
-        Assert.Pass();
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
     }
 
     [Test]
@@ -232,8 +224,6 @@ end
     {
         string testString = "";
 
-        Parser.ParseProgram(testString);
-
-        Assert.Pass();
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
     }
 }
