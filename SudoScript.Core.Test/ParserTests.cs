@@ -143,14 +143,7 @@ internal sealed class ParserTests
         {
             if(unitNode.UnitStatements[0] is FunctionCallNode callNode) 
             {
-                if (callNode.Arguments[0] is CellNode cellNode)
-                {
-                    Assert.Pass();
-                }
-                else
-                {
-                    Assert.Fail();
-                }
+                Assert.IsInstanceOf<CellNode>(callNode.Arguments[0]);
             }
             else 
             {
