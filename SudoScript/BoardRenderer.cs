@@ -52,15 +52,19 @@ public sealed class BoardRenderer
     {
         (int left, int top) = Console.GetCursorPosition();
         Cell cell = _board[cellReference.X, cellReference.Y];
-        if (!_cellColors.TryGetValue(cellReference, out ConsoleColor backgroundColor))
-        {
-            backgroundColor = ConsoleColor.Black;
-        }
         
+        if (_cellColors.TryGetValue(cellReference, out ConsoleColor backgroundColor))
+        {
+            Console.BackgroundColor = backgroundColor;
+            Console.ForegroundColor = ConsoleHelper.GetContrastColor(backgroundColor);
+        }
+        else
+        {
+            Console.ResetColor();
+        }
         Console.SetCursorPosition(cellReference.X * 2, _board.MaxY - _board.MinY - cellReference.Y + 2);
-        Console.BackgroundColor = backgroundColor;
-        Console.ForegroundColor = ConsoleHelper.GetContrastColor(backgroundColor);
         Console.Write((cell.Digit == Cell.EmptyDigit ? "." : cell.Digit.ToString()) + " ");
+        
         Console.ResetColor();
         Console.SetCursorPosition(left, top);
     }
@@ -71,9 +75,34 @@ public sealed class BoardRenderer
         RenderBoard();
     }
 
-    public void SetHighlight(CellReference cellReference, ConsoleColor color = (ConsoleColor)-1)
+    public void SetHighlight(CellReference cellReference, ConsoleColor color)
     {
         _cellColors[cellReference] = color;
         RenderCell(cellReference);
+    }
+
+    public void ClearHighlight(CellReference cellReference)
+    {
+        if (_cellColors.ContainsKey(cellReference))
+        {
+            _cellColors.Remove(cellReference);
+        }
+        RenderCell(cellReference);
+    }
+
+    public void SetHighlights(IEnumerable<CellReference> references, ConsoleColor color)
+    {
+        foreach (CellReference cellReference in references)
+        {
+            SetHighlight(cellReference, color);
+        }
+    }
+    
+    public void ClearHighlights(IEnumerable<CellReference> references)
+    {
+        foreach (CellReference reference in references)
+        {
+            ClearHighlight(reference);
+        }
     }
 }

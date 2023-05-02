@@ -29,6 +29,7 @@ public sealed class CliApplication
         _board = Generator.GetBoardFromAST(programNode); 
         _boardRenderer = new BoardRenderer(_board);
         _cellInfoRenderer = new CellInfoRenderer(_board, 50);
+        _selectedCell = (1, 1);
         SelectedCell = (1, 1);
     }
 
@@ -41,6 +42,8 @@ public sealed class CliApplication
             _boardRenderer.ClearHighlights();
             _boardRenderer.SetHighlight(value, ConsoleHelper.HighlightedCell);
             _cellInfoRenderer.RenderedCell = _selectedCell;
+            _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
+                .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
         }
     }
     
@@ -80,7 +83,7 @@ public sealed class CliApplication
                 case ConsoleKey.D8:
                 case ConsoleKey.D9:
                     int key = keyInfo.Key - ConsoleKey.D0;
-                    if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Control))
+                    if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift))
                     {
                         if (_board[SelectedCell.X, SelectedCell.Y].HasCandidate(key))
                         {
@@ -100,17 +103,11 @@ public sealed class CliApplication
                     _boardRenderer.RenderCell(SelectedCell);
                     break;
                 case ConsoleKey.Tab:
-                    foreach (CellReference reference in _cellInfoRenderer.SelectedUnit.References()
-                                 .Where(c => c != SelectedCell))
-                    {
-                        _boardRenderer.SetHighlight(reference);
-                    }
-                    _cellInfoRenderer.MoveSelection(keyInfo.Modifiers.HasFlag(ConsoleModifiers.Control) ? -1 : +1);
-                    foreach (CellReference reference in _cellInfoRenderer.SelectedUnit.References()
-                                 .Where(c => c != SelectedCell))
-                    {
-                        _boardRenderer.SetHighlight(reference, ConsoleColor.DarkRed);
-                    }
+                    _boardRenderer.ClearHighlights(_cellInfoRenderer.SelectedUnit.References()
+                        .Where(c => c != SelectedCell));
+                    _cellInfoRenderer.MoveSelection(keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift) ? -1 : +1);
+                    _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
+                        .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
                     break;
                 // Eliminate candidates.
                 case ConsoleKey.F1:

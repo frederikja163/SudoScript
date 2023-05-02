@@ -73,7 +73,7 @@ public sealed class CellInfoRenderer
 
     public void MoveSelection(int delta)
     {
-        _selectedUnit = (int)MathF.Min(SelectedUnits.Count, MathF.Max(delta, 0));
+        _selectedUnit = (int)MathF.Min(SelectedUnits.Count - 1, MathF.Max(_selectedUnit + delta, 0));
         Render();
     }
     
