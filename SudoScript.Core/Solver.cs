@@ -51,22 +51,20 @@ public static class Solver
             return true;
         }
 
-        foreach (Cell cell in orderedCells)
+        Cell cell = orderedCells.First();
+        foreach (int candidate in cell.Candidates())
         {
-            foreach (int candidate in cell.Candidates())
+            // Create a clone of the board for backtracking.
+            Board clonedBoard = board.Clone();
+            Cell clonedCell = clonedBoard[cell.X, cell.Y];
+
+            // Collapse the cell with a digit.
+            clonedCell.Digit = candidate;
+
+            // Call solve on the new board.
+            if (SolveRec(clonedBoard, out solvedBoard))
             {
-                // Create a clone of the board for backtracking.
-                Board clonedBoard = board.Clone();
-                Cell clonedCell = clonedBoard[cell.X, cell.Y];
-
-                // Collapse the cell with a digit.
-                clonedCell.Digit = candidate;
-
-                // Call solve on the new board.
-                if (SolveRec(clonedBoard, out solvedBoard))
-                {
-                    return true;
-                }
+                return true;
             }
         }
         solvedBoard = null;
