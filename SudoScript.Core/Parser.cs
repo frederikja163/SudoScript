@@ -28,16 +28,18 @@ public static class Parser {
         List<UnitStatementNode> children = new List<UnitStatementNode>();
 
         // While next token is not the last rightbrace of the program, continues to parse UnitStatements
-        if (stream.HasNext && stream.Peek(true, out Token? rightBrace) && rightBrace.Type != TokenType.RightBrace) 
+        if (stream.HasNonSpecialNext && stream.Peek(true, out Token? rightBrace) && rightBrace.Type != TokenType.RightBrace) 
         {
             // Here, a single UnitStatement is parsed.
             children.Add(ParseUnitStatement(stream));
+
             if (!stream.HasNext || (stream.Peek(true, out rightBrace) && rightBrace.Type == TokenType.RightBrace))
             {
                 return children;
             }
 
             stream.Expect(TokenType.Newline, out _);
+
             // Recursively parses all subsequent UnitStatement nodes.
             children.AddRange(ParseUnitStatements(stream));
         }

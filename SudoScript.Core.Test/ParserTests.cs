@@ -188,14 +188,7 @@ unit {
         {
             if(unitNode.UnitStatements[0] is FunctionCallNode callNode) 
             {
-                if (callNode.Arguments[0] is CellNode cellNode)
-                {
-                    Assert.Pass();
-                }
-                else
-                {
-                    Assert.Fail();
-                }
+                Assert.IsInstanceOf<CellNode>(callNode.Arguments[0]);
             }
             else 
             {
@@ -206,5 +199,69 @@ unit {
         {
             Assert.Fail();
         }
+    }
+
+    [Test]
+    public void ProgramEndsWithNewline()
+    {
+        string testString = @"
+unit UnitName a (b,c) {
+    rules {
+    
+    }
+}
+";
+
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
+    }
+
+    [Test]
+    public void ProgramEndsWithSpace()
+    {
+        string testString = @"
+unit UnitName a (b,c) {
+    rules {
+    
+    }
+} ";
+
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
+    }
+
+    [Test]
+    public void ProgramEndsWithLineComment()
+    {
+        string testString = @"
+unit UnitName a (b,c) {
+    rules {
+    
+    }
+} //end";
+
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
+    }
+
+    [Test]
+    public void ProgramEndsWithBlockComment()
+    {
+        string testString = @"
+unit UnitName a (b,c) {
+    rules {
+    
+    }
+}
+/*
+end
+*/";
+
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
+    }
+
+    [Test]
+    public void EmptyFile()
+    {
+        string testString = "";
+
+        Assert.DoesNotThrow(() => Parser.ParseProgram(testString));
     }
 }

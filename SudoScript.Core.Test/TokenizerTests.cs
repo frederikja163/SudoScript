@@ -38,6 +38,11 @@ internal sealed class TokenizerTests
             Assert.That(tokenizer.Expect(expected[i].type, out Token? token));
             Assert.That(token?.Match, Is.EqualTo(expected[i].match));
         }
+
+
+        Assert.That(tokenizer.HasNext, Is.False);
+        Assert.That(tokenizer.HasSpecialNext, Is.False);
+        Assert.That(tokenizer.HasNonSpecialNext, Is.False);
     }
 
     [Test]
@@ -68,5 +73,7 @@ internal sealed class TokenizerTests
         }
 
         Assert.That(tokenizer.HasNext, Is.True);
+        Assert.That(tokenizer.HasSpecialNext, Is.True);
+        Assert.That(tokenizer.HasNonSpecialNext, Is.False);
     }
 }
