@@ -7,6 +7,10 @@ namespace StandardLibrary
         public Box(int x, int y) : base(InitCells(x, y), new List<IRule> { new OneRule() })
         {
         }
+        
+        public Box(CellReference reference) : base(InitCells(reference.X, reference.Y), new List<IRule> { new OneRule() })
+        {
+        }
 
         private static List<CellReference> InitCells(int x, int y)
         {

@@ -10,8 +10,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseUnitTestWithoutName()
     {
-        using StreamReader stream = new StreamReader("./TestData/UnitWithoutName.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+unit {
+
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         if (tree.Child.UnitStatements.First() is UnitNode unitNode)
         {
@@ -27,8 +31,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseUnitTestWithName()
     {
-        using StreamReader stream = new StreamReader("./TestData/UnitWithName.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+unit UnitName {
+
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         if (tree.Child.UnitStatements.First() is UnitNode unitNode)
         {
@@ -44,8 +52,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseUnitTestWithParams()
     {
-        using StreamReader stream = new StreamReader("./TestData/UnitWithParams.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+unit UnitName a (x,y) {
+	
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         if (tree.Child.UnitStatements.First() is UnitNode unitNode)
         {
@@ -62,8 +74,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseRuleTest()
     {
-        using StreamReader stream = new StreamReader("./TestData/EmptyRuleUnit.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+rules {
+
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
     }
@@ -71,8 +87,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseRuleTestWithFunctionNoArgs()
     {
-        using StreamReader stream = new StreamReader("./TestData/RuleUnitWithFuncNoArgs.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+rules {
+	myRule 
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(1));
     }
@@ -80,8 +100,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseRuleTestWithFunctionWithArgs()
     {
-        using StreamReader stream = new StreamReader("./TestData/RuleUnitWithFuncWithArgs.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+rules {
+	myRule 1 (3,4)
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(1));
     }
@@ -89,8 +113,13 @@ internal sealed class ParserTests
     [Test]
     public void ParseRuleTestWithFunctionMultipleArgs()
     {
-        using StreamReader stream = new StreamReader("./TestData/RuleUnitWithFuncMultipleArgs.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+rules {
+	myRule 1 (3,4)
+	secondRule
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(2));
     }
@@ -99,8 +128,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseGivensNoGivens()
     {
-        using StreamReader stream = new StreamReader("./TestData/GivensNoGiven.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+givens {
+
+}";
+ 
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
     }
@@ -108,8 +141,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseGivensWithGiven()
     {
-        using StreamReader stream = new StreamReader("./TestData/GivensWithGiven.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+givens {
+	(2,3) 5
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(1));
     }
@@ -118,8 +155,10 @@ internal sealed class ParserTests
     [Test]
     public void ParseFunctionCallNoArgs()
     {
-        using StreamReader stream = new StreamReader("./TestData/CallFunctionNoArgs.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+MyFunc";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(0));
     }
@@ -127,8 +166,10 @@ internal sealed class ParserTests
     [Test]
     public void ParseFunctionCallWithArgs()
     {
-        using StreamReader stream = new StreamReader("./TestData/CallFunctionWithArgs.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+MyFunc 10 (1,2)";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         Assert.That(tree.Child.UnitStatements[0].Children().Count, Is.EqualTo(2));
     }
@@ -136,8 +177,12 @@ internal sealed class ParserTests
     [Test]
     public void ParseCellFunctionCall()
     {
-        using StreamReader stream = new StreamReader("./TestData/CellFunctionCall.txt");
-        ProgramNode tree = Parser.ParseProgram(stream);
+        string testString = @"
+unit {
+(9,5)	
+}";
+
+        ProgramNode tree = Parser.ParseProgram(testString);
 
         if (tree.Child.UnitStatements[0] is UnitNode unitNode)
         {

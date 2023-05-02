@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,6 +9,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SudoScript.Core\SudoScript.Core.csproj" />
+    <ProjectReference Include="..\StandardLibrary\StandardLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Samples/**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
