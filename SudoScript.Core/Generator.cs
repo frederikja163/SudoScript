@@ -12,11 +12,14 @@ public static class Generator
 
     private static IEnumerable<Unit> Union(SymbolTable table, object[] args)
     {
+        //Creates a new instance of unit class.
         Unit unit = new Unit();
         foreach (object arg in args)
         {
+            //Check if the object is a CellReference.
             if (arg is CellReference cell)
             {
+                //If it is then add it to the unit.
                 unit.AddCell(cell);
             }
             else
@@ -27,15 +30,15 @@ public static class Generator
         yield return unit;
     }
 
-    // Takes the program node as input, and creates the initial symboltable (WIP),
-    // and returns the Board with cells and units
+    // Takes the program node as input, and creates the initial symboltable,
+    // and returns the Board with cells and units.
     public static Board GetBoardFromAST(ProgramNode node)
     {
         SymbolTable symbolTable = new SymbolTable();
         return GenerateBoard(node, symbolTable!);
     }
 
-    // Generates the Board using lists of cells and units
+    // Generates the Board using lists of cells and units.
     public static Board GenerateBoard(ProgramNode node, SymbolTable symbolTable)
     {
         List<Unit> units = GetUnitFromStatements(node.Child, symbolTable).ToList();
@@ -43,21 +46,27 @@ public static class Generator
         return new Board(symbolTable.GetCells(), units);
     }
 
-    // Takes the primary node, and travels its children to find units
+    // Takes UnitNode, SymbolTable as inputs and a new function from the Plugin class.
     private static void AddUnitFunction(UnitNode node, SymbolTable symbolTable)
-    {
+    {   
+        //register the new Unit function.
         Plugins.AddUnitFunction(node.NameToken!.Match, (symbolTable, args) =>
         {
+            //Create a new SymbolTable 
             SymbolTable table = new SymbolTable(symbolTable);
             for (int i = 0; i < args.Length; i++)
             {
                 object arg = args[i];
                 ParameterNode param = node.Parameters[i];
+                //If argument is CellRefernece & the parameter is ParameterCellNode,
+                //then add x & y digits to new SymbolTable.
                 if (arg is CellReference cell && param is ParameterCellNode paramCell)
                 {
                     table.AddDigit(paramCell.X.NameToken.Match, cell.X);
                     table.AddDigit(paramCell.Y.NameToken.Match, cell.Y);
                 }
+                //If argument is a int & the parameter is ParameterIdentifierNode,
+                //then add int value to new SymbolTable.
                 else if (arg is int digit && param is ParameterIdentifierNode paramDigit)
                 {
                     table.AddDigit(paramDigit.NameToken.Match, digit);
@@ -79,11 +88,13 @@ public static class Generator
         {
             switch (child)
             {
-                case UnitNode unitNode:                 // In case of a UnitNode, it recursively calls the GetUnits function
+                case UnitNode unitNode:                 
+                    // In case of a UnitNode, it recursively calls the GetUnits function.
                     if(unitNode.NameToken is not null)
                     {
                         AddUnitFunction(unitNode, symbolTable);
                     }
+                    //if its not a unitNode, GetUnitFromStatements is recursively called.
                     else
                     {
                         IEnumerable<Unit> units = GetUnitFromStatements(node, symbolTable);
@@ -93,13 +104,16 @@ public static class Generator
                         }
                     }
                     break;
-                case RulesNode rulesNode:               // A RulesNode is handled by the RulesHandler function
+                case RulesNode rulesNode:               
+                    // A RulesNode is handled by the RulesHandler function.
                     unit.AddRule(GetRules(rulesNode, symbolTable));
                     break;
-                case GivensNode givensNode:             // Since a given is a cell with a digit, a function is made to attach a digit to the cell
+                case GivensNode givensNode:             
+                    // Since a given is a cell with a digit, a function is made to attach a digit to the cell.
                     GetGivens(givensNode, symbolTable);
                     break;
-                case FunctionCallNode functionCallNode: // Lastly, a function is used to extract cells and units from functioncalls
+                case FunctionCallNode functionCallNode: 
+                    // Lastly, a function is used to extract cells and units from functioncalls.
                     foreach (Unit newUnit in GetCellsAndUnitsFromFunction(functionCallNode, symbolTable))
                     {
                         unit.AddUnit(newUnit);
@@ -129,6 +143,7 @@ public static class Generator
 
     private static List<List<object>> ArgumentToArgumentCombinations(IReadOnlyList<ArgumentNode> argumentNodes, SymbolTable symbolTable)
     {
+        //Create a list to store all arguments generated.
         List<List<object>> argumentCombinations = new List<List<object>>();
 
         // If there are no arguments, instead call function with only one argument.
@@ -140,10 +155,12 @@ public static class Generator
         foreach (ArgumentNode argument in argumentNodes)
         {
             List<object> arguments = new List<object>();
+            //If argument is a CellNode, convert it to a list of cell objects.
             if (argument is CellNode cellNode)
             {
                 arguments = ExpressionToCells(cellNode.X, cellNode.Y, symbolTable).Cast<object>().ToList();
             }
+            //Else if argument is a ExpressionNode, convert to a list of interger values.
             else if (argument is ExpressionNode expressionNode)
             {
                 arguments = ExpressionToInts(expressionNode, symbolTable).Cast<object>().ToList();
@@ -158,7 +175,7 @@ public static class Generator
                 argumentCombinations.Add(arguments);
                 continue;
             }
-
+            //Combine OldArgumentCombinations with currect argumentCombinations.
             List<List<object>> oldArgumentCombinations = argumentCombinations;
             argumentCombinations = new List<List<object>>();
             foreach (List<object> oldArguments in oldArgumentCombinations)
@@ -171,12 +188,12 @@ public static class Generator
         return argumentCombinations;
     }
 
-    // A function to retrieve cells and their given digits, from the AST
+    // A function to retrieve cells and their given digits, from the AST.
     private static void GetGivens(GivensNode node, SymbolTable symbolTable)
     {
         foreach (GivensStatementNode child in node.GivensStatements)
         {
-            // Check if the digit is a usable value
+            // Check if the digit is a usable value.
             if (!ExpressionToInt(child.Digit, symbolTable, out int digit))
             {
                 throw new Exception("Givens must contain one, and only one digit.");
@@ -186,7 +203,7 @@ public static class Generator
                 .Select(c => new Cell(c.X, c.Y, digit))
                 .ToList();
 
-            // Check if there only exists one cell
+            // Check if there only exists one cell.
             if (newCells.Count != 1)
             {
                 throw new Exception("Givens must contain one, and only one cell.");
@@ -199,15 +216,17 @@ public static class Generator
         }
     }
     
-    // Extract list of cells and units
+    // Create a list of all possible combinations of arguments.
     private static IEnumerable<Unit> GetCellsAndUnitsFromFunction(FunctionCallNode node, SymbolTable symbolTable)
     {
         List<List<object>> argumentCombinations = ArgumentToArgumentCombinations(node.Arguments, symbolTable);
         foreach (List<object> arguments in argumentCombinations)
         {
+            //Use Plugin to create a unit from the funtion call and arguments.
             IEnumerable<Unit> units = Plugins.CreateUnit(node.Name.Match, symbolTable, arguments.ToArray());
             foreach (Unit unit in units)
             {
+                //Add all cells in the unit to the symbolTable.
                 foreach (CellReference reference in unit.References())
                 {
                     symbolTable.AddCell(reference, new Cell(reference.X, reference.Y));
@@ -229,14 +248,17 @@ public static class Generator
         return cells;
     }
 
+    //The method attempt to evaluate the expression as a integer value.
     private static bool ExpressionToInt(ExpressionNode node, SymbolTable symbolTable, out int value)
     {
         List<int> values = ExpressionToInts(node, symbolTable);
+        //Expression evaluates to be more or less than one integer value, then its invalid.
         if (values.Count != 1)
         {
             value = 0;
             return false;
         }
+        //Else expression considered valid and return single integer value.
         value = values[0];
         return true;
     }
@@ -253,6 +275,7 @@ public static class Generator
                 return CalculateUnaryNode(unaryNode, symbolTable);
             case IdentifierNode identifierNode:
                 return IdentifierRetriever(identifierNode, symbolTable);
+            //If its a valueNode parse its value as a integer, if successfull return list of integer values.
             case ValueNode valueNode:
                 if(Int32.TryParse(valueNode.ValueToken.Match, out int value))
                 {
@@ -264,8 +287,10 @@ public static class Generator
         }
     }
 
+    //Method evaluates the range and returns a list containing integer values.
     private static List<int> CalculateRange(RangeNode node, SymbolTable symbolTable)
     {
+        //Evaluate the minium and maximum expressions as integers.
         if (!ExpressionToInt(node.MinimumExpression, symbolTable, out int min) ||
             !ExpressionToInt(node.MaximumExpression, symbolTable, out int max))
         {
@@ -274,9 +299,11 @@ public static class Generator
 
         List<int> values = new List<int>();
 
+        //Calculate the starting and ending values for the range, based on inclusive or exclusive.
         int start = node.IsMinInclusive ? min : min + 1;
         int end = node.IsMaxInclusive ? max + 1 : max;
 
+        //loop through the range, adding each integer value to the list of values.
         for (int i = start; i < end; i++)
         {
             values.Add(i);
@@ -287,9 +314,11 @@ public static class Generator
 
     private static List<int> CalculateBinaryNode(BinaryNode node, SymbolTable symbolTable)
     {
+        //check right and left expressions of the binaryNode.
         List<int> left = ExpressionToInts(node.Left, symbolTable);
         List<int> right = ExpressionToInts(node.Right, symbolTable);
         
+        //Switch case to check which binary operation to pick and use.
         switch(node.BinaryType)
         {
             case BinaryType.Plus:
