@@ -174,7 +174,7 @@ public static class Parser {
     private static FunctionCallNode ParseFunctionCall(TokenStream stream) 
     {
         List<ArgumentNode> arguments = new List<ArgumentNode>();
-        Token unionToken = new Token(TokenType.Identifier, "union", "", 0, 0, "");
+        Token unionToken = new Token(TokenType.Identifier, "Union", "", 0, 0, "");
 
         if (stream.Expect(TokenType.Identifier, out Token? funcCall)) 
         {
@@ -412,7 +412,7 @@ public static class Parser {
 
             if (stream.Peek(false, out Token? argumentsCheck) && (argumentsCheck.Type == TokenType.Space || argumentsCheck.Type == TokenType.Newline))
             {
-                return new FunctionCallNode(new Token(TokenType.Identifier, "", "", 0, 0, ""), new());
+                return new FunctionCallNode(nameToken, new());
             }
 
             List<ArgumentNode> ruleArguments = ParseFuncArguments(stream);
