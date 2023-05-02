@@ -30,6 +30,7 @@ public sealed class Cell
         X = cell.X;
         Y = cell.Y;
         _digit = cell.Digit;
+        IsGiven = cell.IsGiven;
         _candidates = cell._candidates.ToHashSet();
     }
 
@@ -106,6 +107,19 @@ public sealed class Cell
         return EliminateCandidate(_candidates.Where(predicate));
     }
 
+    public void AddCandidate(int candidate)
+    {
+        _candidates.Add(candidate);
+        if (_candidates.Count == 1)
+        {
+            Digit = _candidates.First();
+        }
+        else if (_candidates.Count != 1)
+        {
+            Digit = EmptyDigit;
+        }
+    }
+
     public bool HasCandidate(int candidate)
     {
         return _candidates.Contains(candidate);
@@ -118,14 +132,7 @@ public sealed class Cell
 
     public override string ToString()
     {
-        if(Digit == EmptyDigit)
-        {
-            return ".";
-        }
-        else
-        {
-            return Digit.ToString();
-        }
+        return $"({ X}, { Y}) {(Digit == EmptyDigit ? "." : Digit)}";
     }
 
 }
