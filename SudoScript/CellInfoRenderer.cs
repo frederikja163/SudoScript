@@ -17,6 +17,11 @@ public sealed class CellInfoRenderer
 
         foreach (Unit unit in _board.Units)
         {
+            if (!unit.Rules().Any())
+            {
+                continue;
+            }
+            
             foreach (Cell cell in unit.Cells())
             {
                 CellReference reference = (cell.X, cell.Y);
@@ -38,15 +43,6 @@ public sealed class CellInfoRenderer
             _selectedUnit = 0;
             _renderedCell = value;
             Render();
-        }
-    }
-
-    private void ClearFrom(int line)
-    {
-        for (int i = 0; i < line; i++)
-        {
-            Console.SetCursorPosition(Console.WindowWidth - _width, line);
-            Console.WriteLine(new string(' ', _width));
         }
     }
 
@@ -84,22 +80,19 @@ public sealed class CellInfoRenderer
     
     public void Render()
     {
+        int line = 0;
+        
         // Clear if no cell is being rendered.
         if (_renderedCell is null)
         {
-            ClearFrom(0);
+            ClearRemaining();
             return;
         }
 
-        int line = 0;
-        
         if (!_board.TryGetCell(_renderedCell, out Cell? cell))
         {
             WriteLine("No cell selected.");
-            while (line + 1 < Console.WindowHeight)
-            {
-                WriteLine("");
-            }
+            ClearRemaining();
             return;
         }
         
@@ -109,13 +102,7 @@ public sealed class CellInfoRenderer
 
         for (int i = 0; i < SelectedUnits.Count; i++)
         {
-            Unit unit = SelectedUnits[i];
-            // Only display units with rules.
-            if (!unit.Rules().Any())
-            {
-                continue;
-            }
-
+            Unit unit = SelectedUnits[i];   
             if (i == _selectedUnit)
             {
                 Console.BackgroundColor = ConsoleHelper.HighlightedUnit;
@@ -131,10 +118,7 @@ public sealed class CellInfoRenderer
             }
         }
 
-        while (line + 1 < Console.WindowHeight)
-        {
-            WriteLine("");
-        }
+        ClearRemaining();
 
         void WriteLine(string message)
         {
@@ -147,6 +131,14 @@ public sealed class CellInfoRenderer
             else
             {
                 Console.WriteLine(message + new string(' ', _width - message.Length));
+            }
+        }
+
+        void ClearRemaining()
+        {
+            while (line + 1 < Console.WindowHeight)
+            {
+                WriteLine("");
             }
         }
     }

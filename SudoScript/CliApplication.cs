@@ -28,7 +28,7 @@ public sealed class CliApplication
         ProgramNode programNode = Parser.ParseProgram(reader);
         _board = Generator.GetBoardFromAST(programNode); 
         _boardRenderer = new BoardRenderer(_board);
-        _cellInfoRenderer = new CellInfoRenderer(_board, 50);
+        _cellInfoRenderer = new CellInfoRenderer(_board,  Console.WindowWidth / 2);
         _selectedCell = (_board.MinX, _board.MinY);
         SelectedCell = _selectedCell;
     }
@@ -108,7 +108,7 @@ public sealed class CliApplication
                 case ConsoleKey.Tab:
                     if (_cellInfoRenderer.SelectedUnit is null)
                     {
-                        return;
+                        continue;
                     }
                     
                     _boardRenderer.ClearHighlights(_cellInfoRenderer.SelectedUnit.References()
@@ -126,7 +126,7 @@ public sealed class CliApplication
                 case ConsoleKey.F2:
                     _board = Solver.Solve(_board);
                     _boardRenderer = new BoardRenderer(_board);
-                    _cellInfoRenderer = new CellInfoRenderer(_board, 50);
+                    _cellInfoRenderer = new CellInfoRenderer(_board, Console.WindowWidth / 2);
                     SelectedCell = SelectedCell;
                     break;
             }
