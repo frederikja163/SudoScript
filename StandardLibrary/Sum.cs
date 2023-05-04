@@ -87,9 +87,18 @@ namespace StandardLibrary
         public bool ValidateRules(Unit unit)
         {
             int counter = 0;
-            foreach (Cell cell in unit.Cells()) { counter += cell.Digit; }
-            if (counter == SumVal) { return true; }
-            return false;
+            bool isAnyEmpty = false;
+            foreach (Cell cell in unit.Cells())
+            {
+                if (cell.Digit == Cell.EmptyDigit)
+                {
+                    isAnyEmpty = true;
+                }
+                counter += cell.Digit;
+            }
+
+            return (counter == SumVal && !isAnyEmpty) ||
+                   (counter < SumVal && isAnyEmpty);
         }
     }
 }

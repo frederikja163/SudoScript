@@ -132,7 +132,14 @@ public sealed class Cell
 
     public override string ToString()
     {
-        return $"({ X}, { Y}) {(Digit == EmptyDigit ? "." : Digit)}";
+        return ToString($"(X, Y) Digit");
+    }
+
+    public string ToString(string format)
+    {
+        return format.Replace("Digit", _digit == EmptyDigit ? "." : _digit.ToString())
+            .Replace("X", X.ToString())
+            .Replace("Y", Y.ToString());
     }
 
 }

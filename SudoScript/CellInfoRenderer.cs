@@ -4,11 +4,11 @@ namespace SudoScript;
 
 public sealed class CellInfoRenderer
 {
-    private CellReference? _renderedCell = null;
+    private CellReference? _renderedCell;
     private readonly Board _board;
     private readonly int _width;
-    private Dictionary<CellReference, List<Unit>> _cellsToUnits = new Dictionary<CellReference, List<Unit>>();
-    private int _selectedUnit = 0;
+    private readonly Dictionary<CellReference, List<Unit>> _cellsToUnits = new Dictionary<CellReference, List<Unit>>();
+    private int _selectedUnit;
 
     public CellInfoRenderer(Board board, int width)
     {
@@ -54,6 +54,11 @@ public sealed class CellInfoRenderer
     {
         get
         {
+            if (_renderedCell is null)
+            {
+                return new List<Unit>();
+            }
+            
             // Get the units affecting this cell.
             // Empty list in case there are no rules.
             if (!_cellsToUnits.TryGetValue(_renderedCell, out List<Unit>? units))
@@ -66,9 +71,9 @@ public sealed class CellInfoRenderer
         }
     }
     
-    public Unit SelectedUnit
+    public Unit? SelectedUnit
     {
-        get => SelectedUnits[_selectedUnit];
+        get => SelectedUnits.Any() ? SelectedUnits[_selectedUnit] : null;
     }
 
     public void MoveSelection(int delta)
@@ -85,9 +90,19 @@ public sealed class CellInfoRenderer
             ClearFrom(0);
             return;
         }
-        
-        Cell cell = _board[_renderedCell.X, _renderedCell.Y];
+
         int line = 0;
+        
+        if (!_board.TryGetCell(_renderedCell, out Cell? cell))
+        {
+            WriteLine("No cell selected.");
+            while (line + 1 < Console.WindowHeight)
+            {
+                WriteLine("");
+            }
+            return;
+        }
+        
         WriteLine($"Digit: {(cell.Digit == Cell.EmptyDigit ? " " : cell.Digit)}");
         WriteLine($"Is Given: {(cell.IsGiven ? "[X]" : "[ ]")}");
         WriteLine($"Candidates: {{{string.Join(", ", cell.Candidates())}}}");
@@ -114,6 +129,11 @@ public sealed class CellInfoRenderer
             {
                 Console.ResetColor();
             }
+        }
+
+        while (line + 1 < Console.WindowHeight)
+        {
+            WriteLine("");
         }
 
         void WriteLine(string message)
