@@ -56,5 +56,10 @@ namespace StandardLibrary
             //The loop has checked all digits without returning
             return true;
         }
+
+        public override string ToString()
+        {
+            return nameof(Unique);
+        }
     }
 }

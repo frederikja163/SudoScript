@@ -4,19 +4,24 @@ namespace StandardLibrary
 {
     public class Row : Unit
     {
-        public Row(int y) : base(InitCells(1, y), new List<IRule> { new OneRule() }) //X is assumed to be 1
+        public Row(int y) : this(1, y) // X is assumed to be 1.
         {
         }
-        public Row(int x, int y) : base(InitCells(x, y), new List<IRule> { new OneRule() })
+        public Row(int x, int y) : this((x, y))
         {
         }
 
-        private static List<CellReference> InitCells(int x, int y)
+        public Row(CellReference reference) : base(InitCells(reference), new List<IRule>() { new OneRule() })
+        {
+            
+        }
+
+        private static List<CellReference> InitCells(CellReference reference)
         {
             List<CellReference> rowCells = new List<CellReference>();
-            for (int i = x; i < x + 9; i++)
+            for (int i = reference.X; i < reference.X + 9; i++)
             {
-                rowCells.Add(new CellReference(i, y));
+                rowCells.Add(reference with { X = i });
             }
             return rowCells;
         }

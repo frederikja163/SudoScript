@@ -32,5 +32,10 @@ namespace StandardLibrary
             }
             return true;
         }
+
+        public override string ToString()
+        {
+            return nameof(Odd);
+        }
     }
 }

@@ -51,4 +51,9 @@ public sealed class OneRule : IRule
         }
         return true;
     }
+
+    public override string ToString()
+    {
+        return nameof(OneRule);
+    }
 }

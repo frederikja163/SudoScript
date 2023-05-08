@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using SudoScript.Core.Data;
-using Tests;
 
 namespace StandardLibrary.Test
 {

@@ -91,5 +91,10 @@ namespace StandardLibrary
             if (counter == SumVal) { return true; }
             return false;
         }
+
+        public override string ToString()
+        {
+            return $"{nameof(Sum)} {SumVal}";
+        }
     }
 }

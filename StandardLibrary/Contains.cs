@@ -6,16 +6,17 @@ namespace StandardLibrary
     {
         public Contains(int number)
         {
-            Number = number;
+            _number = number;
         }
 
-        internal int Number { get; private init; }
+        private readonly int _number;
+        
         public bool EliminateCandidates(Unit unit)
         {
             int numCandidates = 0;
             foreach (Cell cell in unit.Cells())
             {
-                if (cell.Candidates().Contains(Number))
+                if (cell.Candidates().Contains(_number))
                 {
                     numCandidates++;
                 }
@@ -29,9 +30,9 @@ namespace StandardLibrary
             {
                 foreach (Cell cell in unit.Cells())
                 {
-                    if (cell.Candidates().Contains(Number))
+                    if (cell.Candidates().Contains(_number))
                     {
-                        cell.EliminateCandidate(a => a != Number);
+                        cell.EliminateCandidate(a => a != _number);
                         return true;
                     }
                 }
@@ -44,12 +45,17 @@ namespace StandardLibrary
             bool contains = false;
             foreach (Cell cell in unit.Cells())
             {
-                if (cell.Digit == Number)
+                if (cell.Digit == _number)
                 {
                     contains = true;
                 }
             }
             return contains;
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(Contains)} {_number}";
         }
     }
 }
