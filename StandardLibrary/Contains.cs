@@ -41,15 +41,14 @@ namespace StandardLibrary
 
         public bool ValidateRules(Unit unit)
         {
-            bool contains = false;
             foreach (Cell cell in unit.Cells())
             {
                 if (cell.Digit == Number)
                 {
-                    contains = true;
+                    return true;
                 }
             }
-            return contains;
+            return false;
         }
     }
 }
