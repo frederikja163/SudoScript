@@ -9,7 +9,7 @@ public class Odd : IRule
         bool somethingEliminated = false;
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.EliminateCandidate(c => c % 2 != 1))
+            if (cell.Digit != Cell.EmptyDigit && cell.EliminateCandidate(c => c % 2 != 1))
             {
                 somethingEliminated = true;
             }
@@ -22,7 +22,7 @@ public class Odd : IRule
     {
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.Digit % 2 != 1 && cell.Digit != Cell.EmptyDigit)
+            if (cell.Digit != Cell.EmptyDigit && cell.Digit % 2 != 1)
             {
                 return false;
             }
