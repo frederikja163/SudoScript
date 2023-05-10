@@ -35,7 +35,7 @@ public class Sum : IRule
         //If there is only one empty cell
         if (emptyCells.Count == 1)
         {
-            emptyCells[0].EliminateCandidate(a => a != remainder);
+            return emptyCells[0].EliminateCandidate(a => a != remainder);
         }
 
         //Test each candidate in each cell to see if it is possible to get the sum
@@ -62,8 +62,19 @@ public class Sum : IRule
     public bool ValidateRules(Unit unit)
     {
         int counter = 0;
-        foreach (Cell cell in unit.Cells()) { counter += cell.Digit; }
-        if (counter == SumVal) { return true; }
+        foreach (Cell cell in unit.Cells())
+        {
+            if (cell.Digit == Cell.EmptyDigit)
+            {
+                return true;
+            }
+            counter += cell.Digit;
+        }
+
+        if (counter == SumVal)
+        {
+            return true;
+        }
         return false;
     }
 

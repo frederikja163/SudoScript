@@ -113,7 +113,7 @@ public sealed class Board: ICloneable
         {
             for (int col = MinX; col <= MaxX; col++)
             {
-                s.Append(_cells.TryGetValue((row, col), out Cell? cell) ? cell.ToString("Digit") : ' ');
+                s.Append(_cells.TryGetValue((col, row), out Cell? cell) ? cell.ToString("Digit") : ' ');
             }
             s.AppendLine();
         }
