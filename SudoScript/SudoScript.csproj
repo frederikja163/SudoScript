@@ -18,4 +18,9 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Samples\mashup.ss" />
+    <None Remove="Samples\subdoku.ss" />
+  </ItemGroup>
+
 </Project>

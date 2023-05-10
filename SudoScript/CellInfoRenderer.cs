@@ -30,7 +30,9 @@ public sealed class CellInfoRenderer
                     units = new List<Unit>();
                     _cellsToUnits.Add(reference, units);
                 }
-                units.Add(unit);
+                if (!units.Contains(unit)) {
+                    units.Add(unit);
+                }
             }
         }
     }
@@ -128,7 +130,7 @@ public sealed class CellInfoRenderer
                 }
                 
                 int tabCount = 0;
-                while (str[tabCount] == '\t')
+                while (tabCount < str.Length && str[tabCount] == '\t')
                 {
                     tabCount += 1;
                 }
