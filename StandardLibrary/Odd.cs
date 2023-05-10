@@ -1,41 +1,37 @@
 ﻿using SudoScript.Core.Data;
 
-namespace StandardLibrary
+namespace StandardLibrary;
+
+public class Odd : IRule
 {
-    public class Odd : IRule
+    public bool EliminateCandidates(Unit unit)
     {
-        public bool EliminateCandidates(Unit unit)
+        bool somethingEliminated = false;
+        foreach (Cell cell in unit.Cells())
         {
-            bool somethingEliminated = false;
-            foreach (Cell cell in unit.Cells())
+            if (cell.EliminateCandidate(c => c % 2 != 1))
             {
-                foreach (int candidate in cell.Candidates())
-                {
-                    if (candidate % 2 == 0)
-                    {
-                        somethingEliminated = true;
-                        cell.EliminateCandidate(candidate);
-                    }
-                }
+                somethingEliminated = true;
             }
-            return somethingEliminated;
         }
 
-        public bool ValidateRules(Unit unit)
-        {
-            foreach (Cell cell in unit.Cells())
-            {
-                if (cell.Digit % 2 == 0 && cell.Digit != Cell.EmptyDigit)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+        return somethingEliminated;
+    }
 
-        public override string ToString()
+    public bool ValidateRules(Unit unit)
+    {
+        foreach (Cell cell in unit.Cells())
         {
-            return nameof(Odd);
+            if (cell.Digit % 2 != 1)
+            {
+                return false;
+            }
         }
+        return true;
+    }
+
+    public override string ToString()
+    {
+        return nameof(Odd);
     }
 }
