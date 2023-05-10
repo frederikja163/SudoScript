@@ -1,54 +1,53 @@
 ﻿using SudoScript.Core.Data;
 
-namespace StandardLibrary
-{
-    public class Contains : IRule
-    {
-        public Contains(int number)
-        {
-            Number = number;
-        }
+namespace StandardLibrary;
 
-        internal int Number { get; private init; }
-        public bool EliminateCandidates(Unit unit)
+public class Contains : IRule
+{
+    public Contains(int number)
+    {
+        Number = number;
+    }
+
+    internal int Number { get; private init; }
+    public bool EliminateCandidates(Unit unit)
+    {
+        int numCandidates = 0;
+        foreach (Cell cell in unit.Cells())
         {
-            int numCandidates = 0;
+            if (cell.Candidates().Contains(Number))
+            {
+                numCandidates++;
+            }
+            if (numCandidates > 1)
+            {
+                return false;
+            }
+
+        }
+        if (numCandidates == 1)
+        {
             foreach (Cell cell in unit.Cells())
             {
                 if (cell.Candidates().Contains(Number))
                 {
-                    numCandidates++;
-                }
-                if (numCandidates > 1)
-                {
-                    return false;
-                }
-
-            }
-            if (numCandidates == 1)
-            {
-                foreach (Cell cell in unit.Cells())
-                {
-                    if (cell.Candidates().Contains(Number))
-                    {
-                        cell.EliminateCandidate(a => a != Number);
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public bool ValidateRules(Unit unit)
-        {
-            foreach (Cell cell in unit.Cells())
-            {
-                if (cell.Digit == Number)
-                {
+                    cell.EliminateCandidate(a => a != Number);
                     return true;
                 }
             }
-            return false;
         }
+        return false;
+    }
+
+    public bool ValidateRules(Unit unit)
+    {
+        foreach (Cell cell in unit.Cells())
+        {
+            if (cell.Digit == Number)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
