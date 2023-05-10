@@ -9,7 +9,7 @@ public class Even : IRule
         bool somethingEliminated = false;
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.Digit != Cell.EmptyDigit && cell.EliminateCandidate(c => c % 2 != 0))
+            if (cell.Digit == Cell.EmptyDigit && cell.EliminateCandidate(c => c % 2 != 0))
             {
                 somethingEliminated = true;
             }
