@@ -30,7 +30,7 @@ namespace StandardLibrary
 
         public override string ToString()
         {
-            return $"{nameof(Column)} {_origin}";
+            return base.ToString($"{nameof(Column)} {_origin}");
         }
     }
 }

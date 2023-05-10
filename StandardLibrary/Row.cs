@@ -13,8 +13,10 @@ namespace StandardLibrary
 
         public Row(CellReference reference) : base(InitCells(reference), new List<IRule>() { new OneRule() })
         {
-            
+            _reference = reference;
         }
+
+        private readonly CellReference _reference;
 
         private static List<CellReference> InitCells(CellReference reference)
         {
@@ -24,6 +26,11 @@ namespace StandardLibrary
                 rowCells.Add(reference with { X = i });
             }
             return rowCells;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString($"{nameof(Row)} {_reference}");
         }
     }
 }

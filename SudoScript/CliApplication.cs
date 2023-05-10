@@ -105,6 +105,9 @@ public sealed class CliApplication
                     _cellInfoRenderer.Render();
                     _boardRenderer.RenderCell(SelectedCell);
                     break;
+                case ConsoleKey.Q:
+                    IsRunning = false;
+                    break;
                 case ConsoleKey.Tab:
                     if (_cellInfoRenderer.SelectedUnit is null)
                     {
@@ -114,6 +117,11 @@ public sealed class CliApplication
                     _boardRenderer.ClearHighlights(_cellInfoRenderer.SelectedUnit.References()
                         .Where(c => c != SelectedCell));
                     _cellInfoRenderer.MoveSelection(keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift) ? -1 : +1);
+                    
+                    if (_cellInfoRenderer.SelectedUnit is null)
+                    {
+                        continue;
+                    }
                     _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
                         .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
                     break;

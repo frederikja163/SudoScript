@@ -31,7 +31,7 @@ namespace StandardLibrary
 
         public override string ToString()
         {
-            return $"{nameof(Box)} {_origin}";
+            return base.ToString($"{nameof(Box)} {_origin}");
         }
     }
 }

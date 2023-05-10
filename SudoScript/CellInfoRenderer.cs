@@ -40,7 +40,7 @@ public sealed class CellInfoRenderer
         get => _renderedCell;
         set
         {
-            _selectedUnit = 0;
+            _selectedUnit = -1;
             _renderedCell = value;
             Render();
         }
@@ -69,12 +69,12 @@ public sealed class CellInfoRenderer
     
     public Unit? SelectedUnit
     {
-        get => SelectedUnits.Any() ? SelectedUnits[_selectedUnit] : null;
+        get => SelectedUnits.Any() && _selectedUnit != -1 ? SelectedUnits[_selectedUnit] : null;
     }
 
     public void MoveSelection(int delta)
     {
-        _selectedUnit = (int)MathF.Min(SelectedUnits.Count - 1, MathF.Max(_selectedUnit + delta, 0));
+        _selectedUnit = (int)MathF.Min(SelectedUnits.Count - 1, MathF.Max(_selectedUnit + delta, -1));
         Render();
     }
     
@@ -108,10 +108,7 @@ public sealed class CellInfoRenderer
                 Console.BackgroundColor = ConsoleHelper.HighlightedUnit;
                 Console.ForegroundColor = ConsoleHelper.GetContrastColor(ConsoleHelper.HighlightedUnit);
             }
-            WriteLine($"Unit: {{");
-            WriteLine($"  {string.Join(", ", unit.References())}");
-            WriteLine($"  Rules: {{{string.Join(", ", unit.Rules().Select(r => r.GetType().Name))}}}");
-            WriteLine($"}}");
+            WriteLine(unit.ToString());
             if (i == _selectedUnit)
             {
                 Console.ResetColor();
@@ -122,15 +119,19 @@ public sealed class CellInfoRenderer
 
         void WriteLine(string message)
         {
-            Console.SetCursorPosition(Console.WindowWidth - _width, line++);
-            if (_width < message.Length)
+            string[] lines = message.Split('\n');
+            foreach (string str in lines)
             {
-                Console.WriteLine(message[0.._width]);
-                WriteLine("  " + message[_width..]);
-            }
-            else
-            {
-                Console.WriteLine(message + new string(' ', _width - message.Length));
+                Console.SetCursorPosition(Console.WindowWidth - _width, line++);
+                if (_width < str.Length)
+                {
+                    Console.WriteLine(str[0.._width]);
+                    WriteLine("\t" + str[_width..]);
+                }
+                else
+                {
+                    Console.WriteLine(str + new string(' ', _width - str.Length));
+                }
             }
         }
 

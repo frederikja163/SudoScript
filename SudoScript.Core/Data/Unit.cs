@@ -91,4 +91,30 @@ public class Unit
         }
         return true;
     }
+
+    public string ToString(string name)
+    {
+        string cells = string.Join(" ", _cells);
+        string rules = string.Join("\n", _rules);
+        return
+@$"unit {name} {{
+    {cells}
+    rules {{
+        {rules}
+    }}
+}}";
+    }
+    
+    public override string ToString()
+    {
+        string cells = string.Join(" ", _cells);
+        string rules = string.Join("\n", _rules);
+        return
+@$"unit {{
+    {cells}
+    rules {{
+        {rules}
+    }}
+}}";
+    }
 }
