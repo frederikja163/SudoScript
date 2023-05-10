@@ -14,6 +14,11 @@ public abstract class AntiBase : IRule
         bool somethingEliminated = false;
         foreach (Cell cell in unit.Cells())
         {
+            if (cell.Digit != Cell.EmptyDigit)
+            {
+                continue;
+            }
+            
             List<Cell> seenCells = ListSeenCells(cell, unit);
             foreach (Cell seenCell in seenCells)
             {
@@ -52,7 +57,7 @@ public abstract class AntiBase : IRule
         List<Cell> list = new List<Cell>();
         if (unit.Board is null)
         {
-            throw new Exception(this.ToString() + "- unit.Board is null");
+            throw new Exception(this + "- unit.Board is null");
         }
         for (int i = 0; i < _coordinates.Length; i++)
         {

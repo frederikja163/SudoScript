@@ -126,9 +126,9 @@ public sealed class CellInfoRenderer
                 {
                     return;
                 }
-                
+
                 int tabCount = 0;
-                while (str[tabCount] == '\t')
+                while (tabCount < str.Length && str[tabCount] == '\t')
                 {
                     tabCount += 1;
                 }
