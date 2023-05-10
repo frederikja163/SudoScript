@@ -22,7 +22,7 @@ public class Odd : IRule
     {
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.Digit % 2 != 1)
+            if (cell.Digit % 2 != 1 && cell.Digit != Cell.EmptyDigit)
             {
                 return false;
             }

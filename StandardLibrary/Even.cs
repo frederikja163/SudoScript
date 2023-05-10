@@ -22,7 +22,7 @@ public class Even : IRule
     {
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.Digit % 2 != 0)
+            if (cell.Digit % 2 != 0 && cell.Digit != Cell.EmptyDigit)
             {
                 return false;
             }
