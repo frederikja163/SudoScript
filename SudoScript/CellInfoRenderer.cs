@@ -122,15 +122,24 @@ public sealed class CellInfoRenderer
             string[] lines = message.Split('\n');
             foreach (string str in lines)
             {
-                Console.SetCursorPosition(Console.WindowWidth - _width, line++);
-                if (_width < str.Length)
+                int tabCount = 0;
+                string msg = str.Replace("\r", "");
+                string tabSpaces = new string(' ', 4);
+                while (msg.StartsWith("\t"))
                 {
-                    Console.WriteLine(str[0.._width]);
-                    WriteLine("\t" + str[_width..]);
+                    tabCount += 1;
+                    msg = tabSpaces + msg.Substring(1);
+                }
+                
+                Console.SetCursorPosition(Console.WindowWidth - _width, line++);
+                if (_width < msg.Length)
+                {
+                    Console.WriteLine(msg[0.._width]);
+                    WriteLine(new string('\t',tabCount + 1) + msg[_width..]);
                 }
                 else
                 {
-                    Console.WriteLine(str + new string(' ', _width - str.Length));
+                    Console.WriteLine(msg + new string(' ', _width - msg.Length));
                 }
             }
         }
