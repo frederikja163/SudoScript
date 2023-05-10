@@ -23,6 +23,6 @@ public class Row : Unit
 
     public override string ToString()
     {
-        return nameof(Row);
+        return base.ToString(nameof(Row));
     }
 }

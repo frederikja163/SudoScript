@@ -96,25 +96,13 @@ public class Unit
     {
         string cells = string.Join(" ", _cells);
         string rules = string.Join("\n", _rules);
-        return
-@$"unit {name} {{
-    {cells}
-    rules {{
-        {rules}
-    }}
-}}";
+        return $"unit {name} {{\n\t{cells}\n\trules {{\n\t\t{rules} \n\t}}\n}}";
     }
     
     public override string ToString()
     {
         string cells = string.Join(" ", _cells);
-        string rules = string.Join("\n", _rules);
-        return
-@$"unit {{
-    {cells}
-    rules {{
-        {rules}
-    }}
-}}";
+        string rules = string.Join("\n\t\t", _rules);
+        return $"unit {{\n\t{cells}\n\trules {{\n\t\t{rules} \n\t}}\n}}";
     }
 }
