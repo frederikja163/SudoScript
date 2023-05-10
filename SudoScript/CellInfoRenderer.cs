@@ -30,7 +30,9 @@ public sealed class CellInfoRenderer
                     units = new List<Unit>();
                     _cellsToUnits.Add(reference, units);
                 }
-                units.Add(unit);
+                if (!units.Contains(unit)) {
+                    units.Add(unit);
+                }
             }
         }
     }
