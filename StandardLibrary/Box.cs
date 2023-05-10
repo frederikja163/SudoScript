@@ -8,6 +8,10 @@ public class Box : Unit
     {
     }
 
+    public Box(CellReference reference) : base(InitCells(reference.X, reference.Y), new List<IRule> { new OneRule() })
+    {
+    }
+
     private static List<CellReference> InitCells(int x, int y)
     {
         List<CellReference> cells = new List<CellReference>();
@@ -15,9 +19,10 @@ public class Box : Unit
         {
             for (int j = y; j <= y + 2; j++)
             {
-                cells.Add(new CellReference(i,j));
+                cells.Add(new CellReference(i, j));
             }
         }
+
         return cells;
     }
 }
