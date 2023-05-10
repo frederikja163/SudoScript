@@ -70,6 +70,8 @@ public sealed class TokenStream : IDisposable
     }
 
     public bool HasNext { get => _next.Any(); }
+    public bool HasNonSpecialNext { get => ((IEnumerable<Token>)_next).Reverse().Any(t => !IsSpecialToken(t.Type)); }
+    public bool HasSpecialNext { get => _next.Any(t => IsSpecialToken(t.Type)); }
 
     public IEnumerable<Token> Next(bool ignoreSpecial, Func<TokenType, bool>? stopCondition = null)
     {

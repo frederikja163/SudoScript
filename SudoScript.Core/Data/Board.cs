@@ -1,4 +1,7 @@
-﻿namespace SudoScript.Core.Data;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
+
+namespace SudoScript.Core.Data;
 
 public sealed class Board: ICloneable
 {
@@ -12,12 +15,33 @@ public sealed class Board: ICloneable
         {
             unit.Board = this;
         }
+
+        MaxX = int.MinValue;
+        MaxY = int.MinValue;
+        MinX = int.MaxValue;
+        MinY = int.MaxValue;
+        foreach (CellReference cellReference in _cells.Keys)
+        {
+                if (cellReference.X > MaxX)
+                    MaxX = cellReference.X;
+                if (cellReference.X < MinX)
+                    MinX = cellReference.X;
+                if (cellReference.Y > MaxY)
+                    MaxY = cellReference.Y;
+                if (cellReference.Y < MinY)
+                    MinY = cellReference.Y;
+        }
     }
 
     public Board(IReadOnlyList<Cell> cells, IReadOnlyList<Unit> units)
         : this(cells.ToDictionary(c => (c.X, c.Y)), units)
     {
     }
+    
+    public int MinX { get; }
+    public int MaxX { get; }
+    public int MinY { get; }
+    public int MaxY { get; }
 
     public IReadOnlyList<Unit> Units { get; }
 
@@ -54,6 +78,11 @@ public sealed class Board: ICloneable
         return true;
     }
 
+    public bool IsSolved()
+    {
+        return ValidateRules() && Cells().All(c => c.Digit != Cell.EmptyDigit);
+    }
+
     public Board Clone()
     {
         IReadOnlyDictionary<(int, int), Cell> cellsCopy = _cells.ToDictionary(kvp => kvp.Key, kvp => new Cell(kvp.Value));
@@ -69,61 +98,16 @@ public sealed class Board: ICloneable
 
     public override string ToString()
     {
-        return ToString();
-    }
-
-    public string ToString(int cellSize = 2)
-    {
-        int minX = int.MaxValue;
-        int maxX = int.MinValue;
-        int minY = int.MaxValue;
-        int maxY = int.MinValue;
-
-        foreach(Cell cell in _cells.Values)
+        StringBuilder s = new StringBuilder();
+        for (int row = MaxX; row >= MinX; row--)
         {
-            if(cell.X > maxX) maxX = cell.X;
-            if(cell.X < minX) minX = cell.X;
-            if(cell.Y > maxY) maxY = cell.Y;
-            if(cell.Y < minY) minY = cell.Y;
-        }
-
-        string s = "";
-        string newlines = new('\n', cellSize / 3 + 1);
-
-        for(int row = maxX; row >= minX; row--)
-        {
-            for(int col = minX; col <= maxX; col++)
+            for (int col = MinX; col <= MaxX; col++)
             {
-                s += Center(VisualizeCellAt(col, row), cellSize);
+                s.Append(_cells.TryGetValue((row, col), out Cell? cell) ? cell.Digit : '.');
             }
-            s += row == minY ? "" : newlines;
+            s.AppendLine();
         }
 
-        return s;
-    }
-
-    private string VisualizeCellAt(int x, int y)
-    {
-        if(_cells.TryGetValue((x, y), out Cell? cell))
-        {
-            return cell.ToString();
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    private static string Center(string s, int length)
-    {
-        int left = Math.Abs((int)((length - s.Length) / 2d));
-        if(s.Length < length)
-        {
-            int rightPad = (int)Math.Ceiling((length - s.Length) / 2d);
-            return new string(' ', left) + s + new string(' ', rightPad);
-        } else
-        {
-            return s.Substring(left, length);
-        }
+        return s.ToString();
     }
 }
