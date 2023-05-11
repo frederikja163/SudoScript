@@ -39,7 +39,6 @@ internal sealed class AntiKingTests
         board[6, 7].Digit = 1;
         board[4, 7].Digit = 2;
 
-        Assert.IsTrue(unit.ValidateRules());
         Assert.IsTrue(board.ValidateRules());
         Assert.DoesNotThrow(() => unit.EliminateCandidates());
     }

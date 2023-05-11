@@ -30,11 +30,7 @@ public class Contains : IRule
         {
             foreach (Cell cell in unit.Cells())
             {
-                if (cell.HasCandidate(_number))
-                {
-                    cell.EliminateCandidate(a => a != _number);
-                    return true;
-                }
+                return cell.EliminateCandidate(a => a != _number);
             }
         }
 

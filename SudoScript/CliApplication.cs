@@ -72,6 +72,7 @@ public sealed class CliApplication
                 case ConsoleKey.RightArrow:
                     SelectedCell = new CellReference((int)MathF.Min(SelectedCell.X + 1, _board.MaxX), SelectedCell.Y);
                     break;
+                case ConsoleKey.Q:
                 case ConsoleKey.Escape:
                     IsRunning = false;
                     break;
@@ -104,9 +105,6 @@ public sealed class CliApplication
 
                     _cellInfoRenderer.Render();
                     _boardRenderer.RenderCell(SelectedCell);
-                    break;
-                case ConsoleKey.Q:
-                    IsRunning = false;
                     break;
                 case ConsoleKey.Tab:
                     if (_cellInfoRenderer.SelectedUnit is not null)
