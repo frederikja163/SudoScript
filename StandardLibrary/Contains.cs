@@ -13,25 +13,22 @@ public class Contains : IRule
 
     public bool EliminateCandidates(Unit unit)
     {
-        int numCandidates = 0;
+        Cell? cellsWithCandidate = null;
         foreach (Cell cell in unit.Cells())
         {
             if (cell.HasCandidate(_number))
             {
-                numCandidates++;
-                if (numCandidates > 1)
+                cellsWithCandidate = cell;
+                if (cellsWithCandidate is null)
                 {
                     return false;
                 }
             }
         }
-
-        if (numCandidates == 1)
+        if (cellsWithCandidate is not null)
         {
-            foreach (Cell cell in unit.Cells())
-            {
-                return cell.EliminateCandidate(a => a != _number);
-            }
+            cellsWithCandidate.Digit = _number;
+            return true;
         }
 
         return false;
@@ -39,15 +36,7 @@ public class Contains : IRule
 
     public bool ValidateRules(Unit unit)
     {
-        foreach (Cell cell in unit.Cells())
-        {
-            if (cell.Digit == _number)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return unit.Cells().Any(c => c.HasCandidate(_number));
     }
 
     public override string ToString()

@@ -57,7 +57,7 @@ public sealed class ContainsTests
         board[5, 5].Digit = 9;
         board[7, 7].Digit = 7;
 
-        Assert.IsFalse(unit.ValidateRules());
+        Assert.IsTrue(unit.ValidateRules());
         Assert.DoesNotThrow(() => unit.EliminateCandidates());
     }
 
@@ -84,8 +84,7 @@ public sealed class ContainsTests
         board[4, 4].Digit = 4;
         board[5, 5].Digit = 9;
         board[7, 7].Digit = 7;
-            
-        Assert.IsFalse(unit.ValidateRules());
+
         unit.EliminateCandidates();
         Assert.IsTrue(board[3, 3].Candidates().Contains(8));
         Assert.IsTrue(board[6, 6].Candidates().Contains(8));

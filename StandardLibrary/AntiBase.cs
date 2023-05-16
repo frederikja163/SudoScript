@@ -19,8 +19,7 @@ public abstract class AntiBase : IRule
                 continue;
             }
             
-            IEnumerable<Cell> visibleCells = GetVisibleCells(cell, unit);
-            foreach (Cell visibleCell in visibleCells)
+            foreach (Cell visibleCell in GetVisibleCells(cell, unit))
             {
                 if (cell.EliminateCandidate(visibleCell.Digit))
                 {
@@ -60,7 +59,7 @@ public abstract class AntiBase : IRule
         }
         for (int i = 0; i < _coordinates.Length; i++)
         {
-            if (unit.Board.TryGetCell(cell.X, cell.Y, out Cell? visibleCell))
+            if (unit.Board.TryGetCell(_coordinates[i].X + cell.X, _coordinates[i].Y + cell.Y, out Cell? visibleCell))
             {
                 yield return visibleCell;
             }
