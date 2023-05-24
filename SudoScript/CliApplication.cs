@@ -28,9 +28,9 @@ public sealed class CliApplication
         ProgramNode programNode = Parser.ParseProgram(reader);
         _board = Generator.GetBoardFromAST(programNode); 
         _boardRenderer = new BoardRenderer(_board);
-        _cellInfoRenderer = new CellInfoRenderer(_board, 50);
-        _selectedCell = (1, 1);
-        SelectedCell = (1, 1);
+        _cellInfoRenderer = new CellInfoRenderer(_board,  Console.WindowWidth / 2);
+        _selectedCell = (_board.MinX, _board.MinY);
+        SelectedCell = _selectedCell;
     }
 
     public CellReference SelectedCell
@@ -42,8 +42,11 @@ public sealed class CliApplication
             _boardRenderer.ClearHighlights();
             _boardRenderer.SetHighlight(value, ConsoleHelper.HighlightedCell);
             _cellInfoRenderer.RenderedCell = _selectedCell;
-            _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
-                .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
+            if (_cellInfoRenderer.SelectedUnit is not null)
+            {
+                _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
+                    .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
+            }
         }
     }
     
@@ -58,17 +61,18 @@ public sealed class CliApplication
             switch (keyInfo.Key)
             {
                 case ConsoleKey.DownArrow:
-                    SelectedCell = new CellReference(SelectedCell.X, SelectedCell.Y - 1);
+                    SelectedCell = new CellReference(SelectedCell.X,  (int)MathF.Max(SelectedCell.Y - 1, _board.MinY));
                     break;
                 case ConsoleKey.UpArrow:
-                    SelectedCell = new CellReference(SelectedCell.X, SelectedCell.Y + 1);
+                    SelectedCell = new CellReference(SelectedCell.X, (int)MathF.Min(SelectedCell.Y + 1, _board.MaxY));
                     break;
                 case ConsoleKey.LeftArrow:
-                    SelectedCell = new CellReference(SelectedCell.X - 1, SelectedCell.Y);
+                    SelectedCell = new CellReference( (int)MathF.Max(SelectedCell.X - 1, _board.MinX), SelectedCell.Y);
                     break;
                 case ConsoleKey.RightArrow:
-                    SelectedCell = new CellReference(SelectedCell.X + 1, SelectedCell.Y);
+                    SelectedCell = new CellReference((int)MathF.Min(SelectedCell.X + 1, _board.MaxX), SelectedCell.Y);
                     break;
+                case ConsoleKey.Q:
                 case ConsoleKey.Escape:
                     IsRunning = false;
                     break;
@@ -103,11 +107,18 @@ public sealed class CliApplication
                     _boardRenderer.RenderCell(SelectedCell);
                     break;
                 case ConsoleKey.Tab:
-                    _boardRenderer.ClearHighlights(_cellInfoRenderer.SelectedUnit.References()
-                        .Where(c => c != SelectedCell));
+                    if (_cellInfoRenderer.SelectedUnit is not null)
+                    {
+                        _boardRenderer.ClearHighlights(_cellInfoRenderer.SelectedUnit.References()
+                            .Where(c => c != SelectedCell));
+                    }
                     _cellInfoRenderer.MoveSelection(keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift) ? -1 : +1);
-                    _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
-                        .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
+                    
+                    if (_cellInfoRenderer.SelectedUnit is not null)
+                    {
+                        _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
+                            .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
+                    }
                     break;
                 // Eliminate candidates.
                 case ConsoleKey.F1:
@@ -118,7 +129,7 @@ public sealed class CliApplication
                 case ConsoleKey.F2:
                     _board = Solver.Solve(_board);
                     _boardRenderer = new BoardRenderer(_board);
-                    _cellInfoRenderer = new CellInfoRenderer(_board, 50);
+                    _cellInfoRenderer = new CellInfoRenderer(_board, Console.WindowWidth / 2);
                     SelectedCell = SelectedCell;
                     break;
             }

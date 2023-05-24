@@ -6,7 +6,7 @@ namespace SudoScript;
 public sealed class BoardRenderer
 {
     private readonly Board _board;
-    private readonly Dictionary<CellReference, ConsoleColor> _cellColors = new Dictionary<CellReference, ConsoleColor>();
+    private readonly Dictionary<CellReference, ConsoleColor> _cellColors = new();
 
     public BoardRenderer(Board board)
     {
@@ -16,13 +16,13 @@ public sealed class BoardRenderer
     private void RenderBoard()
     {
         Console.SetCursorPosition(0, 1);
-        for (int row = _board.MaxX; row >= _board.MinX; row--)
+        for (int row = _board.MaxY; row >= _board.MinY; row--)
         {
             Console.Write(row + "|");
             // TODO: Maybe cache as many cells as possible here, and write them at once with fewer calls to Console.Write();
             for (int col = _board.MinX; col <= _board.MaxX; col++)
             {
-                Cell cell = _board[col, row];
+                
                 if (_cellColors.TryGetValue((col, row), out ConsoleColor backgroundColor))
                 {
                     Console.BackgroundColor = backgroundColor;
@@ -33,7 +33,7 @@ public sealed class BoardRenderer
                     Console.ResetColor();
                 }
 
-                Console.Write((cell.Digit == Cell.EmptyDigit ? "." : cell.Digit.ToString()) + " ");
+                Console.Write(_board.TryGetCell(col, row, out Cell? cell) ? cell.ToString("Digit ") : "  ");
             }
             Console.ResetColor();
             Console.WriteLine();
@@ -51,7 +51,6 @@ public sealed class BoardRenderer
     public void RenderCell(CellReference cellReference)
     {
         (int left, int top) = Console.GetCursorPosition();
-        Cell cell = _board[cellReference.X, cellReference.Y];
         
         if (_cellColors.TryGetValue(cellReference, out ConsoleColor backgroundColor))
         {
@@ -62,8 +61,8 @@ public sealed class BoardRenderer
         {
             Console.ResetColor();
         }
-        Console.SetCursorPosition(cellReference.X * 2, _board.MaxY - _board.MinY - cellReference.Y + 2);
-        Console.Write((cell.Digit == Cell.EmptyDigit ? "." : cell.Digit.ToString()) + " ");
+        Console.SetCursorPosition((cellReference.X - _board.MinX) * 2 + 2, _board.MaxY - _board.MinY + 1 - (cellReference.Y - _board.MinY));
+        Console.Write(_board.TryGetCell(cellReference.X, cellReference.Y, out Cell? cell) ? cell.ToString("Digit ") : "  ");
         
         Console.ResetColor();
         Console.SetCursorPosition(left, top);

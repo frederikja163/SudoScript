@@ -1,8 +1,4 @@
-﻿using SudoScript.Core;
-using SudoScript.Core.Ast;
-using SudoScript.Core.Data;
-
-namespace SudoScript;
+﻿namespace SudoScript;
 
 internal static class Program
 {

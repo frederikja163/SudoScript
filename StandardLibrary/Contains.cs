@@ -6,48 +6,41 @@ public class Contains : IRule
 {
     public Contains(int number)
     {
-        Number = number;
+        _number = number;
     }
 
-    internal int Number { get; private init; }
+    private readonly int _number;
+
     public bool EliminateCandidates(Unit unit)
     {
-        int numCandidates = 0;
+        Cell? cellsWithCandidate = null;
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.Candidates().Contains(Number))
+            if (cell.HasCandidate(_number))
             {
-                numCandidates++;
-            }
-            if (numCandidates > 1)
-            {
-                return false;
-            }
-
-        }
-        if (numCandidates == 1)
-        {
-            foreach (Cell cell in unit.Cells())
-            {
-                if (cell.Candidates().Contains(Number))
+                cellsWithCandidate = cell;
+                if (cellsWithCandidate is null)
                 {
-                    cell.EliminateCandidate(a => a != Number);
-                    return true;
+                    return false;
                 }
             }
         }
+        if (cellsWithCandidate is not null)
+        {
+            cellsWithCandidate.Digit = _number;
+            return true;
+        }
+
         return false;
     }
 
     public bool ValidateRules(Unit unit)
     {
-        foreach (Cell cell in unit.Cells())
-        {
-            if (cell.Digit == Number)
-            {
-                return true;
-            }
-        }
-        return false;
+        return unit.Cells().Any(c => c.HasCandidate(_number));
+    }
+
+    public override string ToString()
+    {
+        return $"{nameof(Contains)} {_number}";
     }
 }

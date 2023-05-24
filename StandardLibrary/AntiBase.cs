@@ -14,10 +14,14 @@ public abstract class AntiBase : IRule
         bool somethingEliminated = false;
         foreach (Cell cell in unit.Cells())
         {
-            List<Cell> seenCells = ListSeenCells(cell, unit);
-            foreach (Cell seenCell in seenCells)
+            if (cell.Digit != Cell.EmptyDigit)
             {
-                if (cell.EliminateCandidate(seenCell.Digit))
+                continue;
+            }
+            
+            foreach (Cell visibleCell in GetVisibleCells(cell, unit))
+            {
+                if (cell.EliminateCandidate(visibleCell.Digit))
                 {
                     somethingEliminated = true;
                 }
@@ -34,8 +38,8 @@ public abstract class AntiBase : IRule
             {
                 continue;
             }
-            List<Cell> seenCells = ListSeenCells(cell, unit);
-            foreach (Cell seenCell in seenCells)
+            IEnumerable<Cell> visibleCells = GetVisibleCells(cell, unit);
+            foreach (Cell seenCell in visibleCells)
             {
                 if (cell.Digit == seenCell.Digit)
                 {
@@ -47,20 +51,18 @@ public abstract class AntiBase : IRule
     }
     private readonly CellReference[] _coordinates;
 
-    private List<Cell> ListSeenCells(Cell cell, Unit unit)
+    private IEnumerable<Cell> GetVisibleCells(Cell cell, Unit unit)
     {
-        List<Cell> list = new List<Cell>();
         if (unit.Board is null)
         {
-            throw new Exception(this.ToString() + "- unit.Board is null");
+            throw new Exception(this + "- unit.Board is null");
         }
         for (int i = 0; i < _coordinates.Length; i++)
         {
-            if (unit.Board.Cells().Any(c => c.X == cell.X + _coordinates[i].X && c.Y == cell.Y + _coordinates[i].Y))
+            if (unit.Board.TryGetCell(_coordinates[i].X + cell.X, _coordinates[i].Y + cell.Y, out Cell? visibleCell))
             {
-                list.Add(unit.Board[cell.X + _coordinates[i].X, cell.Y + _coordinates[i].Y]);
+                yield return visibleCell;
             }
         }
-        return list;
     }
 }

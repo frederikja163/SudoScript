@@ -4,20 +4,34 @@ namespace StandardLibrary;
 
 public class Column : Unit
 {
-    public Column(int x) : base(InitCells(x, 1), new List<IRule> { new OneRule() }) //Y is assumed to be 1
-    {
-    }
-    public Column(int x, int y) : base(InitCells(x, y), new List<IRule> { new OneRule() })
+    public Column(int x) : this((x, 1)) // Y is assumed to be 1.
     {
     }
 
-    private static List<CellReference> InitCells(int x, int y)
+    public Column(int x, int y) : this((x, y))
+    {
+    }
+
+    public Column(CellReference reference) : base(InitCells(reference), new List<IRule>() { new OneRule() })
+    {
+        _origin = reference;
+    }
+
+    private readonly CellReference _origin;
+
+    private static List<CellReference> InitCells(CellReference reference)
     {
         List<CellReference> columnCells = new List<CellReference>();
-        for (int i = y; i < y + 9; i++)
+        for (int i = reference.Y; i < reference.Y + 9; i++)
         {
-            columnCells.Add(new CellReference(x, i));
+            columnCells.Add(reference with { Y = i });
         }
+
         return columnCells;
+    }
+
+    public override string ToString()
+    {
+        return base.ToString($"{nameof(Column)} {_origin}");
     }
 }

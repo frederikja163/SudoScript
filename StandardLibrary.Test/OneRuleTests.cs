@@ -1,11 +1,7 @@
 ﻿using NUnit.Framework;
-using StandardLibrary;
-using StandardLibrary.Test;
 using SudoScript.Core.Data;
-using Tests;
-using OneRule = StandardLibrary.OneRule;
 
-namespace SudoScript.Core.Test;
+namespace StandardLibrary.Test;
 
 internal sealed class OneRuleTests
 {

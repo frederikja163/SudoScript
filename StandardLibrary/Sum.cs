@@ -20,21 +20,24 @@ public class Sum : IRule
         {
             currentTotal += cell.Digit;
         }
+
         int remainder = SumVal - currentTotal;
         //Make a list of empty cells
         IList<Cell> emptyCells = new List<Cell>();
-        foreach (Cell cell in unit.Cells()) 
-        { 
-            if (cell.Digit == Cell.EmptyDigit) 
-            { 
-                emptyCells.Add(cell); 
-            } 
+        foreach (Cell cell in unit.Cells())
+        {
+            if (cell.Digit == Cell.EmptyDigit)
+            {
+                emptyCells.Add(cell);
+            }
         }
+
         //If there is only one empty cell
         if (emptyCells.Count == 1)
         {
-            emptyCells[0].EliminateCandidate(a => a != remainder);
+            return emptyCells[0].EliminateCandidate(a => a != remainder);
         }
+
         //Test each candidate in each cell to see if it is possible to get the sum
         foreach (Cell cell in emptyCells)
         {
@@ -52,7 +55,27 @@ public class Sum : IRule
             }
 
         }
+
         return somethingEliminated;
+    }
+
+    public bool ValidateRules(Unit unit)
+    {
+        int counter = 0;
+        foreach (Cell cell in unit.Cells())
+        {
+            if (cell.Digit == Cell.EmptyDigit)
+            {
+                return true;
+            }
+            counter += cell.Digit;
+        }
+
+        if (counter == SumVal)
+        {
+            return true;
+        }
+        return false;
     }
 
     private bool RecursiveValidSumSearch(int remainder, List<Cell> emptyCells, int runningSum)
@@ -68,27 +91,28 @@ public class Sum : IRule
                     return true;
                 }
             }
+
             return false;
         }
+
         foreach (int candidate in currentCell.Candidates()) // Test each candidate
         {
-            if (runningSum + candidate > remainder) 
-            { 
-                continue; 
+            if (runningSum + candidate > remainder)
+            {
+                continue;
             }
+
             if (RecursiveValidSumSearch(remainder, emptyCells.ToList(), runningSum + candidate))
             {
                 return true;
             }
         }
+
         return false;
     }
 
-    public bool ValidateRules(Unit unit)
+    public override string ToString()
     {
-        int counter = 0;
-        foreach (Cell cell in unit.Cells()) { counter += cell.Digit; }
-        if (counter == SumVal) { return true; }
-        return false;
+        return $"{nameof(Sum)} {SumVal}";
     }
 }

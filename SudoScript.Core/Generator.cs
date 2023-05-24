@@ -97,7 +97,7 @@ public static class Generator
                     //if its not a unitNode, GetUnitFromStatements is recursively called.
                     else
                     {
-                        IEnumerable<Unit> units = GetUnitFromStatements(node, symbolTable);
+                        IEnumerable<Unit> units = GetUnitFromStatements(unitNode, symbolTable);
                         foreach (Unit newUnit in units)
                         {
                             yield return newUnit;

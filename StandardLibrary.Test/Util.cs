@@ -1,6 +1,6 @@
 ﻿using SudoScript.Core.Data;
 
-namespace Tests;
+namespace StandardLibrary.Test;
 
 internal static class Util
 {

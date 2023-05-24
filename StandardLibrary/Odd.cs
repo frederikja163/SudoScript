@@ -9,15 +9,12 @@ public class Odd : IRule
         bool somethingEliminated = false;
         foreach (Cell cell in unit.Cells())
         {
-            foreach (int candidate in cell.Candidates())
+            if (cell.Digit == Cell.EmptyDigit && cell.EliminateCandidate(c => c % 2 != 1))
             {
-                if (candidate % 2 == 0)
-                {
-                    somethingEliminated = true;
-                    cell.EliminateCandidate(candidate);
-                }
+                somethingEliminated = true;
             }
         }
+
         return somethingEliminated;
     }
 
@@ -25,11 +22,16 @@ public class Odd : IRule
     {
         foreach (Cell cell in unit.Cells())
         {
-            if (cell.Digit % 2 == 0 && cell.Digit != Cell.EmptyDigit)
+            if (cell.Digit != Cell.EmptyDigit && cell.Digit % 2 != 1)
             {
                 return false;
             }
         }
         return true;
+    }
+
+    public override string ToString()
+    {
+        return nameof(Odd);
     }
 }

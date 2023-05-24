@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace SudoScript.Core.Data;
@@ -46,6 +46,16 @@ public sealed class Board: ICloneable
     public IReadOnlyList<Unit> Units { get; }
 
     public Cell this[int x, int y] => _cells[(x, y)];
+
+    public bool TryGetCell(int x, int y, [NotNullWhen(true)] out Cell? cell)
+    {
+        return _cells.TryGetValue((x, y), out cell);
+    }
+    
+    public bool TryGetCell(CellReference cellReference, [NotNullWhen(true)] out Cell? cell)
+    {
+        return _cells.TryGetValue(cellReference, out cell);
+    }
 
     public IEnumerable<Cell> Cells()
     {
@@ -99,11 +109,11 @@ public sealed class Board: ICloneable
     public override string ToString()
     {
         StringBuilder s = new StringBuilder();
-        for (int row = MaxX; row >= MinX; row--)
+        for (int row = MaxY; row >= MinY; row--)
         {
             for (int col = MinX; col <= MaxX; col++)
             {
-                s.Append(_cells.TryGetValue((row, col), out Cell? cell) ? cell.Digit : '.');
+                s.Append(_cells.TryGetValue((col, row), out Cell? cell) ? cell.ToString("Digit") : ' ');
             }
             s.AppendLine();
         }
