@@ -7,10 +7,10 @@ public static class Generator
 {
     static Generator()
     {
-        Plugins.AddUnitFunction("Union", Union);
+        // Plugins.AddUnitFunction("Union", Union);
     }
 
-    private static IEnumerable<Unit> Union(SymbolTable table, object[] args)
+    private static IEnumerable<Unit> Union(object[] args)
     {
         //Creates a new instance of unit class.
         Unit unit = new Unit();
@@ -24,7 +24,7 @@ public static class Generator
             }
             else
             {
-                throw new Exception("Union only accepts Cells as arguments.");
+                throw new ArgumentException();
             }
         }
         yield return unit;
@@ -48,9 +48,10 @@ public static class Generator
 
     // Takes UnitNode, SymbolTable as inputs and a new function from the Plugin class.
     private static void AddUnitFunction(UnitNode node, SymbolTable symbolTable)
-    {   
+    {
+        SymbolTable.ArgType[] args = ArgTypeFromParameterNodes(node.Parameters);
         //register the new Unit function.
-        Plugins.AddUnitFunction(node.NameToken!.Match, (symbolTable, args) =>
+        symbolTable.AddUnitFunction(node.NameToken!.Match, (args) =>
         {
             //Create a new SymbolTable 
             SymbolTable table = new SymbolTable(symbolTable);
@@ -73,11 +74,33 @@ public static class Generator
                 }
                 else
                 {
-                    throw new Exception($"Invalid parameter type.");
+                    throw new ArgumentException();
                 }
             }
             return GetUnitFromStatements(node, symbolTable);
-        });
+        }, args);
+    }
+
+    private static SymbolTable.ArgType[] ArgTypeFromParameterNodes(IReadOnlyList<ParameterNode> parameters)
+    {
+        SymbolTable.ArgType[] args = new SymbolTable.ArgType[parameters.Count];
+        for (int i = 0; i < parameters.Count; i++)
+        {
+            if (parameters[i] is ParameterCellNode)
+            {
+                args[i] = SymbolTable.ArgType.Cell;
+            }
+            else if (parameters[i] is ParameterIdentifierNode)
+            {
+                args[i] = SymbolTable.ArgType.Digit;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        return args;
     }
 
     private static IEnumerable<Unit> GetUnitFromStatements(UnitNode node, SymbolTable symbolTable)
@@ -136,7 +159,7 @@ public static class Generator
 
             foreach(List<object> arguments in argumentCombinations)
             {
-                yield return Plugins.CreateRule(child.Name.Match, arguments.ToArray());
+                yield return symbolTable.GetRules(child.Name.Match, arguments.ToArray());
             }
         }
     }
@@ -222,8 +245,17 @@ public static class Generator
         List<List<object>> argumentCombinations = ArgumentToArgumentCombinations(node.Arguments, symbolTable);
         foreach (List<object> arguments in argumentCombinations)
         {
-            //Use Plugin to create a unit from the funtion call and arguments.
-            IEnumerable<Unit> units = Plugins.CreateUnit(node.Name.Match, symbolTable, arguments.ToArray());
+            //Use SymbolTable to create a unit from the funtion call and arguments.
+            IEnumerable<Unit> units;
+            if (node.Name.Match == "Union") // TODO: Properly support array arguments.
+            {
+                units = Union(arguments.ToArray());
+            }
+            else
+            {
+                units = symbolTable.GetUnits(node.Name.Match, arguments.ToArray());
+            }
+
             foreach (Unit unit in units)
             {
                 //Add all cells in the unit to the symbolTable.
