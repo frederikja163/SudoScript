@@ -30,7 +30,7 @@ public sealed class Arguments
         if (Help)
         {
             Console.WriteLine("USAGE\n\tSudoScript [--watch | -w] [--help | -h] [<path>]");
-            Console.WriteLine("\tOpen the <path> in the TUI interface of SudoScript.");
+            Console.WriteLine("\tOpen the <path> in the TUI of SudoScript.");
             Console.WriteLine("OPTIONS");
             Console.WriteLine("\t<path>\n\tPath to open.\n");
             Console.WriteLine("\t--help, -h\n\tPrint this message.\n");
