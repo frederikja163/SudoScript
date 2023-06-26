@@ -255,126 +255,11 @@ public static class Parser {
         // If argument is not a cell, parse it as an element.
         if (stream.Peek(false, out Token? argument) && argument.Type != TokenType.LeftParenthesis)
         {
-            return ParseElement(stream);
+            return ExpressionParser.Parse(stream);
         }
         
         //otherwise, parse as cell
         return ParseCell(stream);
-    }
-
-    private static ArgumentNode ParseElement(TokenStream stream) 
-    {
-        stream.Peek(true, out Token? token);
-
-        // Parses Element depending on the type of token.
-        switch (token?.Type) {
-            case TokenType.Identifier:
-                if (stream.Expect(TokenType.Identifier, out Token? identifierToken))
-                {
-                    return new IdentifierNode(identifierToken);
-                }
-
-                break;
-            // Minus, plus and number are all parsed as valuenodes
-            case TokenType.Minus:
-            case TokenType.Plus:
-            case TokenType.Number:
-                if(stream.Expect(TokenType.Number, out Token? valueToken))
-                {
-                    return new ValueNode(valueToken);
-                }
-
-                throw new NullReferenceException();
-            // Left- and rightbrackets indicate start of a range.
-            case TokenType.LeftBracket:
-            case TokenType.RightBracket:
-                return ParseRange(stream);
-            // Leftparenthesis indicates start of expression wrapped in parentheses.
-            case TokenType.LeftParenthesis:
-                return ParseExpression(stream);
-        }
-
-        throw new Exception("Argument not identified");
-    }
-
-    private static ExpressionNode ParseExpression(TokenStream stream) 
-    {
-        if(stream.Expect(TokenType.Number, out Token? value))   //
-        {                                                       // Temporary Expression Solution
-            return new ValueNode(value);                        //
-        }                                                       //
-
-        throw new NotImplementedException();
-    }
-
-    private  static ExpressionNode ParseExpression(IEnumerable<Token> tokens) 
-    {
-        // Recursively parses expression.
-        if (tokens.Any(p => p.Type != TokenType.Plus && p.Type != TokenType.Minus))
-        {
-            return ParseTerm(tokens);
-        }
-
-        throw new NotImplementedException();
-    }
-
-    // Helper function that splits expression into first and second halves, excluding operator between the two. 
-    // Ex. 1+2+3*4+5 --> [ 1+2+3*4 ] + [ 5 ]
-    public static void Split<T>(T[] array, int index, out T[] first, out T[] second)
-    {
-        first = array.Take(index-1).ToArray();
-        second = array.Skip(index).ToArray();
-    }
-
-    private static ExpressionNode ParseTerm(IEnumerable<Token> tokens) 
-    {
-        if (tokens.Any(p => p.Type != TokenType.Mod && p.Type != TokenType.Multiply))
-        {
-            return ParseUnary(tokens);
-        }
-
-        Token last = tokens.Last(p => p.Type == TokenType.Mod || p.Type == TokenType.Multiply);
-        int lastIndex = tokens.ToList().LastIndexOf(last);
-        BinaryType type = last.Type == TokenType.Mod ? BinaryType.Mod : BinaryType.Multiply;
-
-        Split(tokens.ToArray(), lastIndex, out Token[] term, out Token[] unary);
-
-        return new BinaryNode(last, type, ParseTerm(term), ParseUnary(unary));
-    }
-
-    private static ExpressionNode ParseUnary(IEnumerable<Token> tokens) 
-    {
-        if (tokens.Any(p => p.Type != TokenType.Plus && p.Type != TokenType.Minus))
-        {
-            return ParseFactor(tokens);
-        }
-
-        throw new NotImplementedException();
-    }
-
-    private static ExpressionNode ParseFactor(IEnumerable<Token> tokens) 
-    {
-        if (tokens.Any(p => p.Type != TokenType.Power))
-        {
-            return ParseFunctionElement(tokens);
-        }
-
-        throw new NotImplementedException();
-    }
-
-    private static ExpressionNode ParseFunctionElement(IEnumerable<Token> tokens) 
-    {
-        if(tokens.First().Type is TokenType.Number)
-        {
-            return new ValueNode(tokens.First());
-        }
-
-        throw new NotImplementedException();
-    }
-
-    private static RangeNode ParseRange(TokenStream stream) 
-    {
-        throw new NotImplementedException();
     }
 
     private static RulesNode ParseRules(TokenStream stream) 
@@ -495,7 +380,7 @@ public static class Parser {
         }
 
         CellNode cellNode = ParseCell(stream);
-        ExpressionNode value = ParseExpression(stream);
+        ExpressionNode value = ExpressionParser.Parse(stream);
 
         return new GivensStatementNode(cellNode, value);
     }
@@ -515,7 +400,7 @@ public static class Parser {
             }
 
             // Parses x
-            x = ParseExpression(stream);
+            x = ExpressionParser.Parse(stream);
 
             // Since x and y are comma separated, parses comma.
             if (!stream.Expect(TokenType.Comma, out Token? commaToken))
@@ -529,7 +414,7 @@ public static class Parser {
             }
 
             // Parses y.
-            y = ParseExpression(stream);
+            y = ExpressionParser.Parse(stream);
 
             // Parses RightParenthesis.
             if (!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
