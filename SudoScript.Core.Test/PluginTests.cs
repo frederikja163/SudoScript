@@ -75,14 +75,14 @@ internal sealed class PluginTests
     [Test]
     public void CreateEmptyRuleTest()
     {
-        IRule rule = Plugins.CreateRule("TestRule1");
+        IRule rule = new SymbolTable().GetRules("TestRule1");
         Assert.IsInstanceOf<TestRule1>(rule);
     }
 
     [Test]
     public void CreateRuleWithCellAndDigitTest()
     {
-        IRule rule = Plugins.CreateRule("TestRule2", new CellReference(1, 2), 3);
+        IRule rule = new SymbolTable().GetRules("TestRule2", new CellReference(1, 2), 3);
         Assert.IsInstanceOf<TestRule2>(rule);
         TestRule2 rule2 = (TestRule2)rule;
         Assert.That(rule2.Cell.X, Is.EqualTo(1));
@@ -93,7 +93,7 @@ internal sealed class PluginTests
     [Test]
     public void CreateRuleWithDigitAndCellTest()
     {
-        IRule rule = Plugins.CreateRule("TestRule2", 3, new CellReference(1, 2));
+        IRule rule = new SymbolTable().GetRules("TestRule2", 3, new CellReference(1, 2));
         Assert.IsInstanceOf<TestRule2>(rule);
         TestRule2 rule2 = (TestRule2)rule;
         Assert.That(rule2.Cell.X, Is.EqualTo(1));
@@ -104,20 +104,20 @@ internal sealed class PluginTests
     [Test]
     public void InvalidOperatorsCreateRule()
     {
-        Assert.Throws<Exception>(() => Plugins.CreateRule("TestRule2", 1, 2));
+        Assert.Throws<Exception>(() => new SymbolTable().GetRules("TestRule2", 1, 2));
     }
 
     [Test]
     public void CreateEmptyUnitTest()
     {
-        Unit rule = Plugins.CreateUnit("TestUnit1", new SymbolTable()).First();
+        Unit rule = new SymbolTable().GetUnits("TestUnit1").First();
         Assert.IsInstanceOf<TestUnit1>(rule);
     }
 
     [Test]
     public void CreateUnitWithCellAndDigitTest()
     {
-        Unit unit = Plugins.CreateUnit("TestUnit2", new SymbolTable(), new CellReference(1, 2), 3).First();
+        Unit unit = new SymbolTable().GetUnits("TestUnit2", new CellReference(1, 2), 3).First();
         Assert.IsInstanceOf<TestUnit2>(unit);
         TestUnit2 unit2 = (TestUnit2)unit;
         Assert.That(unit2.Cell.X, Is.EqualTo(1));
@@ -128,7 +128,7 @@ internal sealed class PluginTests
     [Test]
     public void CreateUnitWithDigitAndCellTest()
     {
-        Unit unit = Plugins.CreateUnit("TestUnit2", new SymbolTable(), 3, new CellReference(1, 2)).First();
+        Unit unit = new SymbolTable().GetUnits("TestUnit2", 3, new CellReference(1, 2)).First();
         Assert.IsInstanceOf<TestUnit2>(unit);
         TestUnit2 unit2 = (TestUnit2)unit;
         Assert.That(unit2.Cell.X, Is.EqualTo(1));
@@ -139,6 +139,6 @@ internal sealed class PluginTests
     [Test]
     public void InvalidOperatorsCreateUnit()
     {
-        Assert.Throws<Exception>(() => Plugins.CreateRule("TestUnit2", 1, 2));
+        Assert.Throws<Exception>(() => new SymbolTable().GetUnits("TestUnit2", 1, 2));
     }
 }

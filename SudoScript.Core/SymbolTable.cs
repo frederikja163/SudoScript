@@ -29,7 +29,7 @@ public sealed class SymbolTable
         _cellTable = new Dictionary<CellReference, Cell>();
         _rules = new Dictionary<string, List<RuleFunction>>();
         _units = new Dictionary<string, List<UnitFunction>>();
-        
+
         string[] files = Directory.GetFiles("./", "*.dll");
         foreach (string file in files)
         {
@@ -50,14 +50,15 @@ public sealed class SymbolTable
                 {
                     foreach ((Func<object[], object> func, ArgType[] args) in GetConstructors(type))
                     {
-                        AddRulesFunction(type.Name, new Func<object[], IRule>(func), args);
+                        AddRulesFunction(type.Name, o => (IRule)func(o), args);
                     }
+
                 }
                 if (type.IsSubclassOf(typeof(Unit)))
                 {
                     foreach ((Func<object[], object> func, ArgType[] args) in GetConstructors(type))
                     {
-                        AddUnitFunction(type.Name, new Func<object[], Unit>(func), args);
+                        AddUnitFunction(type.Name, o => (Unit)func(o), args);
                     }
                 }
 
@@ -65,7 +66,7 @@ public sealed class SymbolTable
                 {
                     foreach ((Func<object[], object> func, ArgType[] args) in GetConstructors(type))
                     {
-                        AddUnitFunction(type.Name, new Func<object[], IEnumerable<Unit>>(func), args);
+                        AddUnitFunction(type.Name, o => (Unit)func(o), args);
                     }
                 }
             }
@@ -164,7 +165,7 @@ public sealed class SymbolTable
         return _cellTable.Values.ToArray();
     }
 
-    public IEnumerable<Unit> GetUnits(string name, object[] args)
+    public IEnumerable<Unit> GetUnits(string name, params object[] args)
     {
         if (!_units.TryGetValue(name, out List<UnitFunction>? functions))
         {
@@ -181,7 +182,7 @@ public sealed class SymbolTable
         return function.Delegate.Invoke(args);
     }
     
-    public IRule GetRules(string name, object[] args)
+    public IRule GetRules(string name, params object[] args)
     {
         if (!_rules.TryGetValue(name, out List<RuleFunction>? functions))
         {
