@@ -6,31 +6,51 @@ namespace SudoScript;
 
 public sealed class CliApplication
 {
-    private Board _board;
-    private CellReference _selectedCell;
-    private BoardRenderer _boardRenderer;
-    private CellInfoRenderer _cellInfoRenderer;
-
-    public CliApplication(string[] args)
+    private Board _board = null!;
+    private CellReference _selectedCell = null!;
+    private BoardRenderer _boardRenderer = null!;
+    private CellInfoRenderer _cellInfoRenderer = null!;
+    public CliApplication(Arguments arguments)
     {
-        Console.Clear();
-        Console.WriteLine(string.Join(' ', args));
-        if (args.Length == 0)
+        if (arguments.Help || string.IsNullOrWhiteSpace(arguments.Path))
         {
-            throw new ArgumentException("No arguments provided, try with 'SudoScript [SudoScriptFile]'");
+            Environment.Exit(string.IsNullOrWhiteSpace(arguments.Path) ? 1 : 0);
         }
 
+        if (arguments.Watch)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(arguments.Path);
+            FileSystemWatcher watcher = new FileSystemWatcher(dirInfo.Parent?.FullName ?? "", dirInfo.Name);
+            watcher.Changed += WatcherOnChanged;
+
+            watcher.NotifyFilter = NotifyFilters.LastWrite;
+            
+            watcher.IncludeSubdirectories = true;
+            watcher.EnableRaisingEvents = true;
+        }
+        
+        Load(arguments.Path);
+    }
+
+    private void WatcherOnChanged(object sender, FileSystemEventArgs e)
+    {
+        Console.WriteLine(e.FullPath);
+        Load(e.FullPath);
+    }
+
+    private void Load(string path)
+    {
+        Console.Clear();
         Console.SetCursorPosition(0, Console.WindowHeight - 1);
         Console.CursorVisible = false;
         Console.Write("[F1 Eliminate candidates] [F2 Solve board]");
         
-        using StreamReader reader = new StreamReader(args[0]);
+        using StreamReader reader = new StreamReader(path);
         ProgramNode programNode = Parser.ParseProgram(reader);
         _board = Generator.GetBoardFromAST(programNode); 
         _boardRenderer = new BoardRenderer(_board);
         _cellInfoRenderer = new CellInfoRenderer(_board,  Console.WindowWidth / 2);
-        _selectedCell = (_board.MinX, _board.MinY);
-        SelectedCell = _selectedCell;
+        SelectedCell = (_board.MinX, _board.MinY);
     }
 
     public CellReference SelectedCell
