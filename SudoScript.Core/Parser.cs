@@ -255,7 +255,7 @@ public static class Parser {
         // If argument is not a cell, parse it as an element.
         if (stream.Peek(false, out Token? argument) && argument.Type != TokenType.LeftParenthesis)
         {
-            return ExpressionParser.Parse(stream);
+            return ExpressionParser.Parse(stream, true);
         }
         
         //otherwise, parse as cell

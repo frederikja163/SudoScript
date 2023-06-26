@@ -6,6 +6,44 @@ namespace SudoScript.Core.Test;
 
 internal sealed class ParserTests
 {
+
+    [TestCase("1", "1")]
+    [TestCase("27", "27")]
+    [TestCase("2 ) /*some code!*/", "2")]
+    [TestCase("2 4 3 code!*/", "2")]
+    public void ParsesSingleNumber(string expression, string match)
+    {
+        TokenStream tokenStream = new(expression);
+        ExpressionNode node = ExpressionParser.Parse(tokenStream, true);
+
+        if(node is ValueNode identifierNode)
+        {
+            Assert.That(identifierNode.ValueToken.Match, Is.EqualTo(match));
+        }
+        else
+        {
+            Assert.Fail();
+        }
+    }
+
+    [TestCase("a", "a")]
+    [TestCase("b \n ) ( unit ", "b")]
+    [TestCase("someName 2", "someName")]
+    public void ParsesSingleIdentifier(string expression, string match)
+    {
+        TokenStream tokenStream = new TokenStream(expression);
+        ExpressionNode node = ExpressionParser.Parse(tokenStream, true);
+
+        if(node is IdentifierNode identifierNode)
+        {
+            Assert.That(identifierNode.NameToken.Match, Is.EqualTo(match));
+        }
+        else
+        {
+            Assert.Fail();
+        }
+    }
+
     // Unit
     [Test]
     public void ParseUnitTestWithoutName()
