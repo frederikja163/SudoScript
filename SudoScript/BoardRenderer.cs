@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using SudoScript.Core.Data;
 
@@ -15,14 +16,13 @@ public sealed class BoardRenderer
 
     private void RenderBoard()
     {
-        Console.SetCursorPosition(0, 1);
+        Console.SetCursorPosition(0, 0);
         for (int row = _board.MaxY; row >= _board.MinY; row--)
         {
             Console.Write(row + "|");
             // TODO: Maybe cache as many cells as possible here, and write them at once with fewer calls to Console.Write();
             for (int col = _board.MinX; col <= _board.MaxX; col++)
             {
-                
                 if (_cellColors.TryGetValue((col, row), out ConsoleColor backgroundColor))
                 {
                     Console.BackgroundColor = backgroundColor;
@@ -50,8 +50,6 @@ public sealed class BoardRenderer
 
     public void RenderCell(CellReference cellReference)
     {
-        (int left, int top) = Console.GetCursorPosition();
-        
         if (_cellColors.TryGetValue(cellReference, out ConsoleColor backgroundColor))
         {
             Console.BackgroundColor = backgroundColor;
@@ -61,11 +59,10 @@ public sealed class BoardRenderer
         {
             Console.ResetColor();
         }
-        Console.SetCursorPosition((cellReference.X - _board.MinX) * 2 + 2, _board.MaxY - _board.MinY + 1 - (cellReference.Y - _board.MinY));
+        Console.SetCursorPosition((cellReference.X - _board.MinX) * 2 + 2, _board.MaxY - _board.MinY - (cellReference.Y - _board.MinY));
         Console.Write(_board.TryGetCell(cellReference.X, cellReference.Y, out Cell? cell) ? cell.ToString("Digit ") : "  ");
         
         Console.ResetColor();
-        Console.SetCursorPosition(left, top);
     }
 
     public void ClearHighlights()
