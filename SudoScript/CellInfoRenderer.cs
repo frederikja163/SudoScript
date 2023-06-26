@@ -30,7 +30,9 @@ public sealed class CellInfoRenderer
                     units = new List<Unit>();
                     _cellsToUnits.Add(reference, units);
                 }
-                units.Add(unit);
+                if (!units.Contains(unit)) {
+                    units.Add(unit);
+                }
             }
         }
     }
@@ -120,24 +122,36 @@ public sealed class CellInfoRenderer
         void WriteLine(string message)
         {
             string[] lines = message.Split('\n');
-            foreach (string str in lines)
+            foreach (string str in lines.Select(s => s.Replace("\r", "")))
             {
-                Console.SetCursorPosition(Console.WindowWidth - _width, line++);
-                if (_width < str.Length)
+                if (line + 3 >= Console.WindowHeight)
                 {
-                    Console.WriteLine(str[0.._width]);
-                    WriteLine("\t" + str[_width..]);
+                    return;
+                }
+
+                int tabCount = 0;
+                while (tabCount < str.Length && str[tabCount] == '\t')
+                {
+                    tabCount += 1;
+                }
+                string msg = str.Replace("\t", "    ");
+                
+                Console.SetCursorPosition(Console.WindowWidth - _width, line++);
+                if (_width < msg.Length)
+                {
+                    Console.WriteLine(msg[0.._width]);
+                    WriteLine(new string('\t', tabCount) + msg[_width..]);
                 }
                 else
                 {
-                    Console.WriteLine(str + new string(' ', _width - str.Length));
+                    Console.WriteLine(msg + new string(' ', _width - msg.Length));
                 }
             }
         }
 
         void ClearRemaining()
         {
-            while (line + 1 < Console.WindowHeight)
+            while (line + 3 < Console.WindowHeight)
             {
                 WriteLine("");
             }

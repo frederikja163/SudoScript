@@ -72,6 +72,7 @@ public sealed class CliApplication
                 case ConsoleKey.RightArrow:
                     SelectedCell = new CellReference((int)MathF.Min(SelectedCell.X + 1, _board.MaxX), SelectedCell.Y);
                     break;
+                case ConsoleKey.Q:
                 case ConsoleKey.Escape:
                     IsRunning = false;
                     break;
@@ -105,25 +106,19 @@ public sealed class CliApplication
                     _cellInfoRenderer.Render();
                     _boardRenderer.RenderCell(SelectedCell);
                     break;
-                case ConsoleKey.Q:
-                    IsRunning = false;
-                    break;
                 case ConsoleKey.Tab:
-                    if (_cellInfoRenderer.SelectedUnit is null)
+                    if (_cellInfoRenderer.SelectedUnit is not null)
                     {
-                        continue;
+                        _boardRenderer.ClearHighlights(_cellInfoRenderer.SelectedUnit.References()
+                            .Where(c => c != SelectedCell));
                     }
-                    
-                    _boardRenderer.ClearHighlights(_cellInfoRenderer.SelectedUnit.References()
-                        .Where(c => c != SelectedCell));
                     _cellInfoRenderer.MoveSelection(keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift) ? -1 : +1);
                     
-                    if (_cellInfoRenderer.SelectedUnit is null)
+                    if (_cellInfoRenderer.SelectedUnit is not null)
                     {
-                        continue;
+                        _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
+                            .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
                     }
-                    _boardRenderer.SetHighlights(_cellInfoRenderer.SelectedUnit.References()
-                        .Where(c => c != SelectedCell), ConsoleHelper.HighlightedUnit);
                     break;
                 // Eliminate candidates.
                 case ConsoleKey.F1:

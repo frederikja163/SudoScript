@@ -1,61 +1,46 @@
 ﻿using SudoScript.Core.Data;
 
-namespace StandardLibrary
-{
-    public class Contains : IRule
-    {
-        public Contains(int number)
-        {
-            _number = number;
-        }
+namespace StandardLibrary;
 
-        private readonly int _number;
-        
-        public bool EliminateCandidates(Unit unit)
+public class Contains : IRule
+{
+    public Contains(int number)
+    {
+        _number = number;
+    }
+
+    private readonly int _number;
+
+    public bool EliminateCandidates(Unit unit)
+    {
+        Cell? cellsWithCandidate = null;
+        foreach (Cell cell in unit.Cells())
         {
-            int numCandidates = 0;
-            foreach (Cell cell in unit.Cells())
+            if (cell.HasCandidate(_number))
             {
-                if (cell.Candidates().Contains(_number))
-                {
-                    numCandidates++;
-                }
-                if (numCandidates > 1)
+                cellsWithCandidate = cell;
+                if (cellsWithCandidate is null)
                 {
                     return false;
                 }
-
             }
-            if (numCandidates == 1)
-            {
-                foreach (Cell cell in unit.Cells())
-                {
-                    if (cell.Candidates().Contains(_number))
-                    {
-                        cell.EliminateCandidate(a => a != _number);
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
-
-        public bool ValidateRules(Unit unit)
+        if (cellsWithCandidate is not null)
         {
-            bool contains = false;
-            foreach (Cell cell in unit.Cells())
-            {
-                if (cell.Digit == _number)
-                {
-                    contains = true;
-                }
-            }
-            return contains;
+            cellsWithCandidate.Digit = _number;
+            return true;
         }
 
-        public override string ToString()
-        {
-            return $"{nameof(Contains)} {_number}";
-        }
+        return false;
+    }
+
+    public bool ValidateRules(Unit unit)
+    {
+        return unit.Cells().Any(c => c.HasCandidate(_number));
+    }
+
+    public override string ToString()
+    {
+        return $"{nameof(Contains)} {_number}";
     }
 }
