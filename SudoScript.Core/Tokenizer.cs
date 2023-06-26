@@ -28,27 +28,18 @@ public enum TokenType {
     Power,
 }
 
-public static class Tokenizer {
-    public static TokenStream GetStream(string src) {
-        return new TokenStream(src);
-    }
-
-    public static TokenStream GetStream(StreamReader reader) {
-        return new TokenStream(reader);
-    }
-}
-
 /// Feel free to remove this comment afterwards, this is purely for implementation details.
 /// <param name="Type">The type of the token</param>
 /// <param name="Match">What this token matches with.</param>
-/// <param name="Line">The line this token is found on. Try to re-use the same line for all tokens if at all possible.</param>
 /// <param name="Row">The row of the start of this token.</param>
 /// <param name="Column">The collumn of the start of this token.</param>
 /// <param name="FileName">The file name of this token.</param>
-public record Token(TokenType Type, string Match, string Line, int Row, int Column, string FileName);
+public record Token(TokenType Type, string Match, int Row, int Column, string FileName);
 
 public sealed class TokenStream : IDisposable
 {
+    int row = 1;
+    int column = 1;
 
     private readonly TextReader _reader;
 
@@ -56,11 +47,14 @@ public sealed class TokenStream : IDisposable
 
     private char? _carry;
 
-    public TokenStream(TextReader reader)
+    private readonly string _src;
+
+    public TokenStream(TextReader reader, string src = "")
     {
         _reader = reader;
         _next = new();
         _carry = null;
+        _src = src;
 
         Continue(false);
     }
@@ -203,11 +197,12 @@ public sealed class TokenStream : IDisposable
             else if(secondCharacter == '*')
             {
                 char lastCharacter = default;
+                char currentCharacter = '\0';
 
                 bool flag = true;
                 while(flag)
                 {
-                    if(GetNextCharacter(out char currentCharacter))
+                    if(GetNextCharacter(out currentCharacter))
                     {
                         if(lastCharacter != '*' && currentCharacter != '/')
                         {
@@ -226,6 +221,7 @@ public sealed class TokenStream : IDisposable
                     }
 
                 }
+                matchList.Add(currentCharacter);
                 type = TokenType.BlockComment;
             }
             match = new string(matchList.ToArray());
@@ -246,7 +242,7 @@ public sealed class TokenStream : IDisposable
             match = character + MatchWhile(c => char.IsDigit(c));
             type = TokenType.Number;
         }
-        else if(character == '\n')
+        else if(character == '\n' || character == '\r' && GetNextCharacter(out char currentCharacter) && currentCharacter == '\n')
         {
             match = character + MatchWhile(c => c == '\n');
             type = TokenType.Newline;
@@ -261,7 +257,30 @@ public sealed class TokenStream : IDisposable
             throw new ArgumentException($"Unrecognized character: {character} is not a recognised token");
         }
 
-        nextToken = new Token(type, match, "", 0, 0, "");
+        nextToken = new Token(type, match, row, column, _src);
+
+        if (nextToken.Type == TokenType.BlockComment || nextToken.Type == TokenType.LineComment)
+        {
+            for (int i = 0; i < nextToken.Match.Length; i++)
+            {
+                column++;
+                if (nextToken.Match[i] == '\n')
+                {
+                    row++;
+                    column = 1;
+                }
+            }
+        }
+        else if (nextToken.Type == TokenType.Newline)
+        {
+            row++;
+            column = 1;
+        }
+        else
+        {
+            column += nextToken.Match.Length;
+        }
+
         return true;
     }
 
