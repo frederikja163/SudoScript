@@ -121,7 +121,7 @@ public static class Parser {
         // While leftBrace is not read, it will keep reading parameters. 
         while (stream.Peek(true ,out Token? endToken) && endToken.Type != TokenType.LeftBrace) 
         {
-            if (!stream.Expect(TokenType.Space, out Token _))
+            if (!stream.Expect(TokenType.Space, out Token? _))
             {
                 throw new Exception("Parameter are expected to be separated by space");
             }
@@ -212,8 +212,7 @@ public static class Parser {
         // If functionCall is a cell, it will parse it accordingly.
         if(stream.Peek(true, out Token? union) && union.Type == TokenType.LeftParenthesis) 
         {
-            arguments.Add(ParseCell(stream));
-
+            arguments.Add(ParseCell(stream)); 
             return new FunctionCallNode(unionToken, arguments);
         }
 
@@ -225,7 +224,7 @@ public static class Parser {
         // Parses single argument.
         List<ArgumentNode> arguments = new List<ArgumentNode>
         {
-            ParseArgument(stream)
+            ExpressionParser.ParseElement(stream)
         };
 
         // Since arguments are separated by spaces, checks for space after first argument.
@@ -247,19 +246,6 @@ public static class Parser {
         }
 
         return arguments;
-    }
-
-    private static ArgumentNode ParseArgument(TokenStream stream) 
-    {
-
-        // If argument is not a cell, parse it as an element.
-        if (stream.Peek(false, out Token? argument) && argument.Type != TokenType.LeftParenthesis)
-        {
-            return ExpressionParser.Parse(stream, true);
-        }
-        
-        //otherwise, parse as cell
-        return ParseCell(stream);
     }
 
     private static RulesNode ParseRules(TokenStream stream) 
@@ -380,51 +366,36 @@ public static class Parser {
         }
 
         CellNode cellNode = ParseCell(stream);
-        ExpressionNode value = ExpressionParser.Parse(stream);
+        ExpressionNode value = ExpressionParser.Parse(stream); 
 
         return new GivensStatementNode(cellNode, value);
     }
 
-    private static CellNode ParseCell(TokenStream stream) 
+    private static CellNode ParseCell(TokenStream stream)
     {
-        ExpressionNode x;
-        ExpressionNode y;
-
-        // Cell grammar is as follows: Cell -> leftParenthesis Expression comma Expression rightParenthesis.
-        // Parses LeftParenthesis.
-        if(stream.Expect(TokenType.LeftParenthesis, out Token? startToken))
+        if(!stream.Expect(TokenType.LeftParenthesis, out Token? startToken))
         {
-            if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Number)
-            {
-                throw new Exception("Expected identifier");
-            }
-
-            // Parses x
-            x = ExpressionParser.Parse(stream);
-
-            // Since x and y are comma separated, parses comma.
-            if (!stream.Expect(TokenType.Comma, out Token? commaToken))
-            {
-                throw new Exception(", expected");
-            }
-
-            if (stream.Peek(true, out identifier) && identifier.Type != TokenType.Number)
-            {
-                throw new Exception("Expected identifier");
-            }
-
-            // Parses y.
-            y = ExpressionParser.Parse(stream);
-
-            // Parses RightParenthesis.
-            if (!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
-            {
-                throw new Exception(") expected");
-            }
-
-            return new CellNode(startToken, endToken, commaToken, x, y);
+            throw new NotImplementedException();
         }
 
-        throw new NullReferenceException();
+        // Parses x
+        ExpressionNode x = ExpressionParser.Parse(stream);
+
+        // Since x and y are comma separated, parses comma.
+        if(!stream.Expect(TokenType.Comma, out Token? commaToken))
+        {
+            throw new Exception(", expected");
+        }
+
+        // Parses y.
+        ExpressionNode y = ExpressionParser.Parse(stream);
+
+        // Parses RightParenthesis.
+        if(!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
+        {
+            throw new Exception(") expected");
+        }
+
+        return new CellNode(startToken, endToken, commaToken, x, y);
     }
 }

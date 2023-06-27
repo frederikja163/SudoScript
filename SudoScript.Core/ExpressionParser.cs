@@ -1,101 +1,137 @@
 ﻿
 using SudoScript.Core.Ast;
+using System.Linq;
 
 namespace SudoScript.Core;
 
 public static class ExpressionParser
 {
-    public static ExpressionNode Parse(TokenStream stream, bool singleElement = false)
+
+    public static ArgumentNode ParseElement(TokenStream stream)
     {
-        Stack<(Token oper, int index)> operatorStack = new();
-        Stack<(ExpressionNode expression, int index)> expressionStack = new();
-
-        int expectingParenthesis = 0;
-        bool expectingEndRange = false;
-
-        bool reduce;
-        bool firstPeek = true;
-
-        int index = 0;
-        while(!singleElement || firstPeek)
+        if(!stream.Peek(true, out Token? peekedToken))
         {
-            firstPeek = false;
-            //Read token as expression and figure out if the expression has ended.
-            if(!stream.Peek(false, out Token? pending) ||
-                pending.Type == TokenType.RightParenthesis && expectingParenthesis == 0 ||
-                pending.Type == TokenType.Newline ||
-                pending.Type == TokenType.Comma)
-            {
-                break;
-            }
-
-            stream.Continue(false);
-
-            if(pending.Type == TokenType.BlockComment || 
-                pending.Type == TokenType.Space ||
-                pending.Type == TokenType.LineComment)
-            {
-                continue;
-            }
-
-            index++;
-
-            Evaluate(pending);
+            throw new ArgumentException();
         }
 
-        if(expressionStack.Count == 1)
+        ArgumentNode argument = null;
+        switch(peekedToken.Type)
         {
-            return expressionStack.Peek().expression;
+            case TokenType.LeftBracket or TokenType.RightBracket : 
+                argument = ParseRange(stream); 
+                break;
+            case TokenType.LeftParenthesis : 
+                argument = ParseCellOrParenthesis(stream); 
+                break;
+            case TokenType.Identifier :
+                stream.Continue(true);
+                argument = new IdentifierNode(peekedToken); 
+                break;
+            case TokenType.Number :
+                stream.Continue(true);
+                argument = new ValueNode(peekedToken); 
+                break;
+            default: 
+                throw new ArgumentException(); 
+        };
+        return argument;
+    }
+
+    private static ExpressionNode ParseRange(TokenStream stream)
+    {
+        if(!stream.Peek(true, out Token? peekedMinToken))
+        {
+            throw new ArgumentException();
+        }
+
+        stream.Continue(true);
+
+        bool isMinInclusive = peekedMinToken.Type == TokenType.LeftBracket;
+        if(!isMinInclusive && peekedMinToken.Type != TokenType.RightBrace)
+        {
+            throw new ArgumentException("Expected bracket for range!");
+        }
+
+        // Parses x
+        ExpressionNode x = Parse(stream);
+
+        // Since x and y are ; separated, parses comma.
+        if(!stream.Expect(TokenType.Semicolon, out Token? semicolonToken))
+        {
+            throw new Exception(", expected");
+        }
+
+        // Parses y.
+        ExpressionNode y = Parse(stream);
+
+        if(!stream.Peek(true, out Token? peekedMaxToken))
+        {
+            throw new ArgumentException();
+        }
+
+        stream.Continue(true);
+
+        bool isMaxInclusive = peekedMaxToken.Type == TokenType.LeftBracket;
+        if(!isMaxInclusive && peekedMaxToken.Type != TokenType.RightBrace)
+        {
+            throw new ArgumentException("Expected bracket for range!");
+        }
+
+        return new RangeNode(peekedMinToken, peekedMaxToken, semicolonToken, x, y, isMinInclusive, isMaxInclusive);
+    }
+
+    private static ArgumentNode ParseCellOrParenthesis(TokenStream stream)
+    {
+        if(!stream.Expect(TokenType.LeftParenthesis, out Token? startToken))
+        {
+            throw new NotImplementedException();
+        }
+
+        // Parses x (or maybe the only expression)
+        ExpressionNode x = Parse(stream);
+
+        // Since x and y are comma separated, parses comma.
+        if(!stream.Peek(true, out Token? peekedToken))
+        {
+            throw new ArgumentException("File-ended abruptly, expected comma or right-parenthesis!");
+        }
+
+        if(peekedToken.Type == TokenType.Comma)
+        {
+            stream.Continue(true);
+
+            // Parses y.
+            ExpressionNode y = Parse(stream);
+
+            // Parses RightParenthesis.
+            if(!stream.Expect(TokenType.RightParenthesis, out Token? endToken))
+            {
+                throw new Exception(") expected");
+            }
+
+            return new CellNode(startToken, endToken, peekedToken, x, y);
+        }
+        else if(peekedToken.Type == TokenType.RightParenthesis)
+        {
+            return x;
         }
         else
         {
-            throw new ArgumentException("Expression could not be parsed!");
-        }
-
-        void Evaluate(Token pending)
-        {
-            //check if pending is an expression by itself
-
-            ExpressionNode? pendingExpression = null;
-            if(pending.Type == TokenType.Identifier)
-            {
-                pendingExpression = new IdentifierNode(pending);
-                reduce = false;
-            }
-            else if(pending.Type == TokenType.Number)
-            {
-                pendingExpression = new ValueNode(pending);
-                reduce = false;
-            }
-            else if(operatorStack.Count <= 0)
-            {
-                reduce = false;
-            }
-            else
-            {
-
-                //if both are operators
-                //get stack top precedence
-                //get token precedence
-
-                //if equal get associativity/default for that precedence
-                reduce = false;
-            }
-
-            if(reduce) //reduce 
-            {
-
-                Evaluate(pending);
-            }
-            else if(pendingExpression is not null)
-            {
-                expressionStack.Push((pendingExpression, index));
-            }
-            else
-            {
-                operatorStack.Push((pending, index));
-            }
+            throw new ArgumentException();
         }
     }
 
+    public static ExpressionNode Parse(TokenStream stream)
+    {
+        ArgumentNode node = ParseElement(stream);
+
+        if(node is ExpressionNode expression)
+        {
+            return expression;
+        }
+        else
+        {
+            throw new ArgumentException("Expected expression, received cell!");
+        }
+    }
 }

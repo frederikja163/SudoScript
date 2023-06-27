@@ -14,7 +14,7 @@ internal sealed class ParserTests
     public void ParsesSingleNumber(string expression, string match)
     {
         TokenStream tokenStream = new(expression);
-        ExpressionNode node = ExpressionParser.Parse(tokenStream, true);
+        ArgumentNode node = ExpressionParser.ParseElement(tokenStream);
 
         if(node is ValueNode identifierNode)
         {
@@ -31,8 +31,8 @@ internal sealed class ParserTests
     [TestCase("someName 2", "someName")]
     public void ParsesSingleIdentifier(string expression, string match)
     {
-        TokenStream tokenStream = new TokenStream(expression);
-        ExpressionNode node = ExpressionParser.Parse(tokenStream, true);
+        TokenStream tokenStream = new(expression);
+        ArgumentNode node = ExpressionParser.ParseElement(tokenStream);
 
         if(node is IdentifierNode identifierNode)
         {
