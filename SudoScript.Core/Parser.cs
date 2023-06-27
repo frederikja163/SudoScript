@@ -241,7 +241,7 @@ public static class Parser {
         }
 
         // If more arguments follow, parse them recursively.
-        if (stream.Peek(false, out Token? identifier) && (identifier.Type == TokenType.Identifier || identifier.Type == TokenType.LeftParenthesis))
+        if (stream.Peek(false, out Token? identifier) && (identifier.Type == TokenType.Identifier || identifier.Type == TokenType.LeftParenthesis || identifier.Type == TokenType.Number))
         {
             arguments.AddRange(ParseArguments(stream));
         }
@@ -299,12 +299,37 @@ public static class Parser {
 
     private static ExpressionNode ParseExpression(TokenStream stream) 
     {
-        if(stream.Expect(TokenType.Number, out Token? value))   //
-        {                                                       // Temporary Expression Solution
-            return new ValueNode(value);                        //
-        }                                                       //
+        stream.Peek(true, out Token? token);
 
-        throw new NotImplementedException();
+        // Parses Element depending on the type of token.
+        switch (token?.Type) {
+            case TokenType.Identifier:
+                if (stream.Expect(TokenType.Identifier, out Token? identifierToken))
+                {
+                    return new IdentifierNode(identifierToken);
+                }
+
+                break;
+            // Minus, plus and number are all parsed as valuenodes
+            case TokenType.Minus:
+            case TokenType.Plus:
+            case TokenType.Number:
+                if(stream.Expect(TokenType.Number, out Token? valueToken))
+                {
+                    return new ValueNode(valueToken);
+                }
+
+                throw new NullReferenceException();
+            // Left- and rightbrackets indicate start of a range.
+            case TokenType.LeftBracket:
+            case TokenType.RightBracket:
+                return ParseRange(stream);
+            // Leftparenthesis indicates start of expression wrapped in parentheses.
+            case TokenType.LeftParenthesis:
+                return ParseExpression(stream);
+        }
+
+        throw new Exception("Argument not identified");
     }
 
     private  static ExpressionNode ParseExpression(IEnumerable<Token> tokens) 
@@ -509,7 +534,7 @@ public static class Parser {
         // Parses LeftParenthesis.
         if(stream.Expect(TokenType.LeftParenthesis, out Token? startToken))
         {
-            if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Number)
+            if (stream.Peek(true, out Token? identifier) && identifier.Type != TokenType.Number && identifier.Type != TokenType.Identifier)
             {
                 throw new Exception("Expected identifier");
             }
@@ -523,7 +548,7 @@ public static class Parser {
                 throw new Exception(", expected");
             }
 
-            if (stream.Peek(true, out identifier) && identifier.Type != TokenType.Number)
+            if (stream.Peek(true, out identifier) && identifier.Type != TokenType.Number && identifier.Type != TokenType.Identifier)
             {
                 throw new Exception("Expected identifier");
             }

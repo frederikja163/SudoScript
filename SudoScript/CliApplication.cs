@@ -44,13 +44,21 @@ public sealed class CliApplication
         Console.SetCursorPosition(0, Console.WindowHeight - 1);
         Console.CursorVisible = false;
         Console.Write("[F1 Eliminate candidates] [F2 Solve board]");
-        
-        using StreamReader reader = new StreamReader(path);
-        ProgramNode programNode = Parser.ParseProgram(reader);
-        _board = Generator.GetBoardFromAST(programNode); 
-        _boardRenderer = new BoardRenderer(_board);
-        _cellInfoRenderer = new CellInfoRenderer(_board,  Console.WindowWidth / 2);
-        SelectedCell = (_board.MinX, _board.MinY);
+
+        try
+        {
+            using StreamReader reader = new StreamReader(path);
+            ProgramNode programNode = Parser.ParseProgram(reader);
+            _board = Generator.GetBoardFromAST(programNode);
+            _boardRenderer = new BoardRenderer(_board);
+            _cellInfoRenderer = new CellInfoRenderer(_board, Console.WindowWidth / 2);
+            SelectedCell = (_board.MinX, _board.MinY);
+        }
+        catch (Exception ex)
+        {
+            Console.Clear();
+            Console.WriteLine(ex.ToString(), ex.StackTrace);
+        }
     }
 
     public CellReference SelectedCell
