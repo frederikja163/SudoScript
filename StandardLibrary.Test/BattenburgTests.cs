@@ -11,7 +11,7 @@ internal sealed class BattenburgTest
         Util.CreateStandardEmpty(unit);
 
 
-        Assert.AreEqual(4, unit.Cells().Count());
+        Assert.That(unit.Cells().Count(), Is.EqualTo(4));
     }
 
     [Test]
