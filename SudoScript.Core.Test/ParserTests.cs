@@ -1,49 +1,154 @@
 ﻿using NUnit.Framework;
 using SudoScript.Core;
 using SudoScript.Core.Ast;
+using System.Linq.Expressions;
 
 namespace SudoScript.Core.Test;
 
 internal sealed class ParserTests
 {
-
-    [TestCase("1", "1")]
-    [TestCase("27", "27")]
-    [TestCase("2 ) /*some code!*/", "2")]
-    [TestCase("2 4 3 code!*/", "2")]
-    public void ParsesSingleNumber(string expression, string match)
+    internal sealed class ExpressionParserTests
     {
-        TokenStream tokenStream = new(expression);
-        ArgumentNode node = ExpressionParser.ParseElement(tokenStream);
 
-        if(node is ValueNode identifierNode)
+        [Test]
+        public void ParsesNegation()
         {
-            Assert.That(identifierNode.ValueToken.Match, Is.EqualTo(match));
+            string expressionString = "a + ( - b )";
+            TokenStream tokenStream = new(expressionString);
+
+            ExpressionNode expressionNode = ExpressionParser.Parse(tokenStream);
+
+            if(expressionNode is BinaryNode binaryExpression)
+            {
+                Assert.That(binaryExpression.BinaryType, Is.EqualTo(BinaryType.Plus));
+                Assert.That(binaryExpression.Left is IdentifierNode identifierR && identifierR.NameToken.Match == "a");
+
+                if(binaryExpression.Right is UnaryNode unaryExpression)
+                {
+                    Assert.That(unaryExpression.UnaryType, Is.EqualTo(UnaryType.Minus));
+                    Assert.That(unaryExpression.Expression is IdentifierNode identifier3L && identifier3L.NameToken.Match == "b");
+                }
+                else
+                {
+                    Assert.Fail();
+                }
+            }
+            else
+            {
+                Assert.Fail();
+            }
         }
-        else
+
+
+        [Test]
+        public void ParsesPlusMultiply()
         {
-            Assert.Fail();
+            string expressionString = "a + b * c";
+            TokenStream tokenStream = new(expressionString);
+
+            ExpressionNode expressionNode = ExpressionParser.Parse(tokenStream);
+
+            if(expressionNode is BinaryNode binaryExpression)
+            {
+                Assert.That(binaryExpression.BinaryType, Is.EqualTo(BinaryType.Plus));
+                Assert.That(binaryExpression.Left is IdentifierNode identifierR && identifierR.NameToken.Match == "a");
+
+                if(binaryExpression.Right is BinaryNode binary2Expression)
+                {
+                    Assert.That(binary2Expression.BinaryType, Is.EqualTo(BinaryType.Multiply));
+                    Assert.That(binary2Expression.Left is IdentifierNode identifier3L && identifier3L.NameToken.Match == "b");
+                    Assert.That(binary2Expression.Right is IdentifierNode identifier3R && identifier3R.NameToken.Match == "c");
+                }
+                else
+                {
+                    Assert.Fail();
+                }
+            }
+            else
+            {
+                Assert.Fail();
+            }
         }
+
+        [Test]
+        public void ParsesPlusChain()
+        {
+            string expressionString = "a + b + c + d";
+            TokenStream tokenStream = new(expressionString);
+            
+            ExpressionNode expressionNode = ExpressionParser.Parse(tokenStream);
+
+            if(expressionNode is BinaryNode binaryExpression)
+            {
+                Assert.That(binaryExpression.BinaryType, Is.EqualTo(BinaryType.Plus));
+                Assert.That(binaryExpression.Right is IdentifierNode identifierR && identifierR.NameToken.Match == "d");
+
+                if(binaryExpression.Left is BinaryNode binary2Expression)
+                {
+                    Assert.That(binary2Expression.BinaryType, Is.EqualTo(BinaryType.Plus));
+                    Assert.That(binary2Expression.Right is IdentifierNode identifier2R && identifier2R.NameToken.Match == "c");
+
+                    if(binary2Expression.Left is BinaryNode binary3Expression)
+                    {
+                        Assert.That(binary3Expression.BinaryType, Is.EqualTo(BinaryType.Plus));
+                        Assert.That(binary3Expression.Left is IdentifierNode identifier3L && identifier3L.NameToken.Match == "a");
+                        Assert.That(binary3Expression.Right is IdentifierNode identifier3R && identifier3R.NameToken.Match == "b");
+                    }
+                    else
+                    {
+                        Assert.Fail();
+                    }
+                }
+                else
+                {
+                    Assert.Fail();
+                }
+            }
+            else
+            {
+                Assert.Fail();
+            }
+
+        }
+
+        [TestCase("1", "1")]
+        [TestCase("27", "27")]
+        [TestCase("2 ) /*some code!*/", "2")]
+        [TestCase("2 4 3 code!*/", "2")]
+        public void ParsesSingleNumber(string expression, string match)
+        {
+            TokenStream tokenStream = new(expression);
+            ArgumentNode node = ExpressionParser.ParseElement(tokenStream);
+
+            if(node is ValueNode identifierNode)
+            {
+                Assert.That(identifierNode.ValueToken.Match, Is.EqualTo(match));
+            }
+            else
+            {
+                Assert.Fail();
+            }
+        }
+
+        [TestCase("a", "a")]
+        [TestCase("b \n ) ( unit ", "b")]
+        [TestCase("someName 2", "someName")]
+        public void ParsesSingleIdentifier(string expression, string match)
+        {
+            TokenStream tokenStream = new(expression);
+            ArgumentNode node = ExpressionParser.ParseElement(tokenStream);
+
+            if(node is IdentifierNode identifierNode)
+            {
+                Assert.That(identifierNode.NameToken.Match, Is.EqualTo(match));
+            }
+            else
+            {
+                Assert.Fail();
+            }
+        }
+
     }
-
-    [TestCase("a", "a")]
-    [TestCase("b \n ) ( unit ", "b")]
-    [TestCase("someName 2", "someName")]
-    public void ParsesSingleIdentifier(string expression, string match)
-    {
-        TokenStream tokenStream = new(expression);
-        ArgumentNode node = ExpressionParser.ParseElement(tokenStream);
-
-        if(node is IdentifierNode identifierNode)
-        {
-            Assert.That(identifierNode.NameToken.Match, Is.EqualTo(match));
-        }
-        else
-        {
-            Assert.Fail();
-        }
-    }
-
     // Unit
     [Test]
     public void ParseUnitTestWithoutName()

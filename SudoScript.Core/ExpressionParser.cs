@@ -1,7 +1,5 @@
 ﻿
 using SudoScript.Core.Ast;
-using System.IO;
-
 namespace SudoScript.Core;
 
 public static class ExpressionParser
@@ -143,16 +141,15 @@ public static class ExpressionParser
         Token? previousOperator = null;
 
         int layer = 0;
-        int expectsRangeEndOnLayer = -1;
 
         bool loopFlag = true;
         bool doPeekFlag = true;
+
         while(loopFlag)
         {
             if(doPeekFlag)
             {
                 stream.Next(false, t => t == TokenType.Space || t == TokenType.BlockComment || t == TokenType.LineComment);
-                
                 if(stream.Peek(false, out peekedToken) && 
                     (peekedToken.Type == TokenType.Space || 
                     peekedToken.Type == TokenType.BlockComment || 
@@ -162,57 +159,14 @@ public static class ExpressionParser
                 }
 
                 loopFlag = stream.Peek(false, out peekedToken) &&
+                    (peekedToken is null ||
                     (peekedToken.Type != TokenType.RightParenthesis || layer != 0) &&
                     peekedToken.Type != TokenType.Newline &&
-                    peekedToken.Type != TokenType.Comma;
-            }
-
-            if(loopFlag && peekedToken is not null)
-            {
-                expressionStack.Add(peekedToken.Type switch
-                {
-                    TokenType.Identifier => new IdentifierNode(peekedToken),
-                    TokenType.Number => new ValueNode(peekedToken),
-                    _ => peekedToken,
-                });
-                stream.Continue(false);
-
-                if(expressionStack[^1] is Token)
-                {
-                    previousOperator = peekedToken;
-
-                    switch(peekedToken.Type)
-                    {
-                        case TokenType.LeftParenthesis:
-                            layer++;
-                            break;
-                        case TokenType.RightParenthesis:
-                            layer--;
-                            break;
-                        case TokenType.LeftBracket:
-                        case TokenType.RightBracket:
-                            if(expectsRangeEndOnLayer == -1)
-                            {
-                                expectsRangeEndOnLayer = layer;
-                                layer++;
-                            }
-                            else if(layer == expectsRangeEndOnLayer)
-                            {
-                                layer--;
-                            }
-                            else
-                            {
-                                throw new ArgumentException();
-                            }
-                            break;
-                    }
-                }
-
-                peekedToken = null;
+                    peekedToken.Type != TokenType.Comma);
             }
 
             int previousPrecedence = previousOperator is not null ? OperatorPrecedence(previousOperator.Type) : int.MaxValue ;
-            int currentPrecedence = peekedToken is not null ? OperatorPrecedence(peekedToken.Type) : int.MinValue;
+            int currentPrecedence = peekedToken is not null ? OperatorPrecedence(peekedToken.Type) : int.MaxValue;
 
             if(expressionStack.Count > 0 &&
                 (previousPrecedence < currentPrecedence ||
@@ -221,10 +175,18 @@ public static class ExpressionParser
             {
                 previousOperator = Reduce(expressionStack);
                 doPeekFlag = false;
+                loopFlag = true;
                 continue;
             }
             else
             {
+                if(doPeekFlag && loopFlag && peekedToken is not null)
+                {
+                    expressionStack.Add(peekedToken);
+                    stream.Continue(false);
+                    previousOperator = peekedToken;
+                    peekedToken = null;
+                }
                 doPeekFlag = true;
             }
         }
@@ -246,7 +208,7 @@ public static class ExpressionParser
                 expressionStack[^2] is Token binaryOperatorToken &&
                 expressionStack[^1] is ExpressionNode rightOperand)
         { //binary operators
-            expressionStack.RemoveRange(expressionStack.Count - 4, 3);
+            expressionStack.RemoveRange(expressionStack.Count - 3, 3);
             BinaryType type = binaryOperatorToken.Type switch
             {
                 TokenType.Plus => BinaryType.Plus,
@@ -270,6 +232,19 @@ public static class ExpressionParser
                 _ => throw new ArgumentException(),
             };
             expressionStack.Add(new UnaryNode(unaryOperatorToken, type, operand));
+        }else if(expressionStack.Count >= 1 &&
+            expressionStack[^1] is Token elementToken)
+        {
+            expressionStack[^1] = elementToken.Type switch
+            {
+                TokenType.Identifier => new IdentifierNode(elementToken),
+                TokenType.Number => new ValueNode(elementToken),
+                _ => throw new ArgumentException(),
+            };
+        }
+        else
+        {
+
         }
 
         //find new previous operator
@@ -284,19 +259,22 @@ public static class ExpressionParser
         return null;
     }
 
+    //TODO: Consider inverting precedence order.
     private static int OperatorPrecedence(TokenType type) => type switch
     {
-        TokenType.RightParenthesis => 0,
-        TokenType.Plus => 1,
-        TokenType.Minus => 1,
+        TokenType.LeftParenthesis => 5,
+        TokenType.Plus => 3,
+        TokenType.Minus => 3,
         TokenType.Multiply => 2,
         TokenType.Mod => 2,
-        TokenType.Power => 3,
-        TokenType.Identifier => 4,
-        TokenType.Number => 4,
-        TokenType.LeftParenthesis => 5,
-        _ => int.MinValue
+        TokenType.Power => 1,
+        TokenType.RightParenthesis => 0,
+        TokenType.Identifier => -1,
+        TokenType.Number => -1,
+        _ => int.MaxValue
     };
+
+    //negation should have different associativity
 
     private static bool OperatorAssociativityIsLeftRight(TokenType type) => type switch
     {
@@ -305,10 +283,10 @@ public static class ExpressionParser
         TokenType.Multiply          => true,
         TokenType.Mod               => true,
         TokenType.Power             => false,
-        TokenType.Identifier        => true,
-        TokenType.Number            => true,
         TokenType.LeftParenthesis   => false,
         TokenType.RightParenthesis  => true,
-        _ => true
+        TokenType.Identifier => true,
+        TokenType.Number => true,
+        _ => false
     };
 }
