@@ -76,7 +76,7 @@ public sealed class SymbolTable
     public SymbolTable(SymbolTable table)
     {
         _digitTable = table._digitTable.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        _units = table._units.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        _units = table._units.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToList());
         _cellTable = table._cellTable;
         _rules = table._rules;
     }
@@ -163,6 +163,11 @@ public sealed class SymbolTable
     public Cell[] GetCells()
     {
         return _cellTable.Values.ToArray();
+    }
+
+    public int GetDigit(string identifier)
+    {
+        return _digitTable[identifier];
     }
 
     public IEnumerable<Unit> GetUnits(string name, params object[] args)

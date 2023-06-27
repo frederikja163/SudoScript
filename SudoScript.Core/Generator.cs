@@ -77,7 +77,7 @@ public static class Generator
                     throw new ArgumentException();
                 }
             }
-            return GetUnitFromStatements(node, symbolTable);
+            return GetUnitFromStatements(node, table);
         }, args);
     }
 
@@ -384,7 +384,7 @@ public static class Generator
 
     private static List<int> IdentifierRetriever(IdentifierNode node, SymbolTable symbolTable)
     {
-        throw new NotImplementedException();
+        return new List<int>() { symbolTable.GetDigit(node.NameToken.Match) };
     }
 
     //Method takes in two lists of T2 and a function for two arguments to return T1 value.
