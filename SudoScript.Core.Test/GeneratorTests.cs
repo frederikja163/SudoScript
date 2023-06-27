@@ -9,12 +9,12 @@ internal sealed class GeneratorTests
 {
     private static Token Token(string match = "")
     {
-        return new Token((TokenType)(-1), match, "", 0, 0, "");
+        return new Token((TokenType)(-1), match, 0, 0, "");
     }
 
     private static Token Token(TokenType token, string match = "")
     {
-        return new Token(token, match, "", 0, 0, "");
+        return new Token(token, match, 0, 0, "");
     }
 
     private static ProgramNode Program(UnitNode node)

@@ -14,9 +14,9 @@ public static class Parser {
         - github comments
      
      */
-    public static ProgramNode ParseProgram(string src) => ParseProgram(Tokenizer.GetStream(src));
+    public static ProgramNode ParseProgram(string src, string path = "") => ParseProgram(new StringReader(src), path);
 
-    public static ProgramNode ParseProgram(StreamReader reader) => ParseProgram(Tokenizer.GetStream(reader));
+    public static ProgramNode ParseProgram(TextReader reader, string path = "") => ParseProgram(new TokenStream(reader));
 
     private static ProgramNode ParseProgram(TokenStream stream) 
     {
@@ -193,7 +193,6 @@ public static class Parser {
     private static FunctionCallNode ParseFunctionCall(TokenStream stream) 
     {
         List<ArgumentNode> arguments = new List<ArgumentNode>();
-        Token unionToken = new Token(TokenType.Identifier, "Union", "", 0, 0, "");
 
         // If functionCall is an identifier, checks for arguments.
         if (stream.Expect(TokenType.Identifier, out Token? functionCall)) 
@@ -213,6 +212,7 @@ public static class Parser {
         if(stream.Peek(true, out Token? union) && union.Type == TokenType.LeftParenthesis) 
         {
             arguments.Add(ParseCell(stream));
+            Token unionToken = new Token(TokenType.Identifier, "Union", union.Row, union.Column, "");
 
             return new FunctionCallNode(unionToken, arguments);
         }

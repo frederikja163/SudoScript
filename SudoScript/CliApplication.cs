@@ -45,8 +45,9 @@ public sealed class CliApplication
         Console.CursorVisible = false;
         Console.Write("[F1 Eliminate candidates] [F2 Solve board]");
         
+
         using StreamReader reader = new StreamReader(path);
-        ProgramNode programNode = Parser.ParseProgram(reader);
+        ProgramNode programNode = Parser.ParseProgram(reader, path);
         _board = Generator.GetBoardFromAST(programNode); 
         _boardRenderer = new BoardRenderer(_board);
         _cellInfoRenderer = new CellInfoRenderer(_board,  Console.WindowWidth / 2);
