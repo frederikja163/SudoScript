@@ -49,12 +49,11 @@ public sealed class TokenStream : IDisposable
 
     private readonly string _src;
 
-    public TokenStream(TextReader reader, string src = "")
+    public TokenStream(TextReader reader)
     {
         _reader = reader;
         _next = new();
         _carry = null;
-        _src = src;
 
         Continue(false);
     }
