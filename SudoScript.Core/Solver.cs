@@ -20,7 +20,7 @@ public static class Solver
 
     private static bool SolveRec(Board board, [NotNullWhen(true)] out Board? solvedBoard)
     {
-        // Eliminate candidates from all rules untill nothing changes.
+        // Eliminate candidates from all rules until nothing changes.
         while (board.EliminateCandidates()) ;
 
         // We hit an invalid state, and must backtrack.
