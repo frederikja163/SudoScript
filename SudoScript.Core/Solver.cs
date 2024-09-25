@@ -42,14 +42,14 @@ public static class Solver
         orderedCells = orderedCells.SkipWhile(c => c.CandidateCount <= 1);
         // The first cell contains the smallest amount of candidates.
         int lowestCandidateCount = orderedCells.FirstOrDefault()?.CandidateCount ?? 1;
-        // Take all cells with the least amount of candidates.
-        orderedCells = orderedCells.TakeWhile(c => c.CandidateCount == lowestCandidateCount);
         // If there are no cells with more than 1 candidate, the board is solved.
         if (lowestCandidateCount == 1)
         {
             solvedBoard = board;
             return true;
         }
+        // Take all cells with the least amount of candidates.
+        orderedCells = orderedCells.TakeWhile(c => c.CandidateCount == lowestCandidateCount);
 
         Cell cell = orderedCells.First();
         foreach (int candidate in cell.Candidates())
