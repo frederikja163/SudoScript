@@ -20,7 +20,7 @@ public static class Solver
 
     private static bool SolveRec(Board board, [NotNullWhen(true)] out Board? solvedBoard)
     {
-        // Eliminate candidates from all rules untill nothing changes.
+        // Eliminate candidates from all rules until nothing changes.
         while (board.EliminateCandidates()) ;
 
         // We hit an invalid state, and must backtrack.
@@ -42,14 +42,14 @@ public static class Solver
         orderedCells = orderedCells.SkipWhile(c => c.CandidateCount <= 1);
         // The first cell contains the smallest amount of candidates.
         int lowestCandidateCount = orderedCells.FirstOrDefault()?.CandidateCount ?? 1;
-        // Take all cells with the least amount of candidates.
-        orderedCells = orderedCells.TakeWhile(c => c.CandidateCount == lowestCandidateCount);
         // If there are no cells with more than 1 candidate, the board is solved.
         if (lowestCandidateCount == 1)
         {
             solvedBoard = board;
             return true;
         }
+        // Take all cells with the least amount of candidates.
+        orderedCells = orderedCells.TakeWhile(c => c.CandidateCount == lowestCandidateCount);
 
         Cell cell = orderedCells.First();
         foreach (int candidate in cell.Candidates())
@@ -76,9 +76,17 @@ public static class Solver
         throw new NotImplementedException();
     }
 
-    public static bool IsSatisfactory(Board board)
+    /// <summary>
+    /// Checks if the board can be solved by just using the EliminateCandidates methods from units.
+    /// </summary>
+    /// <param name="board"></param>
+    /// <returns>True if the board can be solved without trial and error guessing.</returns>
+    public static bool IsSatisfactory(Board board) // Certain methods for eliminating candidates using inference are not currently implemented. Implementing them would make this function more acurate.
     {
-        throw new NotImplementedException();
+        // Eliminate candidates from all rules untill nothing changes.
+        while (board.EliminateCandidates());
+        // If the board is solved, it does not require trial and error.
+        return board.IsSolved();
     }
 
     public static bool IsProper(Board board)
