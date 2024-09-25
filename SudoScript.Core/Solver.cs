@@ -86,14 +86,7 @@ public static class Solver
         // Eliminate candidates from all rules untill nothing changes.
         while (board.EliminateCandidates());
         // If the board is solved, it does not require trial and error.
-        foreach (Cell cell in board.Cells())
-        {
-            if (cell.CandidateCount > 1)
-            {
-                return false;
-            }
-        }
-        return true;
+        return board.IsSolved();
     }
 
     public static bool IsProper(Board board)
