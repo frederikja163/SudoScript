@@ -76,9 +76,19 @@ public static class Solver
         throw new NotImplementedException();
     }
 
-    public static bool IsSatisfactory(Board board)
+    public static bool IsSatisfactory(Board board) // Certain methods for eliminating candidates using inference are not currently implemented. Implementing them would make this function more acurate.
     {
-        throw new NotImplementedException();
+        // Eliminate candidates from all rules untill nothing changes.
+        while (board.EliminateCandidates());
+        // If the board is solved, it does not require trial and error.
+        foreach (Cell cell in board.Cells())
+        {
+            if (cell.CandidateCount > 1)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static bool IsProper(Board board)
