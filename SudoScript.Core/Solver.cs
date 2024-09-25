@@ -76,6 +76,11 @@ public static class Solver
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Checks if the board can be solved by just using the EliminateCandidates methods from units.
+    /// </summary>
+    /// <param name="board"></param>
+    /// <returns>True if the board can be solved without trial and error guessing.</returns>
     public static bool IsSatisfactory(Board board) // Certain methods for eliminating candidates using inference are not currently implemented. Implementing them would make this function more acurate.
     {
         // Eliminate candidates from all rules untill nothing changes.
