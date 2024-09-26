@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using SudoScript.Core.Data;
 
 namespace SudoScript.Core;
@@ -21,7 +22,7 @@ public static class Solver
     private static bool SolveRec(Board board, [NotNullWhen(true)] out Board? solvedBoard)
     {
         // Eliminate candidates from all rules until nothing changes.
-        while (board.EliminateCandidates()) ;
+        while (board.EliminateCandidates());
 
         // We hit an invalid state, and must backtrack.
         if (!board.ValidateRules())
@@ -71,6 +72,66 @@ public static class Solver
         return false;
     }
 
+    /// <summary>
+    /// Finds a number of solutions to a given board.
+    /// </summary>
+    /// <param name="board"></param>
+    /// <param name="random">Whether the solved boards should be randomized.</param>
+    /// <param name="solutionCount">Maximum number of solutions that should be in the returned list. Zero means unlimited.</param>
+    /// <returns></returns>
+    private static List<Board>? FindSolutions(Board board, bool random = false, int solutionCount = 0)
+    {
+        return SolveRecAll(board, random, solutionCount);
+    }
+
+    private static List<Board> SolveRecAll(Board board, bool random, int solutionCount)
+    {
+        List<Board> solutions = new List<Board>();
+        // Eliminate candidates from all rules until nothing changes.
+        while (board.EliminateCandidates());
+        // We hit an invalid state, and must backtrack.
+        if (!board.Validate())
+        {
+            return solutions;
+        }
+        // If the board is solved, return it.
+        if (board.IsSolved())
+        {
+            return new List<Board> { board };
+        }
+
+        // Pick cell to collapse.
+        Cell cell;
+        if (random)
+        {
+            int randomIndex = new Random().Next(0, board.Cells().Count());
+            cell = board.Cells().Skip(randomIndex).First();
+        }
+        else
+        {
+            IEnumerable<Cell> orderedCells = board.Cells()
+                .OrderBy(c => c.CandidateCount);
+            // Skip all cells with less than 2 candidates.
+            orderedCells = orderedCells.SkipWhile(c => c.CandidateCount <= 1);
+            cell = orderedCells.First();
+        }
+
+        foreach (int candidate in cell.Candidates())
+        {
+            // Create a clone of the board for backtracking.
+            Board clonedBoard = board.Clone();
+            Cell clonedCell = clonedBoard[cell.X, cell.Y];
+
+            // Collapse the cell with a digit.
+            clonedCell.Digit = candidate;
+
+            // Call solve on the new board.
+            List<Board> subSolutions = SolveRecAll(clonedBoard, random, solutionCount);
+            solutions.AddRange(subSolutions);
+        }
+        return solutions;
+    }
+
     public static Board GenerateSolveable(Board board)
     {
         throw new NotImplementedException();
@@ -87,6 +148,7 @@ public static class Solver
         while (board.EliminateCandidates());
         // If the board is solved, it does not require trial and error.
         return board.IsSolved();
+
     }
 
     public static bool IsProper(Board board)

@@ -88,6 +88,22 @@ public sealed class Board: ICloneable
         return true;
     }
 
+    public bool Validate()
+    {
+        if ((_cells == null) || !this.ValidateRules())
+        {
+            return false;
+        }
+        foreach (Cell cell in this.Cells())
+        {
+            if (cell.CandidateCount < 1)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public bool IsSolved()
     {
         return ValidateRules() && Cells().All(c => c.Digit != Cell.EmptyDigit);

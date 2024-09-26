@@ -94,4 +94,9 @@ internal sealed class SolverTests
         Assert.IsFalse(Solver.IsSatisfactory(board));
     }
 
+    [Test]
+    public void FindSolutionsTest()
+    {
+        Assert.IsTrue(false);
+    }
 }
