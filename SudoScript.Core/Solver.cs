@@ -79,7 +79,7 @@ public static class Solver
     /// <param name="random">Whether the solved boards should be randomized.</param>
     /// <param name="solutionCount">Maximum number of solutions that should be in the returned list. Zero means unlimited.</param>
     /// <returns></returns>
-    private static List<Board>? FindSolutions(Board board, bool random = false)
+    public static List<Board>? FindSolutions(Board board, bool random = false)
     {
         return SolveRecAll(board, random);
     }

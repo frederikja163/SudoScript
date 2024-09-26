@@ -97,6 +97,15 @@ internal sealed class SolverTests
     [Test]
     public void FindSolutionsTest()
     {
-        Assert.IsTrue(false);
+        List<Cell> allCells = new List<Cell>();
+        for (int x = 1; x <= 9; x++)
+        {
+            allCells.Add(new Cell(x, 1));
+        }
+        Board board = new(allCells, new List<Unit> { Util.CreateRow(1) });
+        List<Board>? boardList = Solver.FindSolutions(board);
+
+        Assert.IsNotNull(boardList);
+        Assert.That(boardList.Count(), Is.EqualTo(45));
     }
 }
