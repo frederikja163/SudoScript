@@ -79,12 +79,12 @@ public static class Solver
     /// <param name="random">Whether the solved boards should be randomized.</param>
     /// <param name="solutionCount">Maximum number of solutions that should be in the returned list. Zero means unlimited.</param>
     /// <returns></returns>
-    private static List<Board>? FindSolutions(Board board, bool random = false, int solutionCount = 0)
+    private static List<Board>? FindSolutions(Board board, bool random = false)
     {
-        return SolveRecAll(board, random, solutionCount);
+        return SolveRecAll(board, random);
     }
 
-    private static List<Board> SolveRecAll(Board board, bool random, int solutionCount)
+    private static List<Board> SolveRecAll(Board board, bool random)
     {
         List<Board> solutions = new List<Board>();
         // Eliminate candidates from all rules until nothing changes.
@@ -126,7 +126,7 @@ public static class Solver
             clonedCell.Digit = candidate;
 
             // Call solve on the new board.
-            List<Board> subSolutions = SolveRecAll(clonedBoard, random, solutionCount);
+            List<Board> subSolutions = SolveRecAll(clonedBoard, random);
             solutions.AddRange(subSolutions);
         }
         return solutions;
