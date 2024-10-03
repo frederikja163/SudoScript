@@ -146,11 +146,19 @@ public sealed class Board: ICloneable
 
         Board other = (Board)obj;
 
-        for (int i = 0; i < _cells.Count; i++)
+        for (int i = 1; i <= _cells.Count; i++)
         {
-            for (int j = 0; j < _cells.Count; j++)
+            for (int j = 1; j <= _cells.Count; j++)
             {
-                if (!TryGetCell(i, j, out Cell? cell1).Equals(other.TryGetCell(i, j, out Cell? cell2)))
+                // Try to get cells from both boards
+                if (!TryGetCell(i, j, out Cell? cell1) || !other.TryGetCell(i, j, out Cell? cell2))
+                {
+                    // If either cell retrieval fails, boards are not equal
+                    return false;
+                }
+
+                // Compare the two cells
+                if (!cell1.Equals(cell2))
                 {
                     return false;
                 }

@@ -142,6 +142,36 @@ public sealed class Cell
             .Replace("Y", Y.ToString());
     }
 
+    public override bool Equals(object? obj)
+    {
+        if (obj == null || GetType() != obj.GetType())
+        {
+            return false;
+        }
+
+        Cell other = (Cell)obj;
+
+        // Check coordinates and digit
+        if (!((this.Y == other.Y) && (this.X == other.X) && (this.Digit == other.Digit)))
+        {
+            return false;
+        }
+
+        // Check candidates
+        for (int i = 1; i <= 9; i++)
+        {
+            if (this.HasCandidate(i) != other.HasCandidate(i))
+            {
+                return false;
+            }
+            if (this.IsGiven != other.IsGiven)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public override int GetHashCode()
     {
         unchecked
