@@ -81,12 +81,13 @@ public static class Solver
     /// <returns></returns>
     public static List<Board>? FindSolutions(Board board, bool random = false)
     {
-        return SolveRecAll(board, random);
+        HashSet<Board> result = SolveRecAll(board, random);
+        return result.ToList();
     }
 
-    private static List<Board> SolveRecAll(Board board, bool random)
+    private static HashSet<Board> SolveRecAll(Board board, bool random)
     {
-        List<Board> solutions = new List<Board>();
+        HashSet<Board> solutions = new HashSet<Board>();
         // Eliminate candidates from all rules until nothing changes.
         while (board.EliminateCandidates());
         // We hit an invalid state, and must backtrack.
@@ -97,7 +98,7 @@ public static class Solver
         // If the board is solved, return it.
         if (board.IsSolved())
         {
-            return new List<Board> { board };
+            return new HashSet<Board> { board };
         }
 
         // Pick cell to collapse.
@@ -126,8 +127,8 @@ public static class Solver
             clonedCell.Digit = candidate;
 
             // Call solve on the new board.
-            List<Board> subSolutions = SolveRecAll(clonedBoard, random);
-            solutions.AddRange(subSolutions);
+            HashSet<Board> subSolutions = SolveRecAll(clonedBoard, random);
+            solutions.UnionWith(subSolutions);
         }
         return solutions;
     }

@@ -136,4 +136,37 @@ public sealed class Board: ICloneable
 
         return s.ToString();
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null || GetType() != obj.GetType())
+        {
+            return false;
+        }
+
+        Board other = (Board)obj;
+
+        for (int i = 0; i < _cells.Count; i++)
+        {
+            for (int j = 0; j < _cells.Count; j++)
+            {
+                if (!TryGetCell(i, j, out Cell? cell1).Equals(other.TryGetCell(i, j, out Cell? cell2)))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public override int GetHashCode()
+    {
+        int hash = 17;
+        foreach (var cell in _cells.Values)
+        {
+            hash = hash * 31 + cell.GetHashCode();
+        }
+        return hash;
+    }
 }
