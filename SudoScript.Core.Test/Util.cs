@@ -3,7 +3,7 @@ using SudoScript.Core.Data;
 
 namespace SudoScript.Core.Test;
 
-internal static class Util
+public static class Util
 {
     private static readonly List<IRule> _oneRuleRules = new List<IRule>() { new OneRule() };
 

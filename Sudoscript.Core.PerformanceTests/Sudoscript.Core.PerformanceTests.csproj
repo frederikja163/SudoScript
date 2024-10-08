@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\StandardLibrary\StandardLibrary.csproj" />
     <ProjectReference Include="..\SudoScript.Core\SudoScript.Core.csproj" />
+    <ProjectReference Include="..\SudoScript.Core.Test\SudoScript.Core.Test.csproj" />
   </ItemGroup>
 
 </Project>
