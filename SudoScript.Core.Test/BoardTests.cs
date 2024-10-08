@@ -7,7 +7,7 @@ namespace SudoScript.Core.Test;
 internal sealed class BoardTests
 {
     [Test]
-    public void ValidateBoardTest()
+    public void ValidateBoardInvalidRuleTest()
     {
         Board board = Util.CreateStandardEmpty();
         board[5, 1].Digit = 2;
@@ -16,8 +16,24 @@ internal sealed class BoardTests
         board[8, 4].Digit = 4;
 
         Assert.That(board.Validate(), Is.False);
+    }
+
+    [Test]
+    public void ValidateBoardValidRuleTest()
+    {
+        Board board = Util.CreateStandardEmpty();
+        board[5, 1].Digit = 2;
+        board[4, 8].Digit = 7;
+        board[8, 4].Digit = 4;
         board[5, 2].Digit = 3;
+
         Assert.That(board.Validate(), Is.True);
+    }
+
+    [Test]
+    public void ValidateBoardNoCandidatesTest()
+    {
+        Board board = Util.CreateStandardEmpty();
 
         board[9, 9].EliminateCandidate(1);
         board[9, 9].EliminateCandidate(2);
