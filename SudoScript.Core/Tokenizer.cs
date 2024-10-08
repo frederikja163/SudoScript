@@ -47,8 +47,6 @@ public sealed class TokenStream : IDisposable
 
     private char? _carry;
 
-    private readonly string _src;
-
     public TokenStream(TextReader reader)
     {
         _reader = reader;
@@ -256,7 +254,7 @@ public sealed class TokenStream : IDisposable
             throw new ArgumentException($"Unrecognized character: {character} is not a recognised token");
         }
 
-        nextToken = new Token(type, match, row, column, _src);
+        nextToken = new Token(type, match, row, column, "");
 
         if (nextToken.Type == TokenType.BlockComment || nextToken.Type == TokenType.LineComment)
         {
