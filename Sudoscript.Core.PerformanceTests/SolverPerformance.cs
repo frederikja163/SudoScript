@@ -9,8 +9,8 @@ namespace SudoScript.Core.PerformanceTests;
 
 public sealed class BoardSolverBenchmarks
 {
-    private Board _smallBoard;
-    private Board _standardBoard;
+    private Board _smallBoard = CreateSmallBoard();
+    private Board _standardBoard = Util.CreateStandardEmpty();
 
     public static Board CreateSmallBoard()
     {

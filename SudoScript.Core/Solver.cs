@@ -79,7 +79,7 @@ public static class Solver
     /// <param name="random">Whether the solved boards should be randomized.</param>
     /// <param name="solutionCount">Maximum number of solutions that should be in the returned list. Zero means unlimited.</param>
     /// <returns></returns>
-    public static List<Board>? FindSolutions(Board board, int limit = 0, bool random = false)
+    public static List<Board> FindSolutions(Board board, int limit = 0, bool random = false)
     {
         HashSet<Board> result = SolveRecAll(board, 0, limit, random);
         // If a limit is specified and the result count exceeds it, return only the correct number of solutions.
