@@ -56,32 +56,23 @@ public sealed class BoardSolverBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        // Initialize the small and large board here
-        _smallBoard = CreateSmallBoard(); // Assuming you have this function
-        _standardBoard = Util.CreateStandardEmpty(); // Assuming you have this function
+        _smallBoard = CreateSmallBoard();
+        _standardBoard = Util.CreateStandardEmpty();
     }
 
     [Benchmark]
     public List<Board> TestSmallBoard()
     {
-        // Test FindSolutions on a small board with a limit of 100 solutions
-        return FindSolutions(_smallBoard, limit: 100);
+        return Solver.FindSolutions(_smallBoard);
     }
 
     [Benchmark]
     public List<Board> TestLargeBoard()
     {
-        // Test FindSolutions on a large board with a limit of 100 solutions
-        return FindSolutions(_largeBoard, limit: 100);
+        return Solver.FindSolutions(_standardBoard);
     }
-
-    // You can add more benchmark methods for different board sizes or limits
-
-    // CreateSmallBoard() and CreateLargeBoard() should be helper functions that
-    // return pre-set or randomly generated boards for testing.
 }
 
-// This is the entry point that runs the benchmarks
 public class Program
 {
     public static void Main(string[] args)
