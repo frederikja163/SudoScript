@@ -79,13 +79,13 @@ public static class Solver
     /// <param name="random">Whether the solved boards should be randomized.</param>
     /// <param name="solutionCount">Maximum number of solutions that should be in the returned list. Zero means unlimited.</param>
     /// <returns></returns>
-    public static List<Board>? FindSolutions(Board board, bool random = false)
+    public static List<Board>? FindSolutions(Board board, int limit = 0, bool random = false)
     {
-        HashSet<Board> result = SolveRecAll(board, random);
+        HashSet<Board> result = SolveRecAll(board, 0, limit, random);
         return result.ToList();
     }
 
-    private static HashSet<Board> SolveRecAll(Board board, bool random)
+    private static HashSet<Board> SolveRecAll(Board board, int solutionCount, int limit, bool random)
     {
         HashSet<Board> solutions = new HashSet<Board>();
         // Eliminate candidates from all rules until nothing changes.
@@ -119,6 +119,13 @@ public static class Solver
 
         foreach (int candidate in cell.Candidates())
         {
+            // Return if the limit of solutions has been reached
+
+            if ((limit != 0) && ((solutions.Count() + solutionCount) >= limit))
+            {
+                return solutions;
+            }
+
             // Create a clone of the board for backtracking.
             Board clonedBoard = board.Clone();
             Cell clonedCell = clonedBoard[cell.X, cell.Y];
@@ -127,7 +134,7 @@ public static class Solver
             clonedCell.Digit = candidate;
 
             // Call solve on the new board.
-            HashSet<Board> subSolutions = SolveRecAll(clonedBoard, random);
+            HashSet<Board> subSolutions = SolveRecAll(clonedBoard, (solutionCount + solutions.Count()), limit, random);
             solutions.UnionWith(subSolutions);
         }
         return solutions;
