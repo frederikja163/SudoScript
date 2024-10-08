@@ -146,22 +146,22 @@ public sealed class Board: ICloneable
 
         Board other = (Board)obj;
 
-        for (int i = 1; i <= _cells.Count; i++)
+        if (other.Cells().Count() != _cells.Count)
         {
-            for (int j = 1; j <= _cells.Count; j++)
-            {
-                // Try to get cells from both boards
-                if (!TryGetCell(i, j, out Cell? cell1) || !other.TryGetCell(i, j, out Cell? cell2))
-                {
-                    // If either cell retrieval fails, boards are not equal
-                    return false;
-                }
+            return false;
+        }
 
-                // Compare the two cells
-                if (!cell1.Equals(cell2))
-                {
-                    return false;
-                }
+        foreach (Cell cell1 in _cells.Values)
+        {
+            if (!other.TryGetCell(cell1.X, cell1.Y, out Cell? cell2))
+            {
+                // Compared board does not contain cell with these coordinates
+                return false;
+            }
+            // Compare cells
+            if (!cell1.Equals(cell2))
+            {
+                return false;
             }
         }
 
