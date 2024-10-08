@@ -9,13 +9,27 @@ internal sealed class BoardTests
     [Test]
     public void ValidateBoardTest()
     {
-        Assert.IsTrue(false);
-    }
+        Board board = Util.CreateStandardEmpty();
+        board[5, 1].Digit = 2;
+        board[4, 8].Digit = 7;
+        board[5, 2].Digit = 2;
+        board[8, 4].Digit = 4;
 
-    [Test]
-    public void ValidateRulesTest()
-    {
-        Assert.IsTrue(false);
+        Assert.That(board.Validate(), Is.False);
+        board[5, 2].Digit = 3;
+        Assert.That(board.Validate(), Is.True);
+
+        board[9, 9].EliminateCandidate(1);
+        board[9, 9].EliminateCandidate(2);
+        board[9, 9].EliminateCandidate(3);
+        board[9, 9].EliminateCandidate(4);
+        board[9, 9].EliminateCandidate(5);
+        board[9, 9].EliminateCandidate(6);
+        board[9, 9].EliminateCandidate(7);
+        board[9, 9].EliminateCandidate(8);
+        board[9, 9].EliminateCandidate(9);
+
+        Assert.That(board.Validate(), Is.False);
     }
 
     [Test]
