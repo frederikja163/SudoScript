@@ -88,6 +88,22 @@ public sealed class Board: ICloneable
         return true;
     }
 
+    public bool Validate()
+    {
+        if ((_cells == null) || !this.ValidateRules())
+        {
+            return false;
+        }
+        foreach (Cell cell in this.Cells())
+        {
+            if (cell.CandidateCount < 1)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public bool IsSolved()
     {
         return ValidateRules() && Cells().All(c => c.Digit != Cell.EmptyDigit);
@@ -119,5 +135,46 @@ public sealed class Board: ICloneable
         }
 
         return s.ToString();
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null || GetType() != obj.GetType())
+        {
+            return false;
+        }
+
+        Board other = (Board)obj;
+
+        if (other.Cells().Count() != _cells.Count)
+        {
+            return false;
+        }
+
+        foreach (Cell cell1 in _cells.Values)
+        {
+            if (!other.TryGetCell(cell1.X, cell1.Y, out Cell? cell2))
+            {
+                // Compared board does not contain cell with these coordinates
+                return false;
+            }
+            // Compare cells
+            if (!cell1.Equals(cell2))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public override int GetHashCode()
+    {
+        int hash = 17;
+        foreach (var cell in _cells.Values)
+        {
+            hash = hash * 31 + cell.GetHashCode();
+        }
+        return hash;
     }
 }
