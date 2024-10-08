@@ -1,6 +1,8 @@
 ﻿using NUnit.Framework;
+using StandardLibrary;
 using SudoScript.Core;
 using SudoScript.Core.Data;
+using System.Data;
 
 namespace SudoScript.Core.Test;
 
@@ -95,17 +97,19 @@ internal sealed class SolverTests
     }
 
     [Test]
-    public void FindSolutionsTest()
+    public void FindSolutionsTwoUniqueCellsTest()
     {
-        List<Cell> allCells = new List<Cell>();
-        for (int x = 1; x <= 9; x++)
-        {
-            allCells.Add(new Cell(x, 1));
-        }
-        Board board = new(allCells, new List<Unit> { Util.CreateRow(1) });
+
+        Board board = new(new List<Cell>{ new Cell(1, 1), new Cell(1, 2) }, 
+            new List<Unit> {
+                new Unit(new List<CellReference> { 
+                    new CellReference(1, 1), 
+                    new CellReference(1,2) }, 
+                new List<IRule> { new Unique { } })});
+
         List<Board>? boardList = Solver.FindSolutions(board);
 
         Assert.IsNotNull(boardList);
-        Assert.That(boardList.Count(), Is.EqualTo(45));
+        Assert.That(boardList.Count(), Is.EqualTo(72));
     }
 }
