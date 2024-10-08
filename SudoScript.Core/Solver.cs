@@ -82,6 +82,11 @@ public static class Solver
     public static List<Board>? FindSolutions(Board board, int limit = 0, bool random = false)
     {
         HashSet<Board> result = SolveRecAll(board, 0, limit, random);
+        // If a limit is specified and the result count exceeds it, return only the correct number of solutions.
+        if (limit != 0 && result.Count > limit)
+        {
+            return result.Take(limit).ToList();
+        }
         return result.ToList();
     }
 
