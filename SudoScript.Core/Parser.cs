@@ -121,7 +121,11 @@ public static class Parser {
         // While leftBrace is not read, it will keep reading parameters. 
         while (stream.Peek(true ,out Token? endToken) && endToken.Type != TokenType.LeftBrace)
         {
-            if (stream.Expect(TokenType.Space, out Token? _))
+            if (!stream.Expect(TokenType.Space, out Token? _))
+            {
+                throw new Exception("Parameter are expected to be separated by space");
+            }
+            else
             {
                 // Checks whether the parameter is an identifier or a cell and parses them acordingly
                 if (stream.Peek(true, out Token? leftParenthesis) && leftParenthesis.Type == TokenType.LeftParenthesis)
@@ -133,10 +137,6 @@ public static class Parser {
                 {
                     paramChildren.Add(ParseParameterIdentifier(stream));
                 }
-            }
-            else
-            {
-                throw new Exception("Parameter are expected to be separated by space");
             }
         }
 
