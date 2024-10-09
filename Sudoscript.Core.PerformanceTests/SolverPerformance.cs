@@ -7,10 +7,24 @@ using SudoScript.Core.Test;
 
 namespace SudoScript.Core.PerformanceTests;
 
-public sealed class BoardSolverBenchmarks
+public class BoardSolverBenchmarks
 {
-    private Board _smallBoard = CreateSmallBoard();
-    private Board _standardBoard = Util.CreateStandardEmpty();
+    private Board _smallBoard;
+    private Board _standardBoard;
+
+    public BoardSolverBenchmarks()
+    {
+        _smallBoard = CreateSmallBoard();
+        _standardBoard = Util.CreateStandardEmpty();
+    }
+
+
+    public IEnumerable<object[]> Solvers()
+    {
+        yield return new object[] { "Base", new Func<Board, int, bool, List<Board>>(Solver.FindSolutions) };
+        yield return new object[] { "MultiThread", new Func<Board, int, bool, List<Board>>(SolverMultiThread.FindSolutions) };
+        yield return new object[] { "DynamicCandidates", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidates.FindSolutions) };
+    }
 
     public static Board CreateSmallBoard()
     {
@@ -56,20 +70,21 @@ public sealed class BoardSolverBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        _smallBoard = CreateSmallBoard();
-        _standardBoard = Util.CreateStandardEmpty();
+        
     }
 
     [Benchmark]
-    public List<Board> TestSmallBoard()
+    [ArgumentsSource(nameof(Solvers))]
+    public List<Board> TestSmallBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
     {
-        return Solver.FindSolutions(_smallBoard);
+        return solverFunction(_smallBoard, 100000, false);
     }
 
     [Benchmark]
-    public List<Board> TestLargeBoard()
+    [ArgumentsSource(nameof(Solvers))]
+    public List<Board> TestLargeBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
     {
-        return Solver.FindSolutions(_standardBoard);
+        return solverFunction(_standardBoard, 10000, false);
     }
 }
 

@@ -59,12 +59,12 @@ internal sealed class SolverTests
                     new CellReference(1,2) }, 
                 new List<IRule> { new Unique { } })});
 
-        List<Board>? boardList = Solver.FindSolutions(board);
+        List<Board>? boardList = SolverMultiThread.FindSolutions(board);
 
         Assert.IsNotNull(boardList);
         Assert.That(boardList.Count(), Is.EqualTo(72));
 
-        List<Board>? randomBoardList = Solver.FindSolutions(board, 0, true);
+        List<Board>? randomBoardList = SolverMultiThread.FindSolutions(board, 0, true);
 
         Assert.IsNotNull(randomBoardList);
         Assert.That(boardList.Count(), Is.EqualTo(randomBoardList.Count()));
