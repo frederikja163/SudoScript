@@ -197,4 +197,16 @@ givens {
 
         Assert.True(solvedBoard.IsSolved());
     }
+
+	[Test]
+	public void WildValidTest()
+	{
+		using StreamReader reader = new("../../../TestBoards/Wild.txt");
+		//Console.WriteLine(reader.ReadToEnd());
+		Board board = SudoScript.Load(reader.ReadToEnd());
+		
+		Assert.That(board, Is.Not.Null);
+        Console.WriteLine(board!.ToString());
+        //Assert.That(Solver.Solve(board!), Is.True);
+    }
 }
