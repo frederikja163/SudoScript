@@ -133,4 +133,45 @@ public static class Util
 
         return board;
     }
+
+    public static Board CreateSmallBoard()
+    {
+        List<Cell> allCells = new List<Cell>();
+        List<Unit> allUnits = new List<Unit>();
+
+        for (int x = 1; x <= 6; x++)
+        {
+            for (int y = 1; y <= 6; y++)
+            {
+                allCells.Add(new Cell(x, y));
+            }
+        }
+
+        allUnits.Add(CreateBox(1, 1));
+        allUnits.Add(CreateBox(1, 4));
+        allUnits.Add(CreateBox(4, 4));
+        allUnits.Add(CreateBox(4, 1));
+
+        for (int y = 1; y <= 6; y++)
+        {
+            List<CellReference> cellList = new List<CellReference>();
+            for (int x = 1; x <= 6; x++)
+            {
+                cellList.Add(new CellReference(x, y));
+            }
+            allUnits.Add(new Unit(cellList, new List<IRule> { new Unique() }));
+        }
+
+        for (int x = 1; x <= 6; x++)
+        {
+            List<CellReference> cellList = new List<CellReference>();
+            for (int y = 1; y <= 6; y++)
+            {
+                cellList.Add(new CellReference(x, y));
+            }
+            allUnits.Add(new Unit(cellList, new List<IRule> { new Unique() }));
+        }
+
+        return new Board(allCells, allUnits);
+    }
 }
