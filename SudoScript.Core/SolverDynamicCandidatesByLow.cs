@@ -4,7 +4,7 @@ using SudoScript.Core.Data;
 
 namespace SudoScript.Core;
 
-public static class SolverDynamicCandidates
+public static class SolverDynamicCandidatesByLow
 {
     // Solve using Wave Function collapse algorithm with clone based back tracking.
     // Perhaps a multithreading solver instead of actual back tracking to calculate multiple paths at once.
@@ -115,11 +115,7 @@ public static class SolverDynamicCandidates
         }
         else
         {
-            IEnumerable<Cell> orderedCells = board.Cells()
-                .OrderBy(c => c.CandidateCount);
-            // Skip all cells with less than 2 candidates.
-            orderedCells = orderedCells.SkipWhile(c => c.CandidateCount <= 1);
-            cell = orderedCells.First();
+            cell = DynamicCellSelect(board);
         }
 
         foreach (int candidate in cell.Candidates())
@@ -143,6 +139,44 @@ public static class SolverDynamicCandidates
             solutions.UnionWith(subSolutions);
         }
         return solutions;
+    }
+    private static Cell DynamicCellSelect(Board board)
+    {
+        IEnumerable<Cell> orderedCells = board.Cells()
+                .OrderBy(c => c.CandidateCount);
+        // Skip all cells with less than 2 candidates.
+        orderedCells = orderedCells.SkipWhile(c => c.CandidateCount <= 1);
+        // Take all cells with lowest candidate count
+        int lowestCandidateCount = orderedCells.First().CandidateCount;
+        orderedCells = orderedCells.TakeWhile(c => c.CandidateCount == lowestCandidateCount);
+
+        // Pick cell that is part of the least common candidates
+        Cell leader = orderedCells.First();
+        int lowestCount = int.MaxValue;
+        foreach (Cell cell in orderedCells)
+        {
+
+            int count = 0;
+            foreach (Cell boardCell in board.Cells())
+            {
+                foreach (int candidate in cell.Candidates())
+                {
+                    if (boardCell.HasCandidate(candidate))
+                    {
+                        count++;
+                    }
+                }
+            }
+            if (count < lowestCount)
+            {
+                lowestCount = count;
+                leader = cell;
+            }
+        }
+
+
+
+        return leader;
     }
 
     public static Board GenerateSolveable(Board board)

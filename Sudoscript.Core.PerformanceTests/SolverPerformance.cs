@@ -23,7 +23,9 @@ public class BoardSolverBenchmarks
     {
         yield return new object[] { "Base", new Func<Board, int, bool, List<Board>>(Solver.FindSolutions) };
         yield return new object[] { "MultiThread", new Func<Board, int, bool, List<Board>>(SolverMultiThread.FindSolutions) };
-        yield return new object[] { "DynamicCandidates", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidates.FindSolutions) };
+        yield return new object[] { "DynamicCandidates", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByUnits.FindSolutions) };
+        yield return new object[] { "DynamicCandidates", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByLow.FindSolutions) };
+        yield return new object[] { "DynamicCandidates", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByHigh.FindSolutions) };
     }
 
     public static Board CreateSmallBoard()
