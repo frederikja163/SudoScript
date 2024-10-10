@@ -201,12 +201,11 @@ givens {
 	[Test]
 	public void WildValidTest()
 	{
-		using StreamReader reader = new("../../../TestBoards/Wild.txt");
-		//Console.WriteLine(reader.ReadToEnd());
-		Board board = SudoScript.Load(reader.ReadToEnd());
-		
+		Board board = Util.CreateWildBoard();
+
 		Assert.That(board, Is.Not.Null);
-        Console.WriteLine(board!.ToString());
-        //Assert.That(Solver.Solve(board!), Is.True);
+		Assert.That(board.Validate(), Is.True);
+		//Assert.That(Solver.Solve(board!).IsSolved(), Is.True);
+		//Assert.That(Solver.FindSolutions(board, 3).Count, Is.EqualTo(3));
     }
 }

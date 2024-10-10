@@ -12,12 +12,14 @@ public class BoardSolverBenchmarks
     private Board _smallBoard;
     private Board _standardBoard;
     private Board _easyBoard;
+    private Board _wildBoard;
 
     public BoardSolverBenchmarks()
     {
         _smallBoard = Util.CreateSmallBoard();
         _standardBoard = Util.CreateStandardEmpty();
         _easyBoard = Util.CreateEasyBoard();
+        _wildBoard = Util.CreateWildBoard();
     }
 
 
@@ -25,9 +27,9 @@ public class BoardSolverBenchmarks
     {
         yield return new object[] { "Base", new Func<Board, int, bool, List<Board>>(Solver.FindSolutions) };
         yield return new object[] { "MultiThread", new Func<Board, int, bool, List<Board>>(SolverMultiThread.FindSolutions) };
-        yield return new object[] { "DynamicCandidates", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByUnits.FindSolutions) };
-        yield return new object[] { "DynamicCandidates", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByLow.FindSolutions) };
-        yield return new object[] { "DynamicCandidates", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByHigh.FindSolutions) };
+        yield return new object[] { "CandidatesByUnits", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByUnits.FindSolutions) };
+        yield return new object[] { "CandidatesByLow", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByLow.FindSolutions) };
+        yield return new object[] { "CandidatesByHigh", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByHigh.FindSolutions) };
     }
 
     [GlobalSetup]
@@ -55,6 +57,13 @@ public class BoardSolverBenchmarks
     public List<Board> TestEasyBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
     {
         return solverFunction(_easyBoard, 0, false);
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Solvers))]
+    public List<Board> TestWildBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
+    {
+        return solverFunction(_wildBoard, 5, false);
     }
 }
 

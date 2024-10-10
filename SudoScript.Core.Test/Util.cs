@@ -174,4 +174,126 @@ public static class Util
 
         return new Board(allCells, allUnits);
     }
+    
+    public static Board CreateWildBoard()
+    {
+        List<Cell> allCells = new List<Cell>();
+        List<Unit> allUnits = new List<Unit>();
+
+        for (int x = 1; x <= 9; x++)
+        {
+            for (int y = 1; y <= 9; y++)
+            {
+                allCells.Add(new Cell(x, y));
+            }
+        }
+        for (int x = 10; x <= 12; x++)
+        {
+            for (int y = 4; y <= 15; y++)
+            {
+                allCells.Add(new Cell(x, y));
+            }
+        }
+
+        for (int i = 1; i <= 9; i++)
+        {
+            allUnits.Add(CreateRow(i));
+            allUnits.Add(CreateColumn(i));
+        }
+        allUnits.Add(CreateBox(1, 1));
+        allUnits.Add(CreateBox(1, 4));
+        allUnits.Add(CreateBox(1, 7));
+        allUnits.Add(CreateBox(4, 1));
+        allUnits.Add(CreateBox(4, 4));
+        allUnits.Add(CreateBox(4, 7));
+        allUnits.Add(CreateBox(7, 1));
+        allUnits.Add(CreateBox(7, 4));
+        allUnits.Add(CreateBox(7, 7));
+
+        allUnits.Add(CreateBox(10, 7));
+        allUnits.Add(CreateBox(10, 10));
+        allUnits.Add(CreateBox(10, 13));
+
+        allUnits.Add(new Unit (
+            new List<CellReference> {
+                new CellReference(4, 4),
+                new CellReference(5, 5),
+                new CellReference(6, 6),
+                new CellReference(7, 7),
+                new CellReference(8, 8),
+                new CellReference(9, 9),
+                new CellReference(10, 10),
+                new CellReference(11, 11),
+                new CellReference(12, 12)}, 
+            new List<IRule> {new OneRule() } ));
+
+        for (int x = 10; x <= 12; x++)
+        {
+            allUnits.Add(new Unit(
+            new List<CellReference> {
+                new CellReference(x, 4),
+                new CellReference(x, 6),
+                new CellReference(x, 5),
+                new CellReference(x, 7),
+                new CellReference(x, 8),
+                new CellReference(x, 9),
+                new CellReference(x, 10),
+                new CellReference(x, 11),
+                new CellReference(x, 12)
+                },
+            new List<IRule> { new Unique() }));
+        }
+
+        allUnits.Add(new Unit(
+            new List<CellReference> {
+                new CellReference(4, 4),
+                new CellReference(4, 5),
+                new CellReference(4, 6),
+                new CellReference(4, 7),
+                new CellReference(6, 1),
+                new CellReference(5, 1),
+                new CellReference(4, 8),
+                new CellReference(8, 3),
+                new CellReference(2, 2)},
+            new List<IRule> { new AntiKnight() }));
+
+        allUnits.Add(new Unit(
+            new List<CellReference> {
+                new CellReference(2, 4),
+                new CellReference(2, 5),
+                new CellReference(9, 6),
+                new CellReference(1, 7)},
+            new List<IRule> { new AntiKnight() }));
+
+        allUnits.Add(new Unit(
+            new List<CellReference> {
+                new CellReference(2, 4),
+                new CellReference(11, 10),
+                new CellReference(6, 9),
+                new CellReference(7, 2)},
+            new List<IRule> { new Even() }));
+
+        allUnits.Add(new Unit(
+            new List<CellReference> {
+                new CellReference(4, 8),
+                new CellReference(5, 9),
+                new CellReference(10, 11)},
+            new List<IRule> { new Unique(),
+                              new AntiKing()}));
+
+        allUnits.Add(new Unit(
+            new List<CellReference> {
+                new CellReference(7, 1),
+                new CellReference(2, 1),
+                new CellReference(1, 6)},
+            new List<IRule> { new AntiKing() }));
+
+        Board board = new Board(allCells, allUnits);
+
+        board[3, 9].Digit = 7;
+        board[9, 9].Digit = 1;
+        board[11, 10].Digit = 6;
+
+        return board;
+    }
 }
