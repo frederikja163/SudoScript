@@ -85,4 +85,11 @@ internal sealed class SolverTests
         Assert.IsNotNull(boardList);
         Assert.That(boardList.Count(), Is.EqualTo(25));
     }
+
+    [Test]
+    public void MultiSolverCanSolvePerformanceTests()
+    {
+        Assert.IsNotEmpty(SolverMultiThread.FindSolutions(Util.CreateWildBoard(), 3));
+        
+    }
 }

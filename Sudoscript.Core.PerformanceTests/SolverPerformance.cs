@@ -25,11 +25,11 @@ public class BoardSolverBenchmarks
 
     public IEnumerable<object[]> Solvers()
     {
-        yield return new object[] { "Base", new Func<Board, int, bool, List<Board>>(Solver.FindSolutions) };
-        //yield return new object[] { "MultiThread", new Func<Board, int, bool, List<Board>>(SolverMultiThread.FindSolutions) };
-        yield return new object[] { "CandidatesByUnits", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByUnits.FindSolutions) };
-        yield return new object[] { "CandidatesByLow", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByLow.FindSolutions) };
-        yield return new object[] { "CandidatesByHigh", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByHigh.FindSolutions) };
+        //yield return new object[] { "Base", new Func<Board, int, bool, List<Board>>(Solver.FindSolutions) };
+        yield return new object[] { "MultiThread", new Func<Board, int, bool, List<Board>>(SolverMultiThread.FindSolutions) };
+        //yield return new object[] { "CandidatesByUnits", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByUnits.FindSolutions) };
+        //yield return new object[] { "CandidatesByLow", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByLow.FindSolutions) };
+        //yield return new object[] { "CandidatesByHigh", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByHigh.FindSolutions) };
     }
 
     [GlobalSetup]
