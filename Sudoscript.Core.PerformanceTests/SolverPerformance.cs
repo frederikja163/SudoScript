@@ -26,7 +26,7 @@ public class BoardSolverBenchmarks
     public IEnumerable<object[]> Solvers()
     {
         yield return new object[] { "Base", new Func<Board, int, bool, List<Board>>(Solver.FindSolutions) };
-        yield return new object[] { "MultiThread", new Func<Board, int, bool, List<Board>>(SolverMultiThread.FindSolutions) };
+        //yield return new object[] { "MultiThread", new Func<Board, int, bool, List<Board>>(SolverMultiThread.FindSolutions) };
         yield return new object[] { "CandidatesByUnits", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByUnits.FindSolutions) };
         yield return new object[] { "CandidatesByLow", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByLow.FindSolutions) };
         yield return new object[] { "CandidatesByHigh", new Func<Board, int, bool, List<Board>>(SolverDynamicCandidatesByHigh.FindSolutions) };
@@ -40,6 +40,13 @@ public class BoardSolverBenchmarks
 
     [Benchmark]
     [ArgumentsSource(nameof(Solvers))]
+    public List<Board> TestWildBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
+    {
+        return solverFunction(_wildBoard, 3, false);
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Solvers))]
     public List<Board> TestSmallBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
     {
         return solverFunction(_smallBoard, 10000, false);
@@ -47,7 +54,7 @@ public class BoardSolverBenchmarks
 
     [Benchmark]
     [ArgumentsSource(nameof(Solvers))]
-    public List<Board> TestLargeBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
+    public List<Board> TestStandardBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
     {
         return solverFunction(_standardBoard, 10000, false);
     }
@@ -57,13 +64,6 @@ public class BoardSolverBenchmarks
     public List<Board> TestEasyBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
     {
         return solverFunction(_easyBoard, 0, false);
-    }
-
-    [Benchmark]
-    [ArgumentsSource(nameof(Solvers))]
-    public List<Board> TestWildBoard(string solverName, Func<Board, int, bool, List<Board>> solverFunction)
-    {
-        return solverFunction(_wildBoard, 5, false);
     }
 }
 
